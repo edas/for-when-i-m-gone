@@ -1,0 +1,23 @@
+Que se passe-t-il quand je ne suis plus là ?
+============================================
+
+Les familles trouvent toujours une solution mais récupérer tout l'administratif ainsi que les numéros et mots de passe des comptes en ligne peut être une difficulté supplémentaire à un moment où on n'en a pas besoin.
+
+À la maison c'est tout le reste qui risque de poser problème. On parle de toute la paperasse numérisée ou de tout l'historique de 15 ans de photos. J'utilise des mots de passe complexes, différents à chaque fois, et je chiffre tous mes disques. Autant dire que si je pars tout deviendra assez rapidement illisible malgré les meilleurs efforts de mes amis.
+
+Je ne vois pas d'autres solutions que de laisser le double de mes clefs au crochet avant de partir.
+
+Il ne s'agit pas que de laisser un document au notaire. J'ai une totale confiance sur la procédure, mais une assez faible sur la confidentialité du contenu. J'ai aussi envie de permettre à mes proches de savoir déclencher la procédure sans avoir à prévoir tous les cas imaginables dans un langage sans ambiguïté pour un juriste. J'ai enfin potentiellement envie que mes proches puissent aller vite pour avoir les données dont ils ont besoin quand ils en ont besoin sans attendre je ne sais quelle procédure légale.
+
+Pour autant je ne veux pas juste laisser le double de mes mots de passe à un proche. J'ai besoin d'un système où il faut que plusieurs personnes de confiance se mettent d'accord pour pouvoir ouvrir le coffre et récupérer ce dont ils ont besoin.
+
+Je partage ici ma procédure, pour qu'elle puisse être réutilisée par d'autres. 
+Les questions et contributions sont bienvenues. Les traductions aussi.
+
+La documentation est dans le répertoire `doc/fr`.
+
+---
+
+Le dépôt original est sur https://github.com/edas/for-when-i-m-gone
+
+Le code et sa documentation sont fournis sous licence GPL version 3 tel que décrit dans le fichier `LICENSE`.

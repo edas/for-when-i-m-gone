@@ -1,0 +1,31 @@
+INSTALLATION
+============
+
+Mac
+---
+
+```
+# Installer Homebrew depuis https://brew.sh/
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Installer `ssss` 
+brew instal ssss
+
+# Installer `openssl`
+brew install openssl
+```
+
+Ruby devrait déjà être nativement présent. La version importe peu.
+
+Linux
+-----
+
+```
+# Installer `ssss`
+sudo apt install ssss
+
+# Installer `openssl`
+sudo apt install openssl
+```
+
+Ruby devrait déjà être nativement présent. La version importe peu.

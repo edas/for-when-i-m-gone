@@ -1,0 +1,43 @@
+La procédure demande de savoir manipuler des fichiers et des lignes de commande. Si ce n'est pas votre cas, n'importe quel informaticien devrait pouvoir vous accompagner pas à pas via des explications pour que vous le fassiez vous-même.
+
+
+Créer les secrets partagés
+==========================
+
+1. Procéder à l'installation des outils, décrit dans le fichier `installation.fr.txt`
+
+2. Ajoutez vos secrets dans le fichier `secrets/secrets.txt`. Il n'y a pas de limite mais plus le fichier est long, plus la donnée partagée va être longue. Limitez-vous idéalement à 1000 signes.
+
+3. Ajoutez les différents destinataires dans le fichier `secrets/participants.txt`. Il faut un participant par ligne. Idéalement sur chaque ligne vous pouvez mettre son nom, téléphone et email. Si vous souhaitez générer un certain nombre de jetons sans lister tout le monde explicitement, vous pouvez ajouter une ligne `SHARES=xx` dans le fichier `secrets/params.env` où `xx` est le nombre de jetons à générer.
+
+4. Ajoutez les différentes personnes à contacter dans le fichier `contacts.txt`, une par ligne.
+
+5. Ajoutez une ligne `THRESHOLD=xx` dans le fichier `secrets/params.env` où le nombre `xx` correspond au nombre de personnes minimum nécessaire pour reconstituer le secret. Si vous n'ajoutez pas cette ligne, il faudra la présence de tous les participants sans exception pour reconstituer le secret. Il est recommandé de permettre l'absence d'une ou deux personnes de la liste.
+
+5. Lancer le chiffrement avec `ruby scripts/encode.rb` (ça sera long, plusieurs minutes).
+
+6. Dans `secrets/dist/` vous trouverez différents fichier html à distribuer aux différents destinataires
+
+/!\ Pensez à vider le fichier `secrets/secrets.txt` et le dossier `secrets/dist/` après après utilisation. Ils contiennent tous vos secrets ou la façon de les récupérer.
+
+
+Relire les données secrètes
+===========================
+
+1. Procéder à l'installation des outils, décrit dans le fichier `installation.fr.txt`
+
+2. Récupérer votre fichier et ceux des autres participants. Le nombre de documents récupéré doit être au moins égal à la valeur de THRESHOLD dans les paramètres de votre document.
+
+3. Si un participant a imprimé son document, vous pouvez recréer son document informatique à la main en créant un fichier HTML qui contient au moins les données suivantes en remplaçant `TOKEN` par son jeton personnel, `ENCODED DATA` par les données chiffrées, et `PARAMS` par les paramètres, en respectant les majuscules et les minuscules. Ce fichier doit avoir pour extension `.html`.
+
+````
+<pre id="token">TOKEN</pre>
+<pre id="enc-data">ENCODED DATA</pre>
+<pre id="params">PARAMETERS</pre>
+```
+
+4. Posez ces fichiers dans un répertoire `dist` lui-même à l'intérieur du répertoire `secrets`. Créez-le si besoin.
+
+5. Lancer la récupération avec `ruby scripts/decode.rb` (ça sera long, plusieurs minutes).
+
+/!\ Pensez à effacer les fichiers dans `secrets/dist` après utilisation. Ils permettent de récupérer tous les secrets.

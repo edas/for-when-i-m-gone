@@ -1,0 +1,20 @@
+Sécurité des documents remis à chaque participant
+=================================================
+
+Le secret ne peut être reconstitué qu'avec le nombre de jetons prévu. Chaque participant n'a qu'un seul jeton. 
+
+Dans la plupart des cas, son propre document peut donc être stocké avec une sécurité modéré, c'est à dire dans ses fichiers numériques personnels ou ses emails sans chiffrement, ou même imprimé dans ses archives papier.
+
+Il faut tout de même s'assurer que ces documents ne soient pas diffusés ou publiés par erreur. Ils donnent quand même indirectement accès aux secrets de quelqu'un, potentiellement à toute sa vie numérique.
+
+
+Sécurité de la procédure
+========================
+
+Pour reconstituer un secret il faut rassembler les documents de plusieurs participants. Chaque participant doit pour cela vérifier attentivement :
+
+- l'identité de la personne qui rassemble les documents
+- que la reconstitution se fait bien dans un des cas prévus initialement (par exemple que le décès est bien réel)
+
+Dans ce cadre, un message de réseau social, un texto ou un email ne sont probablement pas suffisants pour confirmer une identité. Il est possible qu'une personne malveillante ait eu accès ou ait détourné le compte d'un des participants. Avec les technologies modernes, la voix de quelqu'un qu'on connait au téléphone n'est pas non plus un élément probant.
+
