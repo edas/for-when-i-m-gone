@@ -1,0 +1,22 @@
+Questions et réponses
+=====================
+
+
+Authentification à 2 facteurs
+------------------------------
+
+Je ne donne que ma solution :
+
+* Je donne les clefs de mon téléphone (schema android) et le PIN de ma carte SIM. Mes proches pourront donc recevoir des codes par SMS, sur mon téléphone ou sur un autre.
+* Je donne les clefs de mon compte email et celui de mon nom de domaine. Mes proches pourront donc recevoir des codes sur mon compte email ou rediriger mes emails sur un autre compte si besoin.
+* Je donne les clefs de mon gestionnaire de mots de passe, qui gère les codes de confirmation OTP et les codes de secours pour récupérer les comptes verrouillés par une authentification à deux facteurs.
+
+
+Dépendance à la ligne de commande
+---------------------------------
+
+La procédure actuelle demande encore de la ligne de commande. Ce n'est pas forcément un problème parce qu'une majorité des personnes à qui je m'adresse personnellement sont informaticiens ou proches du milieu informatique. Mes proches sauront interagir avec cette procédure.
+
+Idéalement, il faudrait un fonctionnement plus simple, par exemple que la page web que je distribue embarque directement du code qui permet de récupérer les clefs et déchiffrer le secret. C'est possible (moyennement un peu de boulot) mais ça pose d'autres enjeux. Il faut alors sauvegarder le fichier lui-même. Il ne sera plus possible de simplement l'imprimer.
+
+Si on parle de décennies, j'ai aujourd'hui plus confiance dans l'archivage papier de mes proches que dans leur archivage numérique. Ils ont tous un classeur ou quelque chose avec leurs fiches de salaire et quelques papiers à garder toute une vie. Je ne suis pas certain que leurs sauvegardes numériques aient cette même pérennité. 
