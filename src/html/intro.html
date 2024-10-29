@@ -1,0 +1,83 @@
+<article class="doc">
+    <h1>Quel se passe-t-il s'il m'arrive quelque chose ?</h1>
+    <details>
+        
+        <summary>À quoi ça sert tout ça ?</summary>
+        <p>
+            Je veux que mes proches puissent avoir accès à plein
+            d'informations que je ne serai peut-être plus en mesure
+            de leur donner, et entre autres les mots de passe et codes
+            confidentiels des appareils ou des comptes en ligne.
+        </p>
+        <p>
+            Je peux les écrire dans une lettre cachetée mais je ne sais
+            pas ce qu'il peut advenir sur 10, 20 ou 40 ans.
+            
+            Est-ce qu'il ne risque pas de se faire cambrioler avant ? 
+            d'être victime d'un piratage de son disque dûr ou de ses 
+            données en ligne ? 
+            
+            Est-ce qu'un tiers ne va pas abuser de sa confiance ou 
+            de sa négligence ?
+            
+            Est-ce que rien ne va nous diviser au point qu'il pourrait 
+            avoir envie d'utiliser ces informations autrement que de
+            la façon prévue ? 40 ans c'est long, même pour les personnes 
+            en qui j'ai le plus confiance sur tout ça.
+            
+            Même alors, qui y aura accès si cette personne décède ?
+        </p>
+        <p>
+            Il reste le dépôt d'un testament chez le notaire mais, même
+            en ayant confiance en la confidentialité, cette solution me 
+            semble trop rigide. 
+            
+            Si j'échoue à décrire précisément chaque situation 
+            spécifique possible, il risque d'y avoir débat, temps 
+            d'attente, et une décision juridique qui n'est pas forcément 
+            celle que j'aurais anticipé. 
+            
+            Je préfère une évaluation subjective de la situation par des 
+            proches qui me connaissent.
+        </p>
+
+        <h2>Un coffre-fort à plusieurs clefs</h2>
+        <p>
+            La solution elle est visible dans n'importe quel film 
+            d'espionnage ou de cambriolage : un coffre ou une mallette qui 
+            s'ouvre avec plusieurs clefs. 
+            
+            Personne ne peut accéder seul au contenu. Il faut le consensus 
+            de différents détenteurs de clefs pour y accéder.
+        </p>
+        <p>
+            Le secret de Shamir est un algorithme de cryptographie qui fait 
+            exactement ça : 
+            
+            Il divise un secret en plusieurs parties en donnant à chaque 
+            participant une clef unique. 
+            
+            Chaque clef ne donne accès à rien mais elles peuvent 
+            déverrouiller le secret quand elles sont mises ensemble. 
+            
+            L'algorithme permet même de définir combien de clefs seront 
+            nécessaires parmi toutes celles qui existent. 
+            
+            Dans notre cas ça permet de se donner 10 clefs mais 
+            d'accepter que certaines soient perdues ou que leur 
+            détenteur soit injoignable.
+        </p>
+    </details>
+    <p>
+        Cette application va permettre de diviser vos informations 
+        confidentielles en plusieurs parties. 
+        
+        Chaque partie sera constituée d'un document qui pourra être 
+        sauvegardé électroniquement ou imprimé sur papier.
+        
+        La procédure pour reconstituer le secret initial sera inclue 
+        dans chaque document en plus de 
+        <a href="https://github.com/edas/for-when-i-m-gone">github.com/edas/for-when-i-m-gone</a>.
+    
+    </p>
+</article>

@@ -1,0 +1,113 @@
+<section data-page="2" id="step2">
+    <div class="input">
+        
+        <label for="quorum">Quorum pour reconstituer le secret</label>
+        <input type="number" min="2" name="quorum" id="quorum"
+            placeholder="Nombre de serrures sur le coffre" step="1" required>
+
+        <details>
+            <summary>Aide à propos du quorum</summary>
+            <div>
+                <p>
+                    Combien de personnes doivent-elles donner leur accord
+                    pour reconstituer le secret ?
+                </p>
+                <p>
+                    Plus le nombre est grand, plus il sera difficile pour 
+                    une personne malveillante de dérober suffisamment de 
+                    documents ou de convaincre suffisamment de 
+                    participants pour reconstituer le secret d'origine. 
+                    
+                    En échange, il faudra que beaucoup de monde arrive à 
+                    se joindre et se synchroniser, ce qui peut prendre du
+                    temps.
+                </p>
+                <p>
+                    Ce nombre sera connu de tous les participants.
+                </p>
+            </div>
+        </details>
+    </div>
+
+    <div class="input">
+
+        <label for="shares">Nombre de participants</label>
+        <input type="number" min="2" name="shares" id="shares" placeholder="Nombre de clefs distribuées"
+            step="1" required>
+
+        <details>
+            <summary>Aide à propos du nombre de participants</summary>
+            <div>
+                <p>
+                    Le nombre de participants ne peut pas être inférieur 
+                    au quorum défini juste au-dessus.
+                    
+                    S'il est plus élevé, vous permettez que le secret soit 
+                    reconstitué sans l'accord de tout le monde. 
+                    
+                    C'est plutôt une bonne idée s'il s'agit que la 
+                    procédure soit toujours utilisable dans 10, 20 ou 40 
+                    ans. 
+                    
+                    D'ici là certaines personnes auront perdu leur 
+                    document, ou auront mené leur vie ailleurs et ne seront 
+                    pas forcément joignables. 
+                    
+                    D'autres pourraient être décédées ou simplement ne plus 
+                    être de bonne volonté.
+                </p>
+                <p>
+                    Même si ce nombre a intérêt à être grand, n'intégrez 
+                    que des personnes en qui vous avez totale confiance.
+                </p>
+                <p>
+                    Le nombre total de participants ne sera pas donné aux 
+                    différents participants. 
+                    
+                    Rien ne vous empêche d'ajouter des personnes sans le 
+                    dire à tous.
+                </p>
+            </div>
+        </details>
+    </div>
+
+    <div class="input">
+
+        <label for="participants">Liste des participants</label>
+        <textarea name="participants" id="participants" rows="10" cols="50" placeholder="Ma sœur Delphine, 0612121212, delphine@example.com
+Mon avocat, Me Tartampion, 0612121212, avocat@example.com
+Mon banquier, Paul Durant, 0612121212, banquier@example.com
+Ma femme, Marie Dubois, 0612121212, femme@example.com"></textarea>
+
+        <details>
+            <summary>Aide à propos de la liste des participants</summary>
+            <div>
+                <p>
+                    S'il vous arrive quelque chose, quelqu'un devra 
+                    joindre les différents participants pour obtenir le
+                    quorum suffisant. 
+                    
+                    Qui doit-il joindre ? 
+                    
+                    Ici vous pouvez laisser une liste avec noms, adresses,
+                    emails, téléphones ou toute autre coordonnée 
+                    nécessaire. 
+                    
+                    Rien ne vous oblige à lister tout le monde.
+                </p>
+                <p>
+                    Cette liste sera en clair, visible de tous.
+                </p>
+            </div>
+        </details>
+    </div>
+
+    <div class="input submit">
+        <button type="button" class=previous data-to-step="1" id="step2previous">
+            Précédent &lt; Le secret
+        </button>
+        <button type="button" class=next data-to-step="3" id="step2next">
+            Suite &gt; Donner vos informations
+        </button>
+    </div>
+</section>
