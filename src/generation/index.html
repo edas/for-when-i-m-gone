@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        {{> generation/meta}}
+        <title>Au cas où il m'arrive quelque chose</title>
+        <link rel="stylesheet" href="src/generation/style.css">
+        <script src="src/generation/script.js" type="module"></script>
+    </head>
+
+    <body>
+        {{> generation/noscript}}
+        <main>
+            {{> generation/intro}}
+            <hr>
+
+            <article class="app">
+                <h1>Mise en œuvre</h1>
+                <form class="split" id="gen-form" data-current-step="1">
+
+                    {{> generation/params}}
+
+                    {{> generation/step1}}
+                    {{> generation/step2}}
+                    {{> generation/step3}}
+                    {{> generation/step4}}
+                    
+                </form>
+            </article>
+        </main>
+    </body>
+</html>

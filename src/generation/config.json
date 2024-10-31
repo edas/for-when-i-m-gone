@@ -1,0 +1,27 @@
+{
+    "html": {
+        "ids": {
+            "form": "gen-form",
+            "step1": "gen-step1",
+            "step2": "gen-step2",
+            "step3": "gen-step3",
+            "step4": "gen-step4",
+            "step1next": "gen-step1next",
+            "step2next": "gen-step2next",
+            "step3next": "gen-step3next",
+            "step2previous": "gen-step2previous",
+            "step3previous": "gen-step3previous",
+            "step4previous": "gen-step4previous",
+            "secret": "gen-secret",
+            "shares": "gen-shares",
+            "quorum": "gen-quorum",
+            "participants": "gen-participants",
+            "cipher": "gen-cipher",
+            "length": "gen-length",
+            "name": "gen-name",
+            "contact": "gen-contact",
+            "instructions": "gen-instructions",
+            "status": "gen-status"
+        }
+    }
+}
