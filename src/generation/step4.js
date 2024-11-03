@@ -1,5 +1,5 @@
 import { goToStep, onStepChange } from './changesteps.js'
-import { encrypt } from '../encryption.js'
+import { encrypt } from './encryption.js'
 import config from './config.json'
 const ids = config.html.ids
 
