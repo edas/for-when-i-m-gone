@@ -32,4 +32,5 @@ function onGenerateSubmit(e) {
 function showResult(msg) {
     const status = document.getElementById(ids.status)
     status.textContent = msg
+    console.log(msg)
 }

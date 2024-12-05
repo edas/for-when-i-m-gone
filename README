@@ -21,3 +21,27 @@ La documentation est dans le répertoire `doc/fr`.
 Le dépôt original est sur https://github.com/edas/for-when-i-m-gone
 
 Le code et sa documentation sont fournis sous licence GPL version 3 tel que décrit dans le fichier `LICENSE`.
+
+---
+
+
+# Fonctionnement technique
+
+Le secret utilisé est d'abord chiffré avec AES-GCM. La clef de 256 bits générée pour l'occasion est elle-même divisée en plusieurs parties à l'aide de l'algorithme du secret de Shamir. 
+
+Pour reconstruire le secret, on récupère un nombre suffisant de fichiers pour reconstituer la clef AES, qui va permettre ensuite de déchiffrer le secret.
+
+Chaque destinataire reçoit un fichier HTML auto-portant qui contient une partie de la clef passée par le secret de shamir, le secret chiffré par la clef AES, le code logiciel avec une interface graphique pour reconstruire le secret, les paramètres de configuration, et une documentation sur comment se servir de tout ça.
+
+# Quelle implémentation ?
+
+La pérennité est le critère prioritaire. 
+
+Pour le chiffrement AES j'utilise l'implémentation du navigateur fournie par l'interface `Crypto.subtle`. AES est suffisamment répandu pour ne probablement pas disparaitre sur ce siècle et toutes les implémentations sont compatibles entre elles.
+
+Pour le secret de Shamir les deux implémentations suffisamment anciennes et répandues pour garantir un peu de pérenité sont `ssss` et `gfshare`. J'utilise aujourd'hui une implémentation Javascript compatible avec l'historique `ssss`. Il s'agit d'un dérivé de https://github.com/gburca/ssss-js.
+
+Malheureusement cette implémentation est un projet individuel, peu connu, peu ou pas utilisé. Je préférerais me baser sur une implémentation plus connue ou réalisée par quelqu'un de confiance. Si vous connaissez une implémentation Javscript compatible avec `ssss` ou `gfshare` qui correspond à ces critères, signalez-le moi.
+
+# Secret de Shamir
+

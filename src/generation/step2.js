@@ -85,7 +85,7 @@ function onSharesChange(e) {
     const element = e.target
     validateShares(element)
     const quorum = document.getElementById(ids.quorum)
-    validateQuorumAndShare({ quorum, shares, main: 'shares' })
+    validateQuorumAndShare({ quorum, shares: element, main: 'shares' })
     onStepChange()
     element.reportValidity()
 }

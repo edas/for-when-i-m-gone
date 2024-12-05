@@ -2,7 +2,7 @@
     <div class="input">
         
         <label for="gen-quorum">Quorum pour reconstituer le secret</label>
-        <input type="number" min="2" name="quorum" id="gen-quorum"
+        <input type="number" min="2" name="gen-quorum" id="gen-quorum"
             placeholder="Nombre de serrures sur le coffre" step="1" required>
 
         <details>
@@ -32,7 +32,7 @@
     <div class="input">
 
         <label for="gen-shares">Nombre de participants</label>
-        <input type="number" min="2" name="shares" id="shares" placeholder="Nombre de clefs distribuées"
+        <input type="number" min="2" name="shares" id="gen-shares" placeholder="Nombre de clefs distribuées"
             step="1" required>
 
         <details>
@@ -74,7 +74,7 @@
     <div class="input">
 
         <label for="gen-participants">Liste des participants</label>
-        <textarea name="participants" id="gen-participants" rows="10" cols="50" placeholder="Ma sœur Delphine, 0612121212, delphine@example.com
+<textarea name="participants" id="gen-participants" rows="10" cols="50" placeholder="Ma sœur Delphine, 0612121212, delphine@example.com
 Mon avocat, Me Tartampion, 0612121212, avocat@example.com
 Mon banquier, Paul Durant, 0612121212, banquier@example.com
 Ma femme, Marie Dubois, 0612121212, femme@example.com"></textarea>

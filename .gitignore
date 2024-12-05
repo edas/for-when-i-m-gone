@@ -3,3 +3,4 @@
 for-when-i-m-gone.code-workspace
 /dist
 node_modules
+.DS_Store
