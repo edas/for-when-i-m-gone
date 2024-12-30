@@ -1,31 +1,579 @@
 <!DOCTYPE html>
 <html lang="fr">
     <head>
-        {{> generation/meta}}
-        <title>Au cas où il m'arrive quelque chose</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>S'il m'arrive quelque chose</title>
         <link rel="stylesheet" href="src/generation/style.css">
-        <script src="src/generation/script.js" type="module"></script>
+        <style>
+html, body {
+    margin: 0;
+    padding: 0;
+    --active-bg: darkslategrey;
+    --active-text: white;
+    background-color: var(--active-bg);
+    color: var(--active-text);
+}
+section > div {
+    background-color: white;
+    color: black;
+}
+header {
+    --height: 2em;
+    font-size: calc(var(--height) / 2);
+    height: var(--height);
+    line-height: var(--height);
+    font-weight: bold;
+    display: flex;
+    vertical-align: center;
+}
+header :first-child {
+    width: var(--height);
+    flex: none;
+    text-align: center;
+}
+header :last-child {
+    font-size: 1em;
+    flex: 1;
+    margin: 0 0 0 1em
+}
+section > div {
+    padding: 1em;
+}
+div.action {
+    text-align: right;
+    padding: 1em 2em;
+}
+div.action button {
+    background-color: var(--active-bg);
+    color: var(--active-text);
+    padding: 0.5em;
+    border-radius: 0.5em;
+    border: 1px solid gray;
+}
+section > aside {
+    padding: 1em;
+    background-color: var(--active-bg);
+    color: var(--active-text);
+}
+aside h2 {
+    font-size: 1.2em;
+}
+aside a {
+    color: rgb(248, 255, 216);
+    text-decoration: underline;
+}
+aside details {
+    padding-bottom: 1em;
+}
+section {
+    display: none;
+}
+.intro section#intro,
+.secret section#secret, 
+.quorum section#quorum,
+.shares section#shares,
+.letter section#letter,
+.export section#export {
+    display: block;
+}
+
+button {
+    cursor: pointer;
+}
+section header div {
+    cursor: pointer;
+}
+section#intro header div {
+    cursor: default;
+}
+textarea {
+    width: calc(min(100vw, 40rem) - 2rem - 8px);
+    height: 25em;
+}
+main {
+    max-width: 40em;
+    margin: auto;
+}
+
+        </style>
+        <script>
+
+function setStep(step) {
+    document.body.className = step
+}
+
+function validateIntro() {
+    setStep("secret")
+}
+
+function backToIntro() {
+    setStep("intro")
+}
+
+function validateSecret() {
+    setStep("quorum")
+}
+
+function backToSecret() {
+    setStep("secret")
+}
+
+function validateQuorum() {
+    setStep("shares")
+}
+
+function backToQuorum() {
+    setStep("quorum")
+}
+
+function validateShares() {
+    setStep("letter")
+}
+
+function backToShares() {
+    setStep("shares")
+}
+
+function validateLetter() {
+    setStep("export")
+}
+
+function backToLetter() {
+    setStep("letter")
+}
+
+
+function attach() {
+    document.querySelector("section#intro .action button").addEventListener("click", validateIntro)
+    document.querySelector("section#secret header div").addEventListener("click", backToIntro)
+    document.querySelector("section#secret .action button").addEventListener("click", validateSecret)
+    document.querySelector("section#quorum header div").addEventListener("click", backToSecret)
+    document.querySelector("section#quorum .action button").addEventListener("click", validateQuorum)
+    document.querySelector("section#shares header div").addEventListener("click", backToQuorum)
+    document.querySelector("section#shares .action button").addEventListener("click", validateShares)
+    document.querySelector("section#letter header div").addEventListener("click", backToShares)
+    document.querySelector("section#letter .action button").addEventListener("click", validateLetter)
+    document.querySelector("section#export header div").addEventListener("click", backToLetter)
+}
+
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", attach);
+} else {
+    attach();
+}
+
+
+
+        </script>
     </head>
-
-    <body>
-        {{> generation/noscript}}
-        <main>
-            {{> generation/intro}}
-            <hr>
-
-            <article class="app">
-                <h1>Mise en œuvre</h1>
-                <form class="split" id="gen-form" data-current-step="1">
-
-                    {{> generation/params}}
-
-                    {{> generation/step1}}
-                    {{> generation/step2}}
-                    {{> generation/step3}}
-                    {{> generation/step4}}
-                    
-                </form>
-            </article>
-        </main>
+    <body class="letter">
+    <main>
+        <section id="intro">
+            <header>
+                <div>🛟</div>
+                <h1>S'il m'arrive quelque chose</h1>
+            </header>
+            <div>
+                <p>Cette page permet de pour donner accès à <i>vos proches</i> aux <i>données</i> que vous souhaitez s'il vous arrive quelque chose.</p>
+                <p>Ces données seront sécurisées. Aucun de vos proches ne pourra y accéder seul sans l'aide des autres.</p>
+                <p>Préparez les données que vous souhaitez partager, la liste des proches auxquels vous donnez cette responsabilité, 
+                    et un texte d'accompagnement. 
+                </p>
+                <p>Pas de stress, vous serez guidés et on vous expliquera les différents enjeux au fur et à mesure.</p>
+                <div class="action">
+                    <button>Commencer</button>
+                </div>
+            </div>
+            <aside>
+                <h2>Aide</h2>
+                <p>Sur chaque page vous pouvez descendre pour obtenir un peu d'aide contextuelle.</p>
+                <p>Si c'est votre première fois, prenez un peu de temps pour au moins lire les paragraphes déjà 
+                    dépliés et faites peut-être un essai avec de fausses données.</p>
+                </p>
+                <details>
+                    <summary>Est-ce sécurisé ?</summary>
+                    <p>
+                        Le processus utilise un procédé mathématique nommé « secret de Shamir »
+                        qui n'a pas de faille connue depuis près de 40 ans.
+                    </p>
+                    <p>
+                        Vérifiez cependant bien que vous utilisez une version téléchargée par vous-même, directement et récemment,
+                        à partir de <a href="https://github.com/edas/for-when-i-m-gone">github.com/edas/for-when-i-m-gone</a>.
+                    </p>
+                </details>
+                <details>
+                    <summary>Comment avoir confiance ?</summary>
+                    <p>
+                        Le code source de cette page est accessible <a href="https://github.com/edas/for-when-i-m-gone">en ligne</a> 
+                        pour être audité si vous connaissez un informaticien. Si vous avez confiance en lui, vous 
+                        pouvez aussi lui demander de reconstruire l'application à partir de ce code source.
+                    </p>
+                    <p>
+                        Pour plus de sécurité, vous pouvez aussi vous déconnecter d'Internet et de tout réseau pendant que vous 
+                        manipulerez la page. Ça empêchera toute transmission d'une quelconque donnée vers l'extérieur.
+                    <p>
+                </details>
+                <details><summary>Quelle est la valeur juridique ?</summary>
+                    <p>
+                        Je ne sais pas. Peut-être que ce sera considéré comme un document
+                        fiable où sont enregistré vos volontés. Peut-être que non.
+                    </p>
+                    <p>
+                        Ceci est à considérer comme un outil technique. Il donne une possibilité
+                        à vos proches mais ne préjuge pas de ce qui est légal et ne garantit pas
+                        représenter une expression de volonté dans les formes attendues par 
+                        la loi.
+                    </p>
+                    <p>
+                        Si vous voulez exprimer des volontés avec la garantie d'une valeur juridique, 
+                        mieux vaut vous adresser à un notaire.
+                    </p>
+                </details>
+            </aside>
+        </section>
+        <section id="secret">
+            <header>
+                <div>←</div>
+                <h2>Secret à transmettre</h2>
+            </header>
+            <div>
+                <p><label for="secret-input">Notez ici les secrets à transmettre à vos proches</label></p>
+                <textarea id="secret-input"></textarea>
+                <div class="action">
+                    <button>Continuer</button>
+                </div>
+            </div>
+            <aside>
+                <h2>Aide</h2>
+                <p>C'est le texte que auquel vos proches pourront avoir accès collectivement mais que vous souhaitez garder privé entre temps.</p>
+                <p>Généralement il y a les mots de passe de votre compte email et de votre ordinateur, 
+                    le schéma ou le code PIN de votre téléphone ainsi que celui de votre carte SIM,
+                    et les quelques mots de passe les plus importants 
+                    ou l'accès à votre gestionnaire de mots de passe si vous en avez un. Vous pouvez aussi ajouter l'accès à vos sauvegardes.</p>
+                </p>
+                <details>
+                    <summary>Est-ce qu'il y a une taille maximum ?</summary>
+                    <p>
+                        Au-delà de 15 millions de caractères, le document pourra être difficile à envoyer par email. 
+                        Pas d'inquiétude : Ça représente toutefois déjà trois fois la taille de la Bible.
+                    </p>
+                    <p>
+                        Au-delà de deux ou trois milliers de caractères, le document demandera plusieurs pages à l'impression. 
+                        Cela peut rendre le stockage sous forme papier plus hasardeux avec la perte d'une ou plusieurs pages.
+                    </p>
+                    <p>
+                        Au-delà de deux ou trois centaines de caractères, le procédure de récupération pourrait être un
+                        peu pénible pour ceux qui choisissent de stocker le document sous forme papier.
+                    </p>
+                </details>
+                <details><summary>À quoi dois-je penser ?</summary>
+                    <p>
+                        De plus en plus de services demandent une confirmation par email ou par SMS en plus d'un mot de passe.
+                        Pensez à transmettre aussi les moyens d'obtenir ces confirmations, c'est à dire les accès à votre
+                        boite email, le code PIN ou le tracé du schéma de votre téléphone, et/ou le code PIN de votre carte SIM.
+                        Certains services proposent des codes de récupération. Pensez à fournir aussi ça.
+                    </p>
+                    <p>
+                        Si vous donnez d'autres mots de passe, pensez aussi à donner les noms ou identifiants utilisateurs correspondants, 
+                        voire l'adresse des sites web si ce n'est pas évident.
+                    </p>
+                    <p>
+                        Évitez de proposer d'aller lire une lettre stockée dans la bibliothèque ou un quelconque document
+                        physique qui peut disparaitre en même temps que vous 
+                        (par exemple dans une incendie, une guerre ou une catastrophe naturelle) ou dont la pérennité n'est pas 
+                        assurée sur plusieurs décennies si vous prévoyez une transmission qui peut être effective dans cette durée.
+                    </p>
+                </details>
+                <details><summary>Si mes mots de passe changent ?</summary>
+                    <p>
+                        Si quoi que ce soit change, il faudra recommencer de zéro et remplacer 
+                        tous les documents précédents par les nouveaux.
+                    </p>
+                    <p>
+                        Pour éviter ça, le mieux est de stocker tous vos mots de passe dans un gestionnaire de mots de passe, 
+                        puis de transmettre l'accès à celui-ci. Ça vous permettra d'ajouter ou mettre à jour des mots de passe 
+                        sans avoir à recréer et transmettre un nouveau secret à chaque fois à tous vos proches. 
+                    </p>
+                    <p>Il n'y a malheureusement pas de solution si vous changez le mot de passe de votre gestionnaire de mots 
+                        de passe.
+                    </p>
+                </details>
+                <details><summary>Qu'est-ce qu'un gestionnaire de mots de passe ?</summary>
+                    <p>
+                        Un gestionnaire de mots de passe permet de stocker de façon sécurisée tous vos mots de passe. 
+                        Voyez-le comme un coffre-fort électronique.
+                    </p>
+                    <p>
+                        Il y a plein de gestionnaires de mots de passe gratuits tout à fait fiables. Si vous ne savez pas où aller,
+                        commencez par jeter un œil à <a href="https://bitwarden.com/fr-fr/">Bitwarden</a>.
+                    </p>
+                </details>
+            </aside>
+        </section>
+        <section id="quorum">
+            <header>
+                <div>←</div>
+                <h2>Quorum</h2>
+            </header>
+            <div>
+                <p>
+                    <label for="quorum-input">Combien de vos proches doivent-ils donner leur accord ?</label>  
+                </p><p>
+                    <input type="number" min="2" step="1" max="255" id="quorum-input">
+                </p>
+                <div class="action">
+                    <button>Continuer</button>
+                </div>
+            </div>
+            <aside>
+                <h2>Aide</h2>
+                <p>
+                    Aucun de vos proches ne peut accéder aux données seul. L'idée est de faire confiance au collectif. 
+                </p>
+                <p>
+                    Combien de vos proches doivent doivent donner leur accord pour que vous ayez confiance que la situation
+                    soit légitime ? probablement 3 ou 4.
+                </p>
+                <details>
+                    <summary>Comment ça fonctionne ?</summary>
+                    <p>
+                        Si le quorum est de 3, peu importe le nombre de proches à qui vous aurez donné une partie du secret,
+                        il suffira que 3 d'entre eux rassemblent leur partie pour accéder à la totalité des données privées.
+                    </p>
+                </details>
+                <details><summary>Pourquoi pas un quorum trop petit ?</summary>
+                    <p>
+                        Malheureusement parfois les couples, les familles ou les amis se déchirent. On a tous envie d'être 
+                        optimistes mais ici il faut prévoir le pire, même ce qui semble irréaliste.
+                    </p>
+                    <ul>
+                        <li>Vous vous êtes brouillés avec deux amis, qui ont décidé de se venger en collaborant ensemble ;</li>
+                        <li>Vous vous êtes brouillés avec un ami, qui a réussi à en embobiner un autre ;</li>
+                        <li>Vous vous êtes brouillés avec un ami, qui a réussi à fouiller dans les affaires d'un autre pour récupérer sa partie du secret.</li>
+                    </ul>
+                    <p>Un quorum de 2 demandera une grande confiance en vos proches, et des proches suffisament différents. Un quorum de 3
+                        rend des opérations malveillantes bien plus difficiles.
+                    </p>
+                    <p>Il n'est pas possible d'avoir un quorum de 1. Ça permettrait à n'importe lequel de vos proches de 
+                        déverrouiller seul vos données. Vous n'auriez pas besoin de toute cette procédure : autant transmettre vos données 
+                        en clair directement.
+                    </p>
+                </details>
+                <details><summary>Pourquoi pas un quorum trop grand ?</summary>
+                    <p>
+                        Un grand quorum impose une procédure plus complexe à vos proches, où il faut contacter et faire collaborer plus de monde.
+                        Au delà de 3 ou 4, ça peut vite être pénible.
+                    </p>
+                    <p>
+                        Là aussi, il faut envisager des possibilités peu joyeuses avec le temps :
+                    </p>
+                    <ul>
+                        <li>Vous vous êtes brouillés, potentiellement très fort, avec certains de vos proches, y compris de votre famille ;</li>
+                        <li>Certains de vos proches se sont brouillés entre eux, assez pour refuser de collaborer ensemble ;</li>
+                        <li>Certains de vos proches ont déménagé, changé d'email ou de téléphone et les autres ne savent plus comment les contacter ;</li>
+                        <li>Certains de vos proches sont décédé, ou en incapacité, y compris s'ils ont 20 ans de moins ;</li>
+                        <li>D'autres ont peut-être disparu en même temps que vous (par exemple dans un accident, une guerre ou une catastrophe).</li>
+                    </ul>
+                    <p>
+                        Prévoyez donc un quorum qui reste pertinent malgré l'absence de quelques uns de vos proches. Plus le temps dure, plus les absences risquent d'être nombreuses.
+                    </p>
+                </details>
+            </aside>
+        </section>
+        <section id="shares">
+            <header>
+                <div>←</div>
+                <h2>Destinataires</h2>
+            </header>
+            <div>
+                <p><label for="shares-input">Sur combien de vos proches souhaitez-vous compter ?</label></p>
+                <p><input type="number" min="2" step="1" max="255" id="shares-input"></p>
+                <div class="action">
+                    <button>Continuer</button>
+                </div>
+            </div>
+            <aside>
+                <h2>Aide</h2>
+                <p>C'est le nombre de vos proches à qui vous allez donner une partie de votre secret.</p>
+                <p>Idéalement, vous devriez prévoir un nombre plus important que le quorum à l'étape précédente, pour prévoir
+                    l'absence de quelques uns d'entre eux.</p>
+                <p>Plus il y a de monde, mieux c'est, tant que ce sont des personnes en qui vous avez vraiment confiance.</p>
+                <details>
+                    <summary>Est-ce qu'il y a un nombre maximum ?</summary>
+                    <p>L'implémentation actuelle ne permet pas de gérer plus de 255 destinataires. Avez-vous vraiment autant de personnes en qui vous avez <i>vraiment</i> confiance ?</i></p>
+                </details>
+                <details><summary>Groupes, des familles ou des couples</summary>
+                    <p>
+                        Il peut être pertinent de compter un groupe uni comme 1, et de donner à tous ses membres la même partie de votre
+                        secret. Il suffira que l'un deux collabore pour engager tous le groupe. Ce peut être les membres d'un club
+                        de sport, les membres d'une famille d'amis ou d'un couple d'amis.
+                    </p>
+                    <p>
+                        Ce fonctionnement est pertinent si vous pensez que les différents membres de groupe réagiront d'une seule voix 
+                        mais que peut-être certains se désolidariseront du groupe avec le temps.
+                    </p>
+                </details>
+                <details><summary>Qui choisir ?</summary>
+                    <p>
+                        Il faut des personnes en qui vous avez vraiment confiance, c'est à dire qui ne risquent pas de collaborer entre elles
+                        de façon malveillante si vous vous brouillez dans le futur.
+                    </p>
+                    <p>
+                        Les personnes idéales sont celles qui sauront ne pas perdre la partie du secret que vous leur confierez, y compris
+                        queques décennies et plusieurs déménagements ou pannes informatiques. Ce sont aussi celles qui garderont
+                        tout ça en tête, vous préviendront en cas de changement de coordonnées même si vous n'avez pas gardé de lien actif, 
+                        et qui se sentiront responsables de collaborer même si vous vous êtes perdus de vue depuis longtemps.
+                    </p>
+                </details>
+                <details><summary>Ajouter ou retirer des destinataires ?</summary>
+                    <p>
+                        Vous ne pourrez pas retirer un accès déjà donné. Votre seule solution sera de changer tous les mots de passe 
+                        et accès que vous aurez indiqué dans vos données secrètes et recommencer avec votre nouvelle liste de destinataires.
+                    </p>
+                    <p>
+                        Il est techniquement possible d'ajouter des destinataires après coup (mais sans changer le quorum) mais l'outil ne le 
+                        propose pas encore. Rien ne vous empêche par contre de générer plus de parties que nécessaires et les distribuer plus tard. 
+                        Attention toutefois dans ce cas là parce que celui qui gagne accès à ces fichiers pourrait obtenir le quorum seul 
+                        ou plus facilement.
+                    </p>
+                </details>
+            </aside>
+        </section>
+        <section id="letter">
+            <header>
+                <div>←</div>
+                <h2>Lettre d'accompagnement</h2>
+            </header>
+            <div>
+                <p><label for="letter-input">Quelques mots d'accompagnement pour vos proches</label></p>
+                <textarea id="letter-input"></textarea>
+                <div class="action">
+                    <button>Continuer</button>
+                </div>
+            </div>
+            <aside>
+                <h2>Aide</h2>
+                <p>
+                    Ce texte là sera lisible en clair par tout le monde. Vous voudrez probablement y donner au moins trois indications : 
+                </p>
+                <ul>
+                    <li>La liste des personnes à qui vous aller donner une partie de votre secret et les moyens de les contacter ;
+                    </li>
+                    <li>Les conditions pour lesquelles vous souhaitez que vos proches acceptent ou non de récupérer vos données ;
+                    </li>
+                    <li>Ce que vous voudriez qu'on fasse ou qu'on ne fasse pas avec vos données une fois révélées.</li>
+                </ul>
+                <details>
+                    <summary>Est-ce qu'il y a une taille maximum ?</summary>
+                    <p>
+                        Les contraintes de taille sont les mêmes que pour le secret. Les indications de taille ci-dessous
+                        concernent le cumul des deux textes.
+                    </p>
+                    <p>
+                        Au-delà de 15 millions de caractères, le document pourra être difficile à envoyer par email. 
+                        Pas d'inquiétude : Ça représente toutefois déjà trois fois la taille de la Bible.
+                    </p>
+                    <p>
+                        Au-delà de deux ou trois milliers de caractères, le document demandera plusieurs pages à l'impression. 
+                        Cela peut rendre le stockage sous forme papier plus hasardeux avec la perte d'une ou plusieurs pages.
+                    </p>
+                </details>
+                <details><summary>La liste des proches ?</summary>
+                    <p>
+                        Si vous souhaitez la collaboration de trois de vos proches pour accéder à vos données privées, 
+                        il faut leur donner chacun un moyen de contacter les deux autres. 
+                        Vous voudrez donc probablement lister les noms et coordonnées de tous ceux à qui vous allez envoyer
+                        une partie de votre secret.
+                    </p>
+                    <p>
+                        Pensez à la pérennité. Les amis peuvent se perdre de vue. Ne vous contentez pas d'un prénom ou d'un 
+                        surnom. Pour ceux ou celles qui ont un nom de naissance différent du nom d'usage, pensez à préciser les deux. 
+                    </p>
+                    <p>
+                        De même, les numéros de téléphone et les adresses peuvent changer avec le temps. Notez idéalement un maximum 
+                        de choses (avec l'accord de vos proches) : numéro de téléphone, adresse postale, adresse email, etc. Vous 
+                        maximiserez la possibilité de garder contact.
+                    </p>
+                </details>
+                <details><summary>Les conditions d'usage ?</summary>
+                    <p>
+                        Vous avez deux heures de retard à un retour de bivouac en montagne. Est-ce une situation acceptable
+                        pour que l'un de vos proches demandent aux autres l'accès à vos mots de passe et tente de tracer
+                        votre téléphone ?
+                    </p>
+                    <p>
+                        Donner des indications sur les conditions d'usage facilitera la vie de vos proches, évitera les conflits, 
+                        et minimisera les probabilités d'un accès illégitime. 
+                    </p>
+                    <p>
+                        Si le cas en introduction vous semble caricatural, pensez à quelques questions :
+                    </p>
+                    <ul>
+                        <li>Vous allez certainement bien mais vous êtes injoignable et un de vos proches pense
+                            avoir <i>besoin</i> d'accéder à votre ordinateur ou vos emails, est-ce que les
+                            autres l'y autorisent ? 
+                        </li>
+                        <li>Vous êtes inconscient suite à un accident de la route, est-ce que vos proches peuvent
+                            accéder à vos données si jamais ça dure ? à partir de combien de temps ?
+                        </li>
+                        <li>
+                            Vous êtes disparu, est-ce que vos proches peuvent
+                            accéder à vos données si jamais ça dure ? à partir de combien de temps ?
+                        </li>
+                        <li>
+                            Vous perdez une grande partie de vos capacités mentales, est-ce que vos proches peuvent
+                            accéder à vos données ?
+                        </li>
+                    </ul>
+                </details>
+            </aside>
+        </section>
+        <section id="export">
+            <header>
+                <div>←</div>
+                <h2>Téléchargement</h2>
+            </header>
+            <div>
+                
+            </div>
+            <aside>
+                <h2>Aide</h2>
+                <p>
+                    Distribuez un de ces documents à chacun de vos proches. Veillez à ce que chacun
+                    en reçoive un différent (et pas plusieurs fois la même copie).
+                </p>
+                <p>Pensez ensuite à les effacer de votre disque et de l'outil via lequel vous les envoyez 
+                    (par exemple les archives des emails envoyés).</p>
+                <details>
+                    <summary>Comment est-ce que je les distribue ?</summary>
+                    <p>
+                        La réponse réaliste : Si vous n'avez pas de raison de craindre un espionnage 
+                        spécifique contre vous par un groupe avec des moyens importants, envoyez 
+                        bien les documents comme vous voulez : Email, Whatsapp, SMS, réseau social. 
+                        Pensez juste à bien les effacer dans vos archives une fois que ça a été reçu.
+                    </p>
+                    <p>
+                        Si vous êtes réellement la cible de menaces concrètes, vous savez déjà 
+                        probablement comment faire. L'idéal c'est une transmission à la main 
+                        par clé USB. Pensez à faire un effacement sécurisé si vous réutilisez la clé.
+                    </p>
+                    <p>
+                        Pour des envois à distance vous pouvez utiliser des canaux électroniques
+                        chiffrés comme Signal. Whastapp et Telegram peuvent éventuellement convenir
+                        mais le chiffrement de bout en bout n'y est pas activé par défaut. 
+                        Pensez à effacer les envois dans les archives ensuite.
+                    </p>
+                    <p>
+                        L'envoi papier par La Poste permet lui aussi une très bonne sécurité. 
+                        Même si un document se perd ou est intercepté, il sera seul et ne donnera accès à rien. 
+                        Malheureusement cette sécurité se fait au détriment de la praticité : 
+                        Le destinataire devra utiliser une procédure manuelle longue 
+                        et propice aux erreurs pour récupérer vos secrets.
+                    </p>   
+                </details>
+            </aside>
+        </section>
+    </main>
     </body>
 </html>
