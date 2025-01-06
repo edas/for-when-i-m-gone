@@ -103,6 +103,10 @@ function setStep(step) {
 }
 
 function validateIntro() {
+    return true
+}
+
+function submitIntro() {
     setStep("secret")
 }
 
@@ -111,7 +115,23 @@ function backToIntro() {
 }
 
 function validateSecret() {
-    setStep("quorum")
+    const secret = document.querySelector("#secret-input")
+    const validity = secret.validity
+    secret.value = secret.value.replace('/s+$', '')
+    if (validity.missing) {
+        secret.setCustomValidity("Tout ça n'a d'intérêt que si vous avez un secret à transmettre.")
+    } else if (validity.tooShort ) { 
+        secret.setCustomValidity("Mettez au moins deux caractères.")
+    } else {
+        secret.setCustomValidity("")
+        return true
+    }
+    secret.reportValidity()
+    return false
+}
+
+function submitSecret() {
+    validateSecret() && setStep("quorum")
 }
 
 function backToSecret() {
@@ -119,23 +139,70 @@ function backToSecret() {
 }
 
 function validateQuorum() {
+    const quorum = document.querySelector("#quorum-input")
+    const validity = quorum.validity
+    if (validity.valueMissing) {
+        quorum.setCustomValidity("On ne peut pas avancer sans déterminer le nombre de destinataires.")
+    } else if (validity.rangeUnderflow) {
+        quorum.setCustomValidity("Il faut au moins deux personnes pour que ça ait un sens.")
+    } else if (validity.rangeOverflow) {
+        quorum.setCustomValidity("Il ne peut pas y avoir plus de 255 destinataires.")
+    } else if (validity.stepMismatch) {
+        quorum.setCustomValidity("Il faut un nombre entier.")
+    } else {
+        quorum.setCustomValidity("")
+        return true
+    }
+    quorum.reportValidity()
+    return false
+}
+
+function submitQuorum() {
+    if (!validateQuorum()) return false
+    const quorum = document.querySelector("#quorum-input")
+    const shares = document.querySelector("#shares-input")
+    shares.max = quorum.value
     setStep("shares")
+}
+
+function validateShares() {
+    const quorum = document.querySelector("#quorum-input")
+    const shares = document.querySelector("#shares-input")
+    const validity = shares.validity
+    if (validity.valueMissing) {
+        shares.setCustomValidity("On ne peut pas spécifiquer de quorum.")
+    } else if (validity.rangeUnderflow) {
+        shares.setCustomValidity("Il faut au moins deux personnes pour que ça ait un sens.")
+    } else if (validity.stepMismatch) {
+        shares.setCustomValidity("Il faut un nombre entier.")
+    } else if (validity.rangeOverflow || (quorum.value > shares.value)) {
+        shares.setCustomValidity("Personne ne pourra récupérer le secret si le quorum est plus important que le nombre de destinataires.")
+    } else {
+        shares.setCustomValidity("")
+        return true
+    }
+    shares.reportValidity()
+    return false
 }
 
 function backToQuorum() {
     setStep("quorum")
 }
 
-function validateShares() {
-    setStep("letter")
+function submitShares() {
+    validateShares() && setStep("letter")
+}
+
+function validateLetter() {
+    return true
 }
 
 function backToShares() {
     setStep("shares")
 }
 
-function validateLetter() {
-    setStep("export")
+function submitLetter() {
+    validateLetter() && setStep("export")
 }
 
 function backToLetter() {
@@ -144,15 +211,15 @@ function backToLetter() {
 
 
 function attach() {
-    document.querySelector("section#intro .action button").addEventListener("click", validateIntro)
+    document.querySelector("section#intro .action button").addEventListener("click", submitIntro)
     document.querySelector("section#secret header div").addEventListener("click", backToIntro)
-    document.querySelector("section#secret .action button").addEventListener("click", validateSecret)
+    document.querySelector("section#secret .action button").addEventListener("click", submitSecret)
     document.querySelector("section#quorum header div").addEventListener("click", backToSecret)
-    document.querySelector("section#quorum .action button").addEventListener("click", validateQuorum)
+    document.querySelector("section#quorum .action button").addEventListener("click", submitQuorum)
     document.querySelector("section#shares header div").addEventListener("click", backToQuorum)
-    document.querySelector("section#shares .action button").addEventListener("click", validateShares)
+    document.querySelector("section#shares .action button").addEventListener("click", submitShares)
     document.querySelector("section#letter header div").addEventListener("click", backToShares)
-    document.querySelector("section#letter .action button").addEventListener("click", validateLetter)
+    document.querySelector("section#letter .action button").addEventListener("click", submitLetter)
     document.querySelector("section#export header div").addEventListener("click", backToLetter)
 }
 
@@ -239,7 +306,7 @@ if (document.readyState === "loading") {
             </header>
             <div>
                 <p><label for="secret-input">Notez ici les secrets à transmettre à vos proches</label></p>
-                <textarea id="secret-input"></textarea>
+                <textarea minlength="2" required id="secret-input"></textarea>
                 <div class="action">
                     <button>Continuer</button>
                 </div>
