@@ -1,0 +1,34 @@
+securityWarning:
+  title: Avertissement de sécurité
+  subtitle: "Avant de continuer, veuillez confirmer les points suivants :"
+  checkboxLabel: "J'ai téléchargé ce programme moi-même, récemment, directement depuis "
+  checkboxLabelLink: github.com/edas/for-when-i-m-gone
+  checkboxLabelEnd: "."
+  continueButton: Continuer
+
+secretEditor:
+  title: Rédigez votre secret
+  placeholder: Écrivez ici les informations que vous souhaitez transmettre...
+  sidePanel:
+    title: Éléments à inclure
+    essentialNote: >-
+      Les trois premiers éléments sont essentiels car ils donnent accès 
+      aux procédures de récupération des comptes ainsi qu'aux seconds 
+      facteurs d'authentification.
+    collapse: Replier
+    expand: Aide-mémoire
+    checkboxes:
+      emails: Adresses email et mots de passe correspondants
+      phoneCodes: Codes de déverrouillage des téléphones et codes PIN des cartes SIM
+      cloudAccounts: Identifiants et mots de passe Apple, Microsoft et/ou Google
+      computerLogins: Identifiants et mots de passe de session des ordinateurs
+      otherPasswords: Autres identifiants ou mots de passe habituels ou importants
+      domainManager: Serveur, identifiant et mot de passe du gestionnaire de nom de domaine
+      passwordManager: Serveur, identifiant et mot de passe du gestionnaire de mots de passe
+      backups: Serveur, identifiant et mot de passe des sauvegardes
+      crypto: Clés ou identifiants pour les crypto-monnaies
+    sectionOptional: S'il y en a
+  buttons:
+    continueWithoutConfirm: Continuer sans confirmer le contenu
+    continueWithoutEssentials: Continuer sans les essentiels
+    continue: Continuer
