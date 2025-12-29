@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+    <section id="encode">
+      <form>
+        <h3>Transmettre des secrets au cas où il vous arrive quelque chose</h3>
+        <p>
+          <label>Nombre de destinataires <br /><input type="number" id="encode-parts" min="2" max="100" /></label>
+        </p>
+        <p>
+          <label>Quorum à réunir <br /><input type="number" id="encode-quorum" min="2" max="100" /></label>
+        </p>
+        <p>
+          <label>Secrets à transmettre <br/><textarea id="encode-secrets"></textarea></label>
+        </p>
+        <p>
+          <label>Lettre d'accompagnement <br/><textarea id="encode-letter"></textarea></label>
+        </p>
+        <p><input type="submit" value="Télécharger" /></p>
+    </section>
+    <section id="decode"></section>
+  </body>
+</html>

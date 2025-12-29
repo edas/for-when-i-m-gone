@@ -1,9 +1,0 @@
-Pérennité
-=========
-
-Il y a certainement de meilleures façon de faire et des outils plus agréable à utiliser ou à installer.
-
-L'idée maitresse est toutefois d'avoir quelque chose de reproductible dans 5, 10 ou 20 ans. J'ai donc privilégié des outils en ligne de commande qui sont utilisables depuis au moins 20 ans, bien diffusés sur les réseaux et donc la pérennité semble assurée même si les ordinateurs et les systèmes d'exploitation changent totalement dans le futur.
-
-Dans la même intention, mettez des liens vers les présents documents en ligne mais ne vous limitez pas à cela. Il n'y a pas da garantie qu'il soient encore là dans 5, 10 ou 20 ans. Il est donc nécessaire de recopier ces informations sur les documents distribués à chaque participant et qu'il gardera de son côté.
-
