@@ -1,15 +1,17 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { getTranslations, availableLanguages, type Language } from '../lib/i18n';
 
   interface Props {
     lang: Language;
-    onContinue: () => void;
+    initialChecked?: boolean;
+    onContinue: (checked: boolean) => void;
     onLanguageChange: (lang: Language) => void;
   }
 
-  let { lang, onContinue, onLanguageChange }: Props = $props();
+  let { lang, initialChecked, onContinue, onLanguageChange }: Props = $props();
 
-  let isChecked: boolean = $state(false);
+  let isChecked: boolean = $state(untrack(() => initialChecked ?? false));
 
   let t = $derived(getTranslations(lang));
 
@@ -19,7 +21,7 @@
 
   function handleContinue(): void {
     if (isChecked) {
-      onContinue();
+      onContinue(isChecked);
     }
   }
 

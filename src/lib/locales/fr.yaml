@@ -34,7 +34,7 @@ secretEditor:
     generateExample: Générer un exemple
     # exampleContent est chargé depuis examples/secret-example.fr.txt
   buttons:
-    continueWithoutConfirm: Continuer sans confirmer le contenu
+    continueWithoutConfirm: Continuer sans confirmation
     continueWithoutEssentials: Continuer sans les essentiels
     continue: Continuer
 
@@ -75,6 +75,6 @@ introEditor:
     generateExample: Générer un exemple
     # exampleContent est chargé depuis examples/intro-example.fr.html
   buttons:
-    continueWithoutConfirm: Continuer sans vérifier
-    continuePartial: Continuer avec vérification partielle
+    continueWithoutConfirm: Continuer sans confirmation
+    continueWithoutEssentials: Continuer sans les essentiels
     continue: Continuer

@@ -1,37 +1,60 @@
 <script lang="ts">
   import SecurityWarning from './components/SecurityWarning.svelte';
-  import SecretEditor from './components/SecretEditor.svelte';
-  import IntroMessageEditor from './components/IntroMessageEditor.svelte';
+  import SecretEditor, { type SecretCheckboxState } from './components/SecretEditor.svelte';
+  import IntroMessageEditor, { type IntroCheckboxState } from './components/IntroMessageEditor.svelte';
   import { detectLanguage, type Language } from './lib/i18n';
 
   let currentLang: Language = $state(detectLanguage());
   let securityConfirmed: boolean = $state(false);
+  let securityChecked: boolean = $state(false);
   let secretContent: string = $state('');
+  let secretCheckboxState: SecretCheckboxState = $state({
+    emails: false,
+    phoneCodes: false,
+    cloudAccounts: false,
+    computerLogins: false,
+    otherPasswords: false,
+    domainManager: false,
+    passwordManager: false,
+    backups: false,
+    crypto: false,
+  });
   let secretSubmitted: boolean = $state(false);
   let introMessage: string = $state('');
+  let introCheckboxState: IntroCheckboxState = $state({
+    secretHolders: false,
+    openCases: false,
+    noOpenCases: false,
+    directives: false,
+  });
   let introSubmitted: boolean = $state(false);
 
-  function handleSecurityContinue(): void {
+  function handleSecurityContinue(checked: boolean): void {
+    securityChecked = checked;
     securityConfirmed = true;
   }
 
-  function handleSecretContinue(secret: string): void {
+  function handleSecretContinue(secret: string, checkboxState: SecretCheckboxState): void {
     secretContent = secret;
+    secretCheckboxState = checkboxState;
     secretSubmitted = true;
   }
 
-  function handleSecretBack(secret: string): void {
+  function handleSecretBack(secret: string, checkboxState: SecretCheckboxState): void {
     secretContent = secret;
+    secretCheckboxState = checkboxState;
     securityConfirmed = false;
   }
 
-  function handleIntroContinue(message: string): void {
+  function handleIntroContinue(message: string, checkboxState: IntroCheckboxState): void {
     introMessage = message;
+    introCheckboxState = checkboxState;
     introSubmitted = true;
   }
 
-  function handleIntroBack(message: string): void {
+  function handleIntroBack(message: string, checkboxState: IntroCheckboxState): void {
     introMessage = message;
+    introCheckboxState = checkboxState;
     secretSubmitted = false;
   }
 
@@ -43,6 +66,7 @@
 {#if !securityConfirmed}
   <SecurityWarning
     lang={currentLang}
+    initialChecked={securityChecked}
     onContinue={handleSecurityContinue}
     onLanguageChange={handleLanguageChange}
   />
@@ -50,6 +74,7 @@
   <SecretEditor
     lang={currentLang}
     initialValue={secretContent}
+    initialCheckboxState={secretCheckboxState}
     onContinue={handleSecretContinue}
     onBack={handleSecretBack}
   />
@@ -57,6 +82,7 @@
   <IntroMessageEditor
     lang={currentLang}
     initialValue={introMessage}
+    initialCheckboxState={introCheckboxState}
     onContinue={handleIntroContinue}
     onBack={handleIntroBack}
   />

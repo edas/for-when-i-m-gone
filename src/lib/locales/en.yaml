@@ -33,7 +33,7 @@ secretEditor:
     generateExample: Generate an example
     # exampleContent is loaded from examples/secret-example.en.txt
   buttons:
-    continueWithoutConfirm: Continue without confirming content
+    continueWithoutConfirm: Continue without confirmation
     continueWithoutEssentials: Continue without essentials
     continue: Continue
 
@@ -74,6 +74,6 @@ introEditor:
     generateExample: Generate an example
     # exampleContent is loaded from examples/intro-example.en.html
   buttons:
-    continueWithoutConfirm: Continue without verifying
-    continuePartial: Continue with partial verification
+    continueWithoutConfirm: Continue without confirmation
+    continueWithoutEssentials: Continue without essentials
     continue: Continue
