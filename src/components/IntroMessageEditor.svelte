@@ -1,12 +1,14 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
+  import { computeButtonState, getButtonText } from '../lib/buttonState';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
   import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
-  import Icon from './ui/Icons.svelte';
+  import RichTextToolbar from './ui/RichTextToolbar.svelte';
+  import TipSection from './ui/TipSection.svelte';
 
   export interface IntroCheckboxState {
     secretHolders: boolean;
@@ -48,21 +50,8 @@
   let allChecked = $derived(checkSecretHolders && checkOpenCases && checkNoOpenCases && checkDirectives);
   let anyChecked = $derived(checkSecretHolders || checkOpenCases || checkNoOpenCases || checkDirectives);
 
-  type ButtonState = 'none' | 'partial' | 'complete';
-
-  let buttonState = $derived.by((): ButtonState => {
-    if (!hasContent || !anyChecked) return 'none';
-    if (!allChecked) return 'partial';
-    return 'complete';
-  });
-
-  let buttonText = $derived.by(() => {
-    switch (buttonState) {
-      case 'none': return t.introEditor.buttons.continueWithoutConfirm;
-      case 'partial': return t.introEditor.buttons.continueWithoutEssentials;
-      case 'complete': return t.introEditor.buttons.continue;
-    }
-  });
+  let buttonState = $derived(computeButtonState(hasContent, anyChecked, allChecked));
+  let buttonText = $derived(getButtonText(buttonState, t.introEditor.buttons));
 
   function getCurrentCheckboxState(): IntroCheckboxState {
     return {
@@ -87,16 +76,6 @@
     if (editorElement) {
       messageHtml = editorElement.innerHTML;
     }
-  }
-
-  function execCommand(command: string, value: string | undefined = undefined): void {
-    document.execCommand(command, false, value);
-    editorElement?.focus();
-  }
-
-  function formatBlock(tag: string): void {
-    document.execCommand('formatBlock', false, tag);
-    editorElement?.focus();
   }
 
   // Initialize editor content with initial value when mounted
@@ -131,37 +110,7 @@
   onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
 >
   {#snippet toolbar()}
-    <div class="toolbar">
-      <div class="toolbar-group">
-        <button class="toolbar-btn" onclick={() => formatBlock('h2')} title={t.introEditor.toolbar.heading}>
-          <Icon name="heading" size={18} />
-        </button>
-        <button class="toolbar-btn" onclick={() => formatBlock('p')} title={t.introEditor.toolbar.paragraph}>
-          <Icon name="paragraph" size={18} />
-        </button>
-      </div>
-      <div class="toolbar-divider"></div>
-      <div class="toolbar-group">
-        <button class="toolbar-btn" onclick={() => execCommand('bold')} title={t.introEditor.toolbar.bold}>
-          <Icon name="bold" size={18} />
-        </button>
-        <button class="toolbar-btn" onclick={() => execCommand('italic')} title={t.introEditor.toolbar.italic}>
-          <Icon name="italic" size={18} />
-        </button>
-        <button class="toolbar-btn" onclick={() => execCommand('underline')} title={t.introEditor.toolbar.underline}>
-          <Icon name="underline" size={18} />
-        </button>
-      </div>
-      <div class="toolbar-divider"></div>
-      <div class="toolbar-group">
-        <button class="toolbar-btn" onclick={() => execCommand('insertUnorderedList')} title={t.introEditor.toolbar.bulletList}>
-          <Icon name="list-bullet" size={18} />
-        </button>
-        <button class="toolbar-btn" onclick={() => execCommand('insertOrderedList')} title={t.introEditor.toolbar.numberedList}>
-          <Icon name="list-numbered" size={18} />
-        </button>
-      </div>
-    </div>
+    <RichTextToolbar {editorElement} labels={t.introEditor.toolbar} />
   {/snippet}
 
   <div
@@ -216,12 +165,7 @@
       />
     </div>
 
-    <div class="tip-section">
-      <div class="tip-icon">
-        <Icon name="info" size={20} />
-      </div>
-      <p class="tip-text">{t.introEditor.sidePanel.tip}</p>
-    </div>
+    <TipSection text={t.introEditor.sidePanel.tip} />
 
     <div class="section-divider"></div>
 
@@ -233,55 +177,6 @@
 </EditorLayout>
 
 <style>
-  /* Toolbar */
-  .toolbar {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-bottom: none;
-    border-radius: 12px 12px 0 0;
-  }
-
-  .toolbar-group {
-    display: flex;
-    gap: 0.25rem;
-  }
-
-  .toolbar-divider {
-    width: 1px;
-    height: 24px;
-    background: rgba(255, 255, 255, 0.2);
-    margin: 0 0.5rem;
-  }
-
-  .toolbar-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 6px;
-    color: #a0aec0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .toolbar-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #e2e8f0;
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-
-  .toolbar-btn:active {
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  /* Rich Editor */
   .rich-editor {
     flex: 1;
     min-height: 350px;
@@ -333,15 +228,9 @@
     margin-bottom: 0.35rem;
   }
 
-  /* Responsive */
   @media (max-width: 600px) {
     .rich-editor {
       min-height: 200px;
-    }
-
-    .toolbar {
-      flex-wrap: wrap;
-      justify-content: center;
     }
   }
 </style>

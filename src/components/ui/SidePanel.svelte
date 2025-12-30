@@ -127,27 +127,6 @@
     margin: 2rem 0;
   }
 
-  .panel-content :global(.tip-section) {
-    display: flex;
-    gap: 0.75rem;
-    padding: 1rem;
-    margin-top: 1.5rem;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.25);
-    border-radius: 10px;
-  }
-
-  .panel-content :global(.tip-icon) {
-    flex-shrink: 0;
-    color: #3b82f6;
-  }
-
-  .panel-content :global(.tip-text) {
-    font-size: 0.85rem;
-    color: #93c5fd;
-    line-height: 1.5;
-  }
-
   /* Responsive */
   @media (max-width: 900px) {
     .side-panel {

@@ -93,7 +93,7 @@ export interface Translations {
     };
     buttons: {
       continueWithoutConfirm: string;
-      continuePartial: string;
+      continueWithoutEssentials: string;
       continue: string;
     };
   };

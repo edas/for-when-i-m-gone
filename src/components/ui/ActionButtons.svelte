@@ -1,7 +1,6 @@
 <script lang="ts">
   import Icon from './Icons.svelte';
-
-  type ButtonState = 'none' | 'partial' | 'complete';
+  import { type ButtonState } from '../../lib/buttonState';
 
   interface Props {
     backLabel: string;

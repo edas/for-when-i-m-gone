@@ -1,6 +1,7 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
+  import { computeButtonState, getButtonText } from '../lib/buttonState';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
@@ -65,21 +66,8 @@
     checkDomainManager || checkPasswordManager || checkBackups || checkCrypto
   );
 
-  type ButtonState = 'none' | 'partial' | 'complete';
-
-  let buttonState = $derived.by((): ButtonState => {
-    if (!hasContent || !anyChecked) return 'none';
-    if (!essentialsChecked) return 'partial';
-    return 'complete';
-  });
-
-  let buttonText = $derived.by(() => {
-    switch (buttonState) {
-      case 'none': return t.secretEditor.buttons.continueWithoutConfirm;
-      case 'partial': return t.secretEditor.buttons.continueWithoutEssentials;
-      case 'complete': return t.secretEditor.buttons.continue;
-    }
-  });
+  let buttonState = $derived(computeButtonState(hasContent, anyChecked, essentialsChecked));
+  let buttonText = $derived(getButtonText(buttonState, t.secretEditor.buttons));
 
   function getCurrentCheckboxState(): SecretCheckboxState {
     return {
@@ -224,7 +212,6 @@
     box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
   }
 
-  /* Responsive */
   @media (max-width: 600px) {
     .editor-textarea {
       min-height: 250px;
