@@ -1,6 +1,8 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { getTranslations, availableLanguages, type Language } from '../lib/i18n';
+  import { getTranslations, type Language } from '../lib/i18n';
+  import LanguageSelector from './ui/LanguageSelector.svelte';
+  import Icon from './ui/Icons.svelte';
 
   interface Props {
     lang: Language;
@@ -24,27 +26,14 @@
       onContinue(isChecked);
     }
   }
-
-  function handleLanguageSelect(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    onLanguageChange(select.value as Language);
-  }
 </script>
 
 <div class="overlay">
-  <div class="language-selector">
-    <select value={lang} onchange={handleLanguageSelect}>
-      {#each availableLanguages as language}
-        <option value={language.code}>{language.name}</option>
-      {/each}
-    </select>
-  </div>
+  <LanguageSelector {lang} {onLanguageChange} />
 
   <div class="warning-container">
     <div class="warning-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2L1 21h22L12 2zm0 3.83L19.13 19H4.87L12 5.83zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
-      </svg>
+      <Icon name="warning" size={80} />
     </div>
 
     <h1>{t.securityWarning.title}</h1>
@@ -92,33 +81,6 @@
     z-index: 9999;
   }
 
-  .language-selector {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-  }
-
-  .language-selector select {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #e0e0e0;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .language-selector select:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-
-  .language-selector select option {
-    background: #1a1a2e;
-    color: #e0e0e0;
-  }
-
   .warning-container {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
@@ -132,16 +94,9 @@
   }
 
   .warning-icon {
-    width: 80px;
-    height: 80px;
     margin: 0 auto 1.5rem;
     color: #f59e0b;
     animation: pulse 2s ease-in-out infinite;
-  }
-
-  .warning-icon svg {
-    width: 100%;
-    height: 100%;
   }
 
   @keyframes pulse {

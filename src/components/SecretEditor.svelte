@@ -1,7 +1,7 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
-  import SidePanel from './ui/SidePanel.svelte';
+  import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
@@ -58,9 +58,7 @@
   let t = $derived(getTranslations(lang));
 
   let hasContent = $derived(secretText.trim().length > 0);
-
   let essentialsChecked = $derived(checkEmails && checkPhoneCodes && checkCloudAccounts);
-
   let anyChecked = $derived(
     checkEmails || checkPhoneCodes || checkCloudAccounts ||
     checkComputerLogins || checkOtherPasswords ||
@@ -117,32 +115,29 @@
   }
 </script>
 
-<div class="editor-container">
-  <main class="main-content" class:panel-closed={!sidePanelOpen}>
-    <div class="editor-wrapper">
-      <h1 class="editor-title">{t.secretEditor.title}</h1>
-      <textarea
-        class="editor-textarea"
-        bind:value={secretText}
-        placeholder={t.secretEditor.placeholder}
-      ></textarea>
-      <ActionButtons
-        backLabel={t.common.back}
-        continueLabel={buttonText}
-        {buttonState}
-        disabled={!hasContent}
-        onBack={handleBack}
-        onContinue={handleContinue}
-      />
-    </div>
-  </main>
+<EditorLayout
+  title={t.secretEditor.title}
+  {sidePanelOpen}
+  collapseLabel={t.secretEditor.sidePanel.collapse}
+  expandLabel={t.secretEditor.sidePanel.expand}
+  onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
+>
+  <textarea
+    class="editor-textarea"
+    bind:value={secretText}
+    placeholder={t.secretEditor.placeholder}
+  ></textarea>
 
-  <SidePanel
-    open={sidePanelOpen}
-    collapseLabel={t.secretEditor.sidePanel.collapse}
-    expandLabel={t.secretEditor.sidePanel.expand}
-    onToggle={() => sidePanelOpen = !sidePanelOpen}
-  >
+  <ActionButtons
+    backLabel={t.common.back}
+    continueLabel={buttonText}
+    {buttonState}
+    disabled={!hasContent}
+    onBack={handleBack}
+    onContinue={handleContinue}
+  />
+
+  {#snippet sidePanelContent()}
     <h2>{t.secretEditor.sidePanel.title}</h2>
 
     <EssentialSection note={t.secretEditor.sidePanel.essentialNote}>
@@ -200,47 +195,10 @@
       label={t.secretEditor.sidePanel.generateExample}
       onclick={generateExample}
     />
-  </SidePanel>
-</div>
+  {/snippet}
+</EditorLayout>
 
 <style>
-  /* Layout */
-  .editor-container {
-    display: flex;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  }
-
-  .main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 2rem;
-    transition: margin-right 0.3s ease;
-  }
-
-  .main-content.panel-closed {
-    margin-right: 0;
-  }
-
-  .editor-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    max-width: 900px;
-    width: 100%;
-    margin: 0 auto;
-  }
-
-  .editor-title {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-size: 2rem;
-    font-weight: 600;
-    color: #ffffff;
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
-
   .editor-textarea {
     flex: 1;
     min-height: 400px;
@@ -267,37 +225,9 @@
   }
 
   /* Responsive */
-  @media (max-width: 900px) {
-    .main-content {
-      margin-right: 50px;
-    }
-
-    .main-content.panel-closed {
-      margin-right: 50px;
-    }
-  }
-
   @media (max-width: 600px) {
-    .editor-container {
-      flex-direction: column;
-    }
-
-    .main-content {
-      margin-right: 0;
-      padding: 1rem;
-      padding-bottom: 70px;
-    }
-
-    .main-content.panel-closed {
-      margin-right: 0;
-    }
-
     .editor-textarea {
       min-height: 250px;
-    }
-
-    .editor-title {
-      font-size: 1.5rem;
     }
   }
 </style>

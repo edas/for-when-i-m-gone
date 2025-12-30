@@ -1,7 +1,7 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
-  import SidePanel from './ui/SidePanel.svelte';
+  import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
@@ -45,9 +45,7 @@
   let t = $derived(getTranslations(lang));
 
   let hasContent = $derived(messageHtml.trim().length > 0);
-
   let allChecked = $derived(checkSecretHolders && checkOpenCases && checkNoOpenCases && checkDirectives);
-
   let anyChecked = $derived(checkSecretHolders || checkOpenCases || checkNoOpenCases || checkDirectives);
 
   type ButtonState = 'none' | 'partial' | 'complete';
@@ -123,72 +121,69 @@
   }
 </script>
 
-<div class="editor-container">
-  <main class="main-content" class:panel-closed={!sidePanelOpen}>
-    <div class="editor-wrapper">
-      <h1 class="editor-title">{t.introEditor.title}</h1>
-      <p class="editor-subtitle">{t.introEditor.subtitle}</p>
-      
-      <div class="toolbar">
-        <div class="toolbar-group">
-          <button class="toolbar-btn" onclick={() => formatBlock('h2')} title={t.introEditor.toolbar.heading}>
-            <Icon name="heading" size={18} />
-          </button>
-          <button class="toolbar-btn" onclick={() => formatBlock('p')} title={t.introEditor.toolbar.paragraph}>
-            <Icon name="paragraph" size={18} />
-          </button>
-        </div>
-        <div class="toolbar-divider"></div>
-        <div class="toolbar-group">
-          <button class="toolbar-btn" onclick={() => execCommand('bold')} title={t.introEditor.toolbar.bold}>
-            <Icon name="bold" size={18} />
-          </button>
-          <button class="toolbar-btn" onclick={() => execCommand('italic')} title={t.introEditor.toolbar.italic}>
-            <Icon name="italic" size={18} />
-          </button>
-          <button class="toolbar-btn" onclick={() => execCommand('underline')} title={t.introEditor.toolbar.underline}>
-            <Icon name="underline" size={18} />
-          </button>
-        </div>
-        <div class="toolbar-divider"></div>
-        <div class="toolbar-group">
-          <button class="toolbar-btn" onclick={() => execCommand('insertUnorderedList')} title={t.introEditor.toolbar.bulletList}>
-            <Icon name="list-bullet" size={18} />
-          </button>
-          <button class="toolbar-btn" onclick={() => execCommand('insertOrderedList')} title={t.introEditor.toolbar.numberedList}>
-            <Icon name="list-numbered" size={18} />
-          </button>
-        </div>
+<EditorLayout
+  title={t.introEditor.title}
+  subtitle={t.introEditor.subtitle}
+  {sidePanelOpen}
+  collapseLabel={t.introEditor.sidePanel.collapse}
+  expandLabel={t.introEditor.sidePanel.expand}
+  wideSidePanel
+  onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
+>
+  {#snippet toolbar()}
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <button class="toolbar-btn" onclick={() => formatBlock('h2')} title={t.introEditor.toolbar.heading}>
+          <Icon name="heading" size={18} />
+        </button>
+        <button class="toolbar-btn" onclick={() => formatBlock('p')} title={t.introEditor.toolbar.paragraph}>
+          <Icon name="paragraph" size={18} />
+        </button>
       </div>
-
-      <div
-        class="rich-editor"
-        contenteditable="true"
-        bind:this={editorElement}
-        oninput={handleInput}
-        role="textbox"
-        aria-multiline="true"
-        data-placeholder={t.introEditor.placeholder}
-      ></div>
-
-      <ActionButtons
-        backLabel={t.common.back}
-        continueLabel={buttonText}
-        {buttonState}
-        disabled={!hasContent}
-        onBack={handleBack}
-        onContinue={handleContinue}
-      />
+      <div class="toolbar-divider"></div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn" onclick={() => execCommand('bold')} title={t.introEditor.toolbar.bold}>
+          <Icon name="bold" size={18} />
+        </button>
+        <button class="toolbar-btn" onclick={() => execCommand('italic')} title={t.introEditor.toolbar.italic}>
+          <Icon name="italic" size={18} />
+        </button>
+        <button class="toolbar-btn" onclick={() => execCommand('underline')} title={t.introEditor.toolbar.underline}>
+          <Icon name="underline" size={18} />
+        </button>
+      </div>
+      <div class="toolbar-divider"></div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn" onclick={() => execCommand('insertUnorderedList')} title={t.introEditor.toolbar.bulletList}>
+          <Icon name="list-bullet" size={18} />
+        </button>
+        <button class="toolbar-btn" onclick={() => execCommand('insertOrderedList')} title={t.introEditor.toolbar.numberedList}>
+          <Icon name="list-numbered" size={18} />
+        </button>
+      </div>
     </div>
-  </main>
+  {/snippet}
 
-  <SidePanel
-    open={sidePanelOpen}
-    collapseLabel={t.introEditor.sidePanel.collapse}
-    expandLabel={t.introEditor.sidePanel.expand}
-    wide
-    onToggle={() => sidePanelOpen = !sidePanelOpen}
-  >
+  <div
+    class="rich-editor"
+    contenteditable="true"
+    bind:this={editorElement}
+    oninput={handleInput}
+    role="textbox"
+    aria-multiline="true"
+    data-placeholder={t.introEditor.placeholder}
+  ></div>
+
+  <ActionButtons
+    backLabel={t.common.back}
+    continueLabel={buttonText}
+    {buttonState}
+    disabled={!hasContent}
+    onBack={handleBack}
+    onContinue={handleContinue}
+  />
+
+  {#snippet sidePanelContent()}
     <h2>{t.introEditor.sidePanel.title}</h2>
     <p class="panel-intro">{t.introEditor.sidePanel.intro}</p>
 
@@ -234,54 +229,10 @@
       label={t.introEditor.sidePanel.generateExample}
       onclick={generateExample}
     />
-  </SidePanel>
-</div>
+  {/snippet}
+</EditorLayout>
 
 <style>
-  /* Layout */
-  .editor-container {
-    display: flex;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  }
-
-  .main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 2rem;
-    transition: margin-right 0.3s ease;
-  }
-
-  .main-content.panel-closed {
-    margin-right: 0;
-  }
-
-  .editor-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    max-width: 900px;
-    width: 100%;
-    margin: 0 auto;
-  }
-
-  .editor-title {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-size: 2rem;
-    font-weight: 600;
-    color: #ffffff;
-    margin-bottom: 0.5rem;
-    text-align: center;
-  }
-
-  .editor-subtitle {
-    color: #a0aec0;
-    text-align: center;
-    margin-bottom: 1.5rem;
-    font-size: 1rem;
-  }
-
   /* Toolbar */
   .toolbar {
     display: flex;
@@ -383,37 +334,9 @@
   }
 
   /* Responsive */
-  @media (max-width: 900px) {
-    .main-content {
-      margin-right: 50px;
-    }
-
-    .main-content.panel-closed {
-      margin-right: 50px;
-    }
-  }
-
   @media (max-width: 600px) {
-    .editor-container {
-      flex-direction: column;
-    }
-
-    .main-content {
-      margin-right: 0;
-      padding: 1rem;
-      padding-bottom: 70px;
-    }
-
-    .main-content.panel-closed {
-      margin-right: 0;
-    }
-
     .rich-editor {
       min-height: 200px;
-    }
-
-    .editor-title {
-      font-size: 1.5rem;
     }
 
     .toolbar {
