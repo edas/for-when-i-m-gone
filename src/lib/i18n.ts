@@ -1,6 +1,12 @@
 import fr from './locales/fr.yaml';
 import en from './locales/en.yaml';
 
+// Import example content from separate files for easier editing
+import secretExampleEn from './locales/examples/secret-example.en.txt?raw';
+import secretExampleFr from './locales/examples/secret-example.fr.txt?raw';
+import introExampleEn from './locales/examples/intro-example.en.html?raw';
+import introExampleFr from './locales/examples/intro-example.fr.html?raw';
+
 export type Language = 'fr' | 'en';
 
 export interface Translations {
@@ -93,9 +99,21 @@ export interface Translations {
   };
 }
 
+// Build translations by merging YAML content with example files
+function buildTranslations(
+  yamlContent: Record<string, unknown>,
+  secretExample: string,
+  introExample: string
+): Translations {
+  const result = yamlContent as unknown as Translations;
+  result.secretEditor.sidePanel.exampleContent = secretExample;
+  result.introEditor.sidePanel.exampleContent = introExample;
+  return result;
+}
+
 const translations: Record<Language, Translations> = {
-  fr: fr as unknown as Translations,
-  en: en as unknown as Translations,
+  fr: buildTranslations(fr as Record<string, unknown>, secretExampleFr, introExampleFr),
+  en: buildTranslations(en as Record<string, unknown>, secretExampleEn, introExampleEn),
 };
 
 export function getTranslations(lang: Language): Translations {

@@ -31,50 +31,7 @@ secretEditor:
       crypto: Cryptocurrency keys or identifiers
     sectionOptional: If applicable
     generateExample: Generate an example
-    exampleContent: |
-      === EMAILS ===
-      
-      Main email: john.doe@gmail.com
-      Password: MyPassword123!
-      
-      Secondary email: john.doe@outlook.com
-      Password: AnotherPassword456!
-      
-      === PHONES ===
-      
-      iPhone: Unlock code 147258
-      SIM PIN: 1234
-      
-      Android (old): Inverted L pattern
-      SIM PIN: 5678
-      
-      === CLOUD ACCOUNTS ===
-      
-      Apple ID: john.doe@icloud.com
-      Password: ApplePass789!
-      
-      Google: john.doe@gmail.com
-      Password: MyPassword123!
-      
-      Microsoft: john.doe@outlook.com
-      Password: AnotherPassword456!
-      
-      === COMPUTERS ===
-      
-      MacBook Pro: User "John" / Password: MacPass2024
-      Desktop PC: User "JDoe" / Password: WindowsPass!
-      
-      === PASSWORD MANAGER ===
-      
-      Bitwarden (server: bitwarden.eu)
-      Email: john.doe@gmail.com
-      Master password: MySuperMasterPassword2024!
-      (All other passwords are stored here)
-      
-      === NOTES ===
-      
-      The black external hard drive contains a backup of all photos.
-      The safe code is 4521.
+    # exampleContent is loaded from examples/secret-example.en.txt
   buttons:
     continueWithoutConfirm: Continue without confirming content
     continueWithoutEssentials: Continue without essentials
@@ -115,36 +72,7 @@ introEditor:
         description: Instructions on what to do with the information contained in the secret
     tip: This message will be visible in plain text, without needing to decrypt anything. It serves as a guide to help recipients understand the context and steps to follow.
     generateExample: Generate an example
-    exampleContent: |
-      <h2>To my loved ones</h2>
-      <p>This file is for when I am no longer able to manage my digital affairs myself. It contains sensitive information that will help you access my accounts and digital data.</p>
-      <h2>Secret holders</h2>
-      <p>To decrypt this secret, you will need to contact the following people who each hold a part of the key:</p>
-      <ul>
-      <li><b>Marie Dupont</b> (my sister) - Phone: 06 12 34 56 78 - Email: marie.dupont@email.com</li>
-      <li><b>Jean Martin</b> (my friend) - Phone: 06 98 76 54 32 - Email: jean.martin@email.com</li>
-      <li><b>Me Sophie Bernard</b> (notary) - Phone: 01 23 45 67 89 - Address: 12 rue de la Paix, 75001 Paris</li>
-      </ul>
-      <h2>When to open this secret</h2>
-      <p>This secret should be opened in case of:</p>
-      <ul>
-      <li>My death</li>
-      <li>Prolonged incapacity (coma, severe illness preventing any communication)</li>
-      </ul>
-      <p><b>Do NOT open this secret</b> in the following situations:</p>
-      <ul>
-      <li>Simple travel or extended absence</li>
-      <li>Temporary hospitalization</li>
-      <li>Passing difficulties contacting me</li>
-      </ul>
-      <h2>What to do with this information</h2>
-      <p>Once the secret is decrypted, you will find my main identifiers. Use them to:</p>
-      <ul>
-      <li>Secure my important accounts</li>
-      <li>Retrieve personal photos and documents</li>
-      <li>Handle ongoing administrative matters</li>
-      <li>Close accounts that are no longer useful</li>
-      </ul>
+    # exampleContent is loaded from examples/intro-example.en.html
   buttons:
     continueWithoutConfirm: Continue without verifying
     continuePartial: Continue with partial verification
