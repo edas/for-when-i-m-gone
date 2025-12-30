@@ -4,6 +4,9 @@ import en from './locales/en.yaml';
 export type Language = 'fr' | 'en';
 
 export interface Translations {
+  common: {
+    back: string;
+  };
   securityWarning: {
     title: string;
     subtitle: string;
@@ -32,10 +35,59 @@ export interface Translations {
         crypto: string;
       };
       sectionOptional: string;
+      generateExample: string;
+      exampleContent: string;
     };
     buttons: {
       continueWithoutConfirm: string;
       continueWithoutEssentials: string;
+      continue: string;
+    };
+  };
+  introEditor: {
+    title: string;
+    subtitle: string;
+    placeholder: string;
+    toolbar: {
+      heading: string;
+      paragraph: string;
+      bold: string;
+      italic: string;
+      underline: string;
+      bulletList: string;
+      numberedList: string;
+    };
+    sidePanel: {
+      title: string;
+      intro: string;
+      collapse: string;
+      expand: string;
+      essentialNote: string;
+      checkboxes: {
+        secretHolders: {
+          title: string;
+          description: string;
+        };
+        openCases: {
+          title: string;
+          description: string;
+        };
+        noOpenCases: {
+          title: string;
+          description: string;
+        };
+        directives: {
+          title: string;
+          description: string;
+        };
+      };
+      tip: string;
+      generateExample: string;
+      exampleContent: string;
+    };
+    buttons: {
+      continueWithoutConfirm: string;
+      continuePartial: string;
       continue: string;
     };
   };

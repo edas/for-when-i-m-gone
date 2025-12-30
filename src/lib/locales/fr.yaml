@@ -1,3 +1,6 @@
+common:
+  back: Retour
+
 securityWarning:
   title: Avertissement de sécurité
   subtitle: "Avant de continuer, veuillez confirmer les points suivants :"
@@ -28,7 +31,122 @@ secretEditor:
       backups: Serveur, identifiant et mot de passe des sauvegardes
       crypto: Clés ou identifiants pour les crypto-monnaies
     sectionOptional: S'il y en a
+    generateExample: Générer un exemple
+    exampleContent: |
+      === EMAILS ===
+      
+      Email principal : jean.dupont@gmail.com
+      Mot de passe : MotDePasse123!
+      
+      Email secondaire : jean.dupont@outlook.com
+      Mot de passe : AutreMotDePasse456!
+      
+      === TÉLÉPHONES ===
+      
+      iPhone : Code de déverrouillage 147258
+      Code PIN SIM : 1234
+      
+      Android (ancien) : Schéma en L inversé
+      Code PIN SIM : 5678
+      
+      === COMPTES CLOUD ===
+      
+      Apple ID : jean.dupont@icloud.com
+      Mot de passe : ApplePass789!
+      
+      Google : jean.dupont@gmail.com
+      Mot de passe : MotDePasse123!
+      
+      Microsoft : jean.dupont@outlook.com
+      Mot de passe : AutreMotDePasse456!
+      
+      === ORDINATEURS ===
+      
+      MacBook Pro : Utilisateur "Jean" / Mot de passe : MacPass2024
+      PC Bureau : Utilisateur "JDupont" / Mot de passe : WindowsPass!
+      
+      === GESTIONNAIRE DE MOTS DE PASSE ===
+      
+      Bitwarden (serveur : bitwarden.eu)
+      Email : jean.dupont@gmail.com
+      Mot de passe maître : MonSuperMotDePasseMaitre2024!
+      (Tous les autres mots de passe sont stockés ici)
+      
+      === NOTES ===
+      
+      Le disque dur externe noir contient une sauvegarde de toutes les photos.
+      Le code du coffre-fort est 4521.
   buttons:
     continueWithoutConfirm: Continuer sans confirmer le contenu
     continueWithoutEssentials: Continuer sans les essentiels
+    continue: Continuer
+
+introEditor:
+  title: Message d'introduction
+  subtitle: Ce message accompagnera votre secret et expliquera son contexte
+  placeholder: Écrivez ici votre message d'introduction...
+  toolbar:
+    heading: Titre
+    paragraph: Paragraphe
+    bold: Gras
+    italic: Italique
+    underline: Souligné
+    bulletList: Liste à puces
+    numberedList: Liste numérotée
+  sidePanel:
+    title: Vérification du contenu
+    intro: Assurez-vous que votre message contient les informations essentielles pour que vos proches comprennent comment utiliser ce secret.
+    collapse: Replier
+    expand: Guide de rédaction
+    essentialNote: >-
+      Les trois premiers éléments sont essentiels pour que vos proches 
+      sachent qui contacter et dans quelles circonstances.
+    checkboxes:
+      secretHolders:
+        title: Liste des détenteurs du secret
+        description: Noms et coordonnées complètes (téléphone, email, adresse postale, réseaux sociaux) des personnes qui détiennent une partie du secret
+      openCases:
+        title: Cas d'ouverture
+        description: Les situations dans lesquelles le secret doit être ouvert (décès, incapacité, etc.)
+      noOpenCases:
+        title: Cas de non-ouverture
+        description: Les situations où le secret ne doit PAS être ouvert (simple voyage, hospitalisation temporaire, etc.)
+      directives:
+        title: Directives d'utilisation
+        description: Instructions sur ce qu'il faut faire avec les informations contenues dans le secret
+    tip: Ce message sera visible en clair, sans avoir besoin de déchiffrer quoi que ce soit. Il sert de guide pour aider les destinataires à comprendre le contexte et les démarches à suivre.
+    generateExample: Générer un exemple
+    exampleContent: |
+      <h2>À mes proches</h2>
+      <p>Ce fichier sert pour quand je ne serai plus en mesure de gérer moi-même mes affaires numériques. Il contient des informations sensibles qui vous aideront à accéder à mes comptes et données numériques.</p>
+      <h2>Détenteurs du secret</h2>
+      <p>Pour déchiffrer ce secret, vous devrez contacter les personnes suivantes qui détiennent chacune une partie de la clé :</p>
+      <ul>
+      <li><b>Marie Dupont</b> (ma sœur) - Tél : 06 12 34 56 78 - Email : marie.dupont@email.com</li>
+      <li><b>Jean Martin</b> (mon ami) - Tél : 06 98 76 54 32 - Email : jean.martin@email.com</li>
+      <li><b>Me Sophie Bernard</b> (notaire) - Tél : 01 23 45 67 89 - Adresse : 12 rue de la Paix, 75001 Paris</li>
+      </ul>
+      <h2>Quand ouvrir ce secret</h2>
+      <p>Ce secret doit être ouvert en cas de :</p>
+      <ul>
+      <li>Mon décès</li>
+      <li>Incapacité prolongée (coma, maladie grave empêchant toute communication)</li>
+      </ul>
+      <p><b>N'ouvrez PAS ce secret</b> dans les situations suivantes :</p>
+      <ul>
+      <li>Simple voyage ou absence prolongée</li>
+      <li>Hospitalisation temporaire</li>
+      <li>Difficultés passagères à me joindre</li>
+      </ul>
+      <h2>Que faire avec ces informations</h2>
+      <p>Une fois le secret déchiffré, vous trouverez mes identifiants principaux. Utilisez-les pour :</p>
+      <ul>
+      <li>Sécuriser mes comptes importants</li>
+      <li>Récupérer les photos et documents personnels</li>
+      <li>Gérer les démarches administratives en cours</li>
+      <li>Clôturer les comptes devenus inutiles</li>
+      </ul>
+  buttons:
+    continueWithoutConfirm: Continuer sans vérifier
+    continuePartial: Continuer avec vérification partielle
     continue: Continuer

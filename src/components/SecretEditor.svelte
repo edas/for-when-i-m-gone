@@ -1,14 +1,17 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
 
   interface Props {
     lang: Language;
+    initialValue?: string;
     onContinue: (secret: string) => void;
+    onBack: (secret: string) => void;
   }
 
-  let { lang, onContinue }: Props = $props();
+  let { lang, initialValue, onContinue, onBack }: Props = $props();
 
-  let secretText: string = $state('');
+  let secretText: string = $state(untrack(() => initialValue ?? ''));
   let sidePanelOpen: boolean = $state(true);
 
   // Checkbox states - first 3 are essential
@@ -59,6 +62,15 @@
   function toggleSidePanel(): void {
     sidePanelOpen = !sidePanelOpen;
   }
+
+  function generateExample(): void {
+    const example = t.secretEditor.sidePanel.exampleContent;
+    if (secretText.trim()) {
+      secretText = secretText + '\n\n\n' + example;
+    } else {
+      secretText = example;
+    }
+  }
 </script>
 
 <div class="editor-container">
@@ -71,6 +83,12 @@
         placeholder={t.secretEditor.placeholder}
       ></textarea>
       <div class="button-container">
+        <button class="back-button" onclick={() => onBack(secretText)}>
+          <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          {t.common.back}
+        </button>
         <button
           class="continue-button"
           class:state-none={buttonState === 'none'}
@@ -187,6 +205,15 @@
             <span class="label-text">{t.secretEditor.sidePanel.checkboxes.crypto}</span>
           </label>
         </div>
+
+        <div class="section-divider"></div>
+
+        <button class="generate-example-button" onclick={generateExample}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          {t.secretEditor.sidePanel.generateExample}
+        </button>
       </div>
     {/if}
   </aside>
@@ -257,7 +284,35 @@
   .button-container {
     display: flex;
     justify-content: center;
+    align-items: center;
+    gap: 1rem;
     margin-top: 1.5rem;
+  }
+
+  .back-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: #a0aec0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .back-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #e2e8f0;
+  }
+
+  .back-button .button-icon {
+    width: 18px;
+    height: 18px;
   }
 
   .continue-button {
@@ -437,6 +492,45 @@
     opacity: 0.85;
   }
 
+  .section-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 2rem 0;
+  }
+
+  .generate-example-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    border-radius: 10px;
+    color: #c4b5fd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .generate-example-button:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(99, 102, 241, 0.3) 100%);
+    border-color: rgba(139, 92, 246, 0.6);
+    color: #ddd6fe;
+    transform: translateY(-1px);
+  }
+
+  .generate-example-button:active {
+    transform: translateY(0);
+  }
+
+  .generate-example-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
   .checkbox-item {
     display: flex;
     align-items: flex-start;
@@ -577,6 +671,11 @@
       font-size: 1.5rem;
     }
 
+    .button-container {
+      flex-direction: column;
+    }
+
+    .back-button,
     .continue-button {
       width: 100%;
       justify-content: center;

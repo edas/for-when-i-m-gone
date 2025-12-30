@@ -1,12 +1,15 @@
 <script lang="ts">
   import SecurityWarning from './components/SecurityWarning.svelte';
   import SecretEditor from './components/SecretEditor.svelte';
+  import IntroMessageEditor from './components/IntroMessageEditor.svelte';
   import { detectLanguage, type Language } from './lib/i18n';
 
   let currentLang: Language = $state(detectLanguage());
   let securityConfirmed: boolean = $state(false);
   let secretContent: string = $state('');
   let secretSubmitted: boolean = $state(false);
+  let introMessage: string = $state('');
+  let introSubmitted: boolean = $state(false);
 
   function handleSecurityContinue(): void {
     securityConfirmed = true;
@@ -15,6 +18,21 @@
   function handleSecretContinue(secret: string): void {
     secretContent = secret;
     secretSubmitted = true;
+  }
+
+  function handleSecretBack(secret: string): void {
+    secretContent = secret;
+    securityConfirmed = false;
+  }
+
+  function handleIntroContinue(message: string): void {
+    introMessage = message;
+    introSubmitted = true;
+  }
+
+  function handleIntroBack(message: string): void {
+    introMessage = message;
+    secretSubmitted = false;
   }
 
   function handleLanguageChange(lang: Language): void {
@@ -31,7 +49,16 @@
 {:else if !secretSubmitted}
   <SecretEditor
     lang={currentLang}
+    initialValue={secretContent}
     onContinue={handleSecretContinue}
+    onBack={handleSecretBack}
+  />
+{:else if !introSubmitted}
+  <IntroMessageEditor
+    lang={currentLang}
+    initialValue={introMessage}
+    onContinue={handleIntroContinue}
+    onBack={handleIntroBack}
   />
 {:else}
   <main>
