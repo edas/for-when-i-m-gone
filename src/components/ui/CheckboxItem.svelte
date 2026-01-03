@@ -70,8 +70,8 @@
   }
 
   .checkbox-item.essential input:checked ~ .custom-checkbox {
-    background: #f59e0b;
-    border-color: #f59e0b;
+    background: #8b5cf6;
+    border-color: #8b5cf6;
   }
 
   .custom-checkbox::after {

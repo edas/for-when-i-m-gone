@@ -14,7 +14,9 @@
     | 'italic'
     | 'underline'
     | 'list-bullet'
-    | 'list-numbered';
+    | 'list-numbered'
+    | 'heart'
+    | 'star';
 </script>
 
 <script lang="ts">
@@ -79,5 +81,9 @@
     <text x="4" y="7" font-size="6" fill="currentColor" stroke="none">1</text>
     <text x="4" y="13" font-size="6" fill="currentColor" stroke="none">2</text>
     <text x="4" y="19" font-size="6" fill="currentColor" stroke="none">3</text>
+  {:else if name === 'heart'}
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="currentColor" stroke="none"/>
+  {:else if name === 'star'}
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" stroke="none"/>
   {/if}
 </svg>

@@ -12,7 +12,7 @@
 
 <div class="essential-section">
   <div class="essential-badge">
-    <Icon name="warning" size={16} />
+    <Icon name="star" size={16} />
   </div>
 
   {@render children()}
@@ -24,8 +24,8 @@
 
 <style>
   .essential-section {
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    background: rgba(167, 139, 250, 0.15);
+    border: 1px solid rgba(167, 139, 250, 0.3);
     border-radius: 12px;
     padding: 1rem;
     margin-bottom: 1.5rem;
@@ -39,7 +39,7 @@
     position: absolute;
     top: -10px;
     right: 12px;
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     border-radius: 50%;
     width: 28px;
     height: 28px;
@@ -51,10 +51,10 @@
 
   .essential-note {
     font-size: 0.8rem;
-    color: #fbbf24;
+    color: #a78bfa;
     line-height: 1.5;
     margin-top: 0.5rem;
     padding-top: 0.75rem;
-    border-top: 1px solid rgba(245, 158, 11, 0.2);
+    border-top: 1px solid rgba(167, 139, 250, 0.2);
   }
 </style>
