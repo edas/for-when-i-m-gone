@@ -128,7 +128,7 @@ introEditor:
     insertQuorum: Insert required quorum
   sidePanel:
     title: Content Verification
-    intro: Make sure your message contains essential information so your loved ones understand how to use this secret.
+    intro: This message will be visible in plain text, without needing to decrypt anything. It serves as a guide to help recipients understand the context and steps to follow.
     collapse: Collapse
     expand: Writing guide
     essentialNote: >-
@@ -153,7 +153,6 @@ introEditor:
       directives:
         title: Usage directives
         description: Instructions on what to do with the information contained in the secret
-    tip: This message will be visible in plain text, without needing to decrypt anything. It serves as a guide to help recipients understand the context and steps to follow.
     generateExample: Generate an example
     # exampleContent is loaded from examples/intro-example.en.html
   buttons:

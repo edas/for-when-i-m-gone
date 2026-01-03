@@ -23,8 +23,11 @@
   };
 
   const defaultIntroCheckboxState: IntroCheckboxState = {
+    authorIdentity: false,
     secretHolders: false,
     openingConditions: false,
+    dated: false,
+    quorum: false,
     directives: false,
   };
 
@@ -45,17 +48,17 @@
     ...storedData.what?.checkboxState,
   });
   let secretSubmitted: boolean = $state(false);
-  let recipients: Recipient[] = $state(storedData.recipients ?? []);
+  let recipients: Recipient[] = $state(storedData.who?.recipients ?? []);
   let whoSubmitted: boolean = $state(false);
   let howData: Partial<HowData> = $state({
     ...defaultHowData,
-    ...storedData.howData,
+    ...storedData.how,
   });
   let howSubmitted: boolean = $state(false);
-  let introMessage: JSONContent | null = $state(storedData.introMessage ?? null);
+  let introMessage: JSONContent | null = $state(storedData.intro?.message ?? null);
   let introCheckboxState: IntroCheckboxState = $state({
     ...defaultIntroCheckboxState,
-    ...storedData.introCheckboxState,
+    ...storedData.intro?.checkboxState,
   });
   let introSubmitted: boolean = $state(false);
 
@@ -172,6 +175,8 @@
           lang={currentLang}
           initialValue={introMessage}
           initialCheckboxState={introCheckboxState}
+          threshold={howData.threshold!}
+          conditions={howData.conditions ?? null}
           onContinue={handleIntroContinue}
           onBack={handleIntroBack}
         />

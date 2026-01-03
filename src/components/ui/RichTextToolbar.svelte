@@ -22,9 +22,11 @@
     };
     /** Counter that increments on editor updates, used to trigger reactivity */
     editorVersion?: number;
+    /** Threshold value for quorum insertion */
+    threshold?: number;
   }
 
-  let { editor, labels, editorVersion = 0 }: Props = $props();
+  let { editor, labels, editorVersion = 0, threshold }: Props = $props();
 
   // Check if blocks already exist (reactive based on editorVersion)
   let recipientsBlockExists = $derived.by(() => {
@@ -80,7 +82,7 @@
   }
 
   function insertQuorumInline(): void {
-    editor?.chain().focus().insertQuorumInline().run();
+    editor?.chain().focus().insertQuorumInline({ threshold }).run();
   }
 
   interface ToolbarButton {

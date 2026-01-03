@@ -283,7 +283,9 @@
   // Auto-save to JSON on any change (debounced)
   $effect(() => {
     updateStoredDataDebounced({
-      recipients: recipients,
+      who: {
+        recipients: recipients,
+      },
     });
   });
 

@@ -362,7 +362,7 @@
   // Auto-save to JSON on any change (debounced)
   $effect(() => {
     updateStoredDataDebounced({
-      howData: getCurrentData(),
+      how: getCurrentData(),
     });
   });
 </script>

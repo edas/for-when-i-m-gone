@@ -4,8 +4,7 @@ import en from './locales/en.yaml';
 // Import example content from separate files for easier editing
 import secretExampleEn from './locales/examples/secret-example.en.txt?raw';
 import secretExampleFr from './locales/examples/secret-example.fr.txt?raw';
-import introExampleEn from './locales/examples/intro-example.en.html?raw';
-import introExampleFr from './locales/examples/intro-example.fr.html?raw';
+
 import conditionsExampleEn from './locales/examples/conditions-example.en.html?raw';
 import conditionsExampleFr from './locales/examples/conditions-example.fr.html?raw';
 
@@ -253,19 +252,19 @@ export interface Translations {
 function buildTranslations(
   yamlContent: Record<string, unknown>,
   secretExample: string,
-  introExample: string,
+
   conditionsExample: string
 ): Translations {
   const result = yamlContent as unknown as Translations;
   result.secretEditor.sidePanel.exampleContent = secretExample;
-  result.introEditor.sidePanel.exampleContent = introExample;
+
   result.howEditor.sidePanel.exampleContent = conditionsExample;
   return result;
 }
 
 const translations: Record<Language, Translations> = {
-  fr: buildTranslations(fr as Record<string, unknown>, secretExampleFr, introExampleFr, conditionsExampleFr),
-  en: buildTranslations(en as Record<string, unknown>, secretExampleEn, introExampleEn, conditionsExampleEn),
+  fr: buildTranslations(fr as Record<string, unknown>, secretExampleFr, conditionsExampleFr),
+  en: buildTranslations(en as Record<string, unknown>, secretExampleEn, conditionsExampleEn),
 };
 
 export function getTranslations(lang: Language): Translations {

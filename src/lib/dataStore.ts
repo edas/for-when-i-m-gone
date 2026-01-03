@@ -18,15 +18,22 @@ export interface WhatData {
   checkboxState?: SecretCheckboxState;
 }
 
+export interface WhoData {
+  recipients?: Recipient[];
+}
+
+export interface IntroData {
+  message?: JSONContent | null;
+  checkboxState?: IntroCheckboxState;
+}
+
 export interface StoredData {
   encrypt?: number;
   security?: SecurityData;
   what?: WhatData;
-  recipients?: Recipient[];
-  howData?: HowData;
-  introMessage?: JSONContent | null;
-  introCheckboxState?: IntroCheckboxState;
-  threshold?: number;
+  who?: WhoData;
+  how?: HowData;
+  intro?: IntroData;
   language?: string;
 }
 
@@ -73,7 +80,6 @@ function getScriptElement(): HTMLScriptElement {
 export function getStoredData(): StoredData {
   const scriptElement = getScriptElement();
   const data = JSON.parse(scriptElement.textContent!);
-  console.log('read', data);
   return data;
 }
 
@@ -92,7 +98,6 @@ export function updateStoredData(updates: Partial<StoredData>): Promise<StoredDa
   const result = updateMutex.then((currentData): StoredData => {
     const scriptElement = getScriptElement();
     const newData = { ...currentData, ...updates };
-    console.log('write', updates);
     scriptElement.textContent = JSON.stringify(newData, null, 2);
     
     return newData;

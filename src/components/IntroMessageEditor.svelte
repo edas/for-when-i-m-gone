@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, untrack } from 'svelte';
-  import { Editor, type JSONContent } from '@tiptap/core';
+  import { Editor, type JSONContent, generateHTML } from '@tiptap/core';
   import StarterKit from '@tiptap/starter-kit';
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
@@ -11,7 +11,6 @@
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
   import RichTextToolbar from './ui/RichTextToolbar.svelte';
-  import TipSection from './ui/TipSection.svelte';
   import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
 
   export interface IntroCheckboxState {
@@ -36,11 +35,13 @@
     lang: Language;
     initialValue?: JSONContent | null;
     initialCheckboxState?: IntroCheckboxState;
+    threshold: number;
+    conditions?: JSONContent | null;
     onContinue: (message: JSONContent | null, checkboxState: IntroCheckboxState) => void;
     onBack: (message: JSONContent | null, checkboxState: IntroCheckboxState) => void;
   }
 
-  let { lang, initialValue, initialCheckboxState, onContinue, onBack }: Props = $props();
+  let { lang, initialValue, initialCheckboxState, threshold, conditions, onContinue, onBack }: Props = $props();
 
   // Generate example content for a given language
   function getExampleContent(language: Language): JSONContent {
@@ -135,9 +136,32 @@
         };
   }
 
-  // Get initial content: use provided value or default example
+  // Helper function to update quorumInline nodes with threshold
+  // Always updates the threshold, even if it already exists
+  function updateQuorumNodes(content: JSONContent, thresholdValue: number): JSONContent {
+    function updateNode(node: JSONContent): JSONContent {
+      if (node.type === 'quorumInline') {
+        return {
+          ...node,
+          attrs: { ...(node.attrs || {}), threshold: thresholdValue },
+        };
+      }
+      if (node.content) {
+        return {
+          ...node,
+          content: node.content.map(updateNode),
+        };
+      }
+      return node;
+    }
+    
+    return updateNode(content);
+  }
+
+  // Get initial content: use provided value or default example, and update quorum nodes
   function getInitialContent(): JSONContent {
-    return initialValue ?? getExampleContent(lang);
+    const content = initialValue ?? getExampleContent(lang);
+    return updateQuorumNodes(content, threshold);
   }
 
   // Helper function to check if a node type exists in the JSON content
@@ -305,6 +329,87 @@
     editorVersion++;
   }
 
+  // Function to update conditionsBlock nodes with actual conditions content
+  function updateConditionsBlocks(editor: Editor, conditions: JSONContent | null): void {
+    if (!editor) return;
+    
+    const conditionsJson = conditions ? JSON.stringify(conditions) : null;
+    
+    // Collect all positions of conditionsBlock nodes first
+    const positions: number[] = [];
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'conditionsBlock') {
+        positions.push(pos);
+      }
+    });
+    
+    // Update all conditionsBlock nodes in a single transaction
+    if (positions.length > 0) {
+      const tr = editor.state.tr;
+      positions.forEach((pos) => {
+        const node = editor.state.doc.nodeAt(pos);
+        if (node && node.type.name === 'conditionsBlock') {
+          tr.setNodeMarkup(pos, undefined, {
+            ...node.attrs,
+            conditions: conditionsJson,
+          });
+        }
+      });
+      editor.view.dispatch(tr);
+    }
+  }
+
+  // Function to update quorumInline nodes with current threshold
+  function updateQuorumInlines(editor: Editor, thresholdValue: number): void {
+    if (!editor) return;
+    
+    // Collect all positions of quorumInline nodes first
+    const positions: number[] = [];
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'quorumInline') {
+        positions.push(pos);
+      }
+    });
+    
+    // Update all quorumInline nodes in a single transaction
+    if (positions.length > 0) {
+      const tr = editor.state.tr;
+      positions.forEach((pos) => {
+        const node = editor.state.doc.nodeAt(pos);
+        if (node && node.type.name === 'quorumInline') {
+          tr.setNodeMarkup(pos, undefined, {
+            ...node.attrs,
+            threshold: thresholdValue,
+          });
+        }
+      });
+      editor.view.dispatch(tr);
+    }
+  }
+
+  // Function to update DOM for dateTimeInline nodes with current date/time
+  function updateDateTimeDOM(): void {
+    if (!editorElement) return;
+    
+    requestAnimationFrame(() => {
+      const dateNodes = editorElement?.querySelectorAll('[data-type="datetime-inline"]');
+      dateNodes?.forEach((node) => {
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString(undefined, {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+        const formattedTime = now.toLocaleTimeString(undefined, {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+        node.textContent = `${formattedDate}, ${formattedTime}`;
+      });
+    });
+  }
+
   // Initialize TipTap editor when element is mounted
   $effect(() => {
     if (editorElement && !editor) {
@@ -336,11 +441,103 @@
         onUpdate: ({ editor: e }) => {
           messageJson = e.getJSON();
           editorVersion++; // Trigger reactivity for toolbar button states
+          
+          // Update conditions blocks when content changes (e.g., new block inserted)
+          if (conditions !== undefined) {
+            updateConditionsBlocks(e, conditions);
+            updateConditionsDOM();
+          }
         },
       });
       
       editor = newEditor;
       editorVersion++; // Trigger initial check for existing blocks
+      
+      // Update all dynamic content after editor is initialized
+      // Use setTimeout to ensure editor is fully initialized
+      setTimeout(() => {
+        // Update conditions blocks
+        if (conditions !== undefined) {
+          updateConditionsBlocks(newEditor, conditions);
+          updateConditionsDOM();
+        }
+        
+        // Update quorumInline nodes with current threshold
+        updateQuorumInlines(newEditor, threshold);
+        
+        // Update dateTimeInline nodes with current date/time
+        updateDateTimeDOM();
+      }, 0);
+    }
+  });
+
+  // Helper function to update DOM for conditions blocks
+  function updateConditionsDOM(): void {
+    if (!editorElement) return;
+    
+    requestAnimationFrame(() => {
+      const blocks = editorElement?.querySelectorAll('[data-type="conditions-block"]');
+      blocks?.forEach((block) => {
+        const conditionsJson = block.getAttribute('data-conditions');
+        const contentDiv = block.querySelector('.conditions-content');
+        
+        if (conditionsJson && contentDiv) {
+          try {
+            const conditionsData: JSONContent = JSON.parse(conditionsJson);
+            const html = generateHTML(conditionsData, [
+              StarterKit.configure({
+                blockquote: false,
+                code: false,
+                codeBlock: false,
+                hardBreak: false,
+                horizontalRule: false,
+                strike: false,
+                heading: false,
+              }),
+            ]);
+            contentDiv.innerHTML = html;
+          } catch (e) {
+            console.error('Failed to render conditions:', e);
+          }
+        } else if (!conditionsJson) {
+          // Remove content div if no conditions
+          contentDiv?.remove();
+        }
+      });
+    });
+  }
+
+  // Update all dynamic content (conditions, quorum, date) when props change
+  // This ensures everything is up-to-date when returning to this screen
+  // We track threshold and conditions to trigger updates when they change
+  $effect(() => {
+    if (editor) {
+      // Update conditions blocks
+      if (conditions !== undefined) {
+        updateConditionsBlocks(editor, conditions);
+        updateConditionsDOM();
+      }
+      
+      // Update quorumInline nodes with current threshold
+      updateQuorumInlines(editor, threshold);
+      
+      // Update dateTimeInline nodes with current date/time
+      // Use setTimeout to ensure this runs after the editor is fully rendered
+      setTimeout(() => {
+        updateDateTimeDOM();
+      }, 0);
+    }
+  });
+
+  // Separate effect to update date when editor is first created
+  // This ensures date is current even if threshold/conditions haven't changed
+  $effect(() => {
+    if (editor) {
+      // Update date after editor is ready
+      const timeoutId = setTimeout(() => {
+        updateDateTimeDOM();
+      }, 50);
+      return () => clearTimeout(timeoutId);
     }
   });
 
@@ -353,8 +550,10 @@
   $effect(() => {
     const state = getCurrentCheckboxState();
     updateStoredDataDebounced({
-      introMessage: messageJson,
-      introCheckboxState: state,
+      intro: {
+        message: messageJson,
+        checkboxState: state,
+      },
     });
   });
 </script>
@@ -369,7 +568,7 @@
   onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
 >
   {#snippet toolbar()}
-    <RichTextToolbar {editor} {editorVersion} labels={t.introEditor.toolbar} />
+    <RichTextToolbar {editor} {editorVersion} labels={t.introEditor.toolbar} {threshold} />
   {/snippet}
 
   <div
@@ -434,8 +633,6 @@
         description={t.introEditor.sidePanel.checkboxes.directives.description}
       />
     </div>
-
-    <TipSection text={t.introEditor.sidePanel.tip} />
 
     <div class="section-divider"></div>
 
@@ -507,8 +704,7 @@
   }
 
   /* Atomic blocks styles */
-  .rich-editor :global(.recipients-block),
-  .rich-editor :global(.conditions-block) {
+  .rich-editor :global(.recipients-block) {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -520,22 +716,56 @@
     cursor: default;
     user-select: none;
     width: fit-content;
-  }
-
-  .rich-editor :global(.recipients-block) {
     background: rgba(96, 165, 250, 0.15);
     border: 1px solid rgba(96, 165, 250, 0.4);
     color: #93c5fd;
   }
 
+  /* Conditions block - no box, just subtle color like dateTimeInline and quorumInline */
   .rich-editor :global(.conditions-block) {
-    background: rgba(168, 85, 247, 0.15);
-    border: 1px solid rgba(168, 85, 247, 0.4);
-    color: #c4b5fd;
+    display: block;
+    margin: 0.5rem 0;
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: default;
+    user-select: none;
   }
 
-  .rich-editor :global(.recipients-block.ProseMirror-selectednode),
   .rich-editor :global(.conditions-block.ProseMirror-selectednode) {
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+    outline-offset: 1px;
+    border-radius: 2px;
+  }
+
+  /* Conditions content styles - normal block display */
+  .rich-editor :global(.conditions-block .conditions-content) {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.75);
+    display: block;
+  }
+
+  .rich-editor :global(.conditions-block .conditions-content p) {
+    margin-bottom: 0.75rem;
+  }
+
+  .rich-editor :global(.conditions-block .conditions-content ul),
+  .rich-editor :global(.conditions-block .conditions-content ol) {
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .rich-editor :global(.conditions-block .conditions-content li) {
+    margin-bottom: 0.35rem;
+  }
+
+  .rich-editor :global(.recipients-block.ProseMirror-selectednode) {
     outline: 2px solid rgba(255, 255, 255, 0.5);
     outline-offset: 2px;
   }
@@ -551,42 +781,32 @@
   /* Inline datetime styles */
   .rich-editor :global(.datetime-inline) {
     display: inline;
-    padding: 0.15rem 0.5rem;
-    margin: 0 0.1rem;
-    border-radius: 4px;
-    background: rgba(251, 191, 36, 0.15);
-    border: 1px solid rgba(251, 191, 36, 0.4);
-    color: #fcd34d;
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.75);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: inherit;
     white-space: nowrap;
     cursor: default;
     user-select: none;
   }
 
   .rich-editor :global(.datetime-inline.ProseMirror-selectednode) {
-    outline: 2px solid rgba(251, 191, 36, 0.6);
+    outline: 2px solid rgba(255, 255, 255, 0.3);
     outline-offset: 1px;
   }
 
   /* Inline quorum styles */
   .rich-editor :global(.quorum-inline) {
     display: inline;
-    padding: 0.15rem 0.5rem;
-    margin: 0 0.1rem;
-    border-radius: 4px;
-    background: rgba(74, 222, 128, 0.15);
-    border: 1px solid rgba(74, 222, 128, 0.4);
-    color: #86efac;
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.75);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: inherit;
     white-space: nowrap;
     cursor: default;
     user-select: none;
   }
 
   .rich-editor :global(.quorum-inline.ProseMirror-selectednode) {
-    outline: 2px solid rgba(74, 222, 128, 0.6);
+    outline: 2px solid rgba(255, 255, 255, 0.3);
     outline-offset: 1px;
   }
 

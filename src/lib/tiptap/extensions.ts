@@ -2,7 +2,9 @@
  * Custom TipTap extensions for non-editable atomic blocks and inline elements
  */
 
-import { Node, mergeAttributes, type Editor } from '@tiptap/core';
+import { Node, mergeAttributes, type Editor, generateHTML } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import type { JSONContent } from '@tiptap/core';
 
 /**
  * Check if a node type already exists in the document
@@ -89,6 +91,33 @@ export const RecipientsBlock = Node.create({
 });
 
 /**
+ * Helper function to convert JSONContent to HTML string
+ */
+function conditionsJsonToHtml(conditionsJson: string | null): string | null {
+  if (!conditionsJson) return null;
+  
+  try {
+    const conditions: JSONContent = JSON.parse(conditionsJson);
+    // Use TipTap to generate HTML from JSONContent
+    const html = generateHTML(conditions, [
+      StarterKit.configure({
+        blockquote: false,
+        code: false,
+        codeBlock: false,
+        hardBreak: false,
+        horizontalRule: false,
+        strike: false,
+        heading: false,
+      }),
+    ]);
+    return html;
+  } catch (e) {
+    console.error('Failed to parse conditions JSON:', e);
+    return null;
+  }
+}
+
+/**
  * ConditionsBlock - Atomic block for displaying the opening conditions
  * Non-editable, can be inserted/deleted but not modified
  * Can only be inserted once per document
@@ -100,6 +129,26 @@ export const ConditionsBlock = Node.create({
   draggable: true,
   selectable: true,
 
+  addAttributes() {
+    return {
+      conditions: {
+        default: null,
+        parseHTML: (element) => {
+          const value = element.getAttribute('data-conditions');
+          return value || null;
+        },
+        renderHTML: (attributes) => {
+          if (attributes.conditions) {
+            return {
+              'data-conditions': attributes.conditions,
+            };
+          }
+          return {};
+        },
+      },
+    };
+  },
+
   parseHTML() {
     return [
       {
@@ -108,17 +157,31 @@ export const ConditionsBlock = Node.create({
     ];
   },
 
-  renderHTML({ HTMLAttributes }) {
+  renderHTML({ node, HTMLAttributes }) {
+    const conditionsJson = node.attrs.conditions;
+    const hasConditions = !!conditionsJson;
+    
+    // Store conditions JSON in data attribute for later rendering
+    const attrs = mergeAttributes(HTMLAttributes, {
+      'data-type': 'conditions-block',
+      'class': 'conditions-block',
+      'contenteditable': 'false',
+    });
+    
+    if (hasConditions) {
+      attrs['data-conditions'] = conditionsJson;
+      return [
+        'div',
+        attrs,
+        ['div', { class: 'conditions-content' }],
+      ];
+    }
+    
+    // Placeholder content when no conditions are available (should not appear in normal flow)
     return [
       'div',
-      mergeAttributes(HTMLAttributes, {
-        'data-type': 'conditions-block',
-        'class': 'conditions-block',
-        'contenteditable': 'false',
-      }),
-      // Placeholder content - will be replaced with actual conditions later
-      ['span', { class: 'block-icon' }, '🔐'],
-      ['span', { class: 'block-label' }, "Conditions d'ouverture"],
+      attrs,
+      "Conditions d'ouverture",
     ];
   },
 
@@ -181,7 +244,7 @@ export const DateTimeInline = Node.create({
         'class': 'datetime-inline',
         'contenteditable': 'false',
       }),
-      `📅 ${formattedDate}, ${formattedTime}`,
+      `${formattedDate}, ${formattedTime}`,
     ];
   },
 
@@ -208,6 +271,26 @@ export const QuorumInline = Node.create({
   atom: true,
   selectable: true,
 
+  addAttributes() {
+    return {
+      threshold: {
+        default: null,
+        parseHTML: (element) => {
+          const value = element.getAttribute('data-threshold');
+          return value ? parseInt(value, 10) : null;
+        },
+        renderHTML: (attributes) => {
+          if (attributes.threshold !== null && attributes.threshold !== undefined) {
+            return {
+              'data-threshold': String(attributes.threshold),
+            };
+          }
+          return {};
+        },
+      },
+    };
+  },
+
   parseHTML() {
     return [
       {
@@ -216,7 +299,10 @@ export const QuorumInline = Node.create({
     ];
   },
 
-  renderHTML({ HTMLAttributes }) {
+  renderHTML({ node, HTMLAttributes }) {
+    const threshold = node.attrs.threshold;
+    const displayText = threshold !== null && threshold !== undefined ? String(threshold) : '[Quorum]';
+    
     return [
       'span',
       mergeAttributes(HTMLAttributes, {
@@ -224,16 +310,17 @@ export const QuorumInline = Node.create({
         'class': 'quorum-inline',
         'contenteditable': 'false',
       }),
-      '👥 [Quorum]',
+      displayText,
     ];
   },
 
   addCommands() {
     return {
       insertQuorumInline:
-        () =>
+        (options?: { threshold?: number }) =>
         ({ commands }) => {
-          return commands.insertContent({ type: this.name });
+          const attrs = options?.threshold !== undefined ? { threshold: options.threshold } : {};
+          return commands.insertContent({ type: this.name, attrs });
         },
     };
   },
@@ -252,7 +339,7 @@ declare module '@tiptap/core' {
       insertDateTimeInline: () => ReturnType;
     };
     quorumInline: {
-      insertQuorumInline: () => ReturnType;
+      insertQuorumInline: (options?: { threshold?: number }) => ReturnType;
     };
   }
 }

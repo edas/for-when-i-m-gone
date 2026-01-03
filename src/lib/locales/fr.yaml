@@ -129,7 +129,7 @@ introEditor:
     insertQuorum: Insérer le quorum requis
   sidePanel:
     title: Vérification du contenu
-    intro: Assurez-vous que votre message contient les informations essentielles pour que vos proches comprennent comment utiliser ce secret.
+    intro: Ce message sera visible en clair, sans avoir besoin de déchiffrer quoi que ce soit. Il sert de guide pour aider les destinataires à comprendre le contexte et les démarches à suivre.
     collapse: Replier
     expand: Guide de rédaction
     essentialNote: >-
@@ -154,7 +154,6 @@ introEditor:
       directives:
         title: Directives d'utilisation
         description: Instructions sur ce qu'il faut faire avec les informations contenues dans le secret
-    tip: Ce message sera visible en clair, sans avoir besoin de déchiffrer quoi que ce soit. Il sert de guide pour aider les destinataires à comprendre le contexte et les démarches à suivre.
     generateExample: Générer un exemple
     # exampleContent est chargé depuis examples/intro-example.fr.html
   buttons:

@@ -123,6 +123,7 @@
   onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
 >
   <textarea
+    autocomplete="off"
     class="editor-textarea"
     bind:value={secretText}
     placeholder={t.secretEditor.placeholder}
