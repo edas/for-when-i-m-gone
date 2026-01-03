@@ -5,12 +5,24 @@
 
 import type { SecretCheckboxState } from '../components/SecretEditor.svelte';
 import type { IntroCheckboxState } from '../components/IntroMessageEditor.svelte';
+import type { Recipient } from '../components/WhoEditor.svelte';
+import type { HowData } from '../components/HowEditor.svelte';
+
+export interface SecurityData {
+  confirmedAt?: string; // ISO datetime with timezone
+}
+
+export interface WhatData {
+  content?: string;
+  checkboxState?: SecretCheckboxState;
+}
 
 export interface StoredData {
   encrypt?: number;
-  securityConfirmedAt?: string; // ISO datetime with timezone
-  secretContent?: string;
-  secretCheckboxState?: SecretCheckboxState;
+  security?: SecurityData;
+  what?: WhatData;
+  recipients?: Recipient[];
+  howData?: HowData;
   introMessage?: string;
   introCheckboxState?: IntroCheckboxState;
   threshold?: number;
@@ -101,7 +113,13 @@ export function getCurrentISODateTime(): string {
  */
 export async function recordSecurityConfirmation(): Promise<string> {
   const timestamp = getCurrentISODateTime();
-  await updateStoredData({ securityConfirmedAt: timestamp });
+  const currentData = await updateMutex;
+  await updateStoredData({ 
+    security: { 
+      ...currentData.security,
+      confirmedAt: timestamp 
+    } 
+  });
   return timestamp;
 }
 

@@ -4,20 +4,26 @@
     label: string;
     description?: string;
     essential?: boolean;
+    readonly?: boolean;
+    strikethrough?: boolean;
     onchange?: (checked: boolean) => void;
   }
 
-  let { checked = $bindable(), label, description, essential = false, onchange }: Props = $props();
+  let { checked = $bindable(), label, description, essential = false, readonly = false, strikethrough = false, onchange }: Props = $props();
 
   function handleChange(event: Event) {
+    if (readonly) {
+      event.preventDefault();
+      return;
+    }
     const target = event.target as HTMLInputElement;
     checked = target.checked;
     onchange?.(checked);
   }
 </script>
 
-<label class="checkbox-item" class:essential>
-  <input type="checkbox" {checked} onchange={handleChange} />
+<label class="checkbox-item" class:essential class:readonly class:strikethrough>
+  <input type="checkbox" {checked} onchange={handleChange} disabled={readonly} />
   <span class="custom-checkbox"></span>
   {#if description}
     <div class="label-content">
@@ -37,6 +43,10 @@
     padding: 0.5rem 0;
     cursor: pointer;
     position: relative;
+  }
+
+  .checkbox-item.readonly {
+    cursor: default;
   }
 
   .checkbox-item input[type="checkbox"] {
@@ -100,14 +110,20 @@
 
   .label-title {
     color: #e2e8f0;
-    font-size: 0.95rem;
-    font-weight: 500;
-    line-height: 1.3;
+    font-size: 0.9rem;
+    line-height: 1.4;
   }
 
   .label-description {
     color: #8892a0;
     font-size: 0.8rem;
     line-height: 1.4;
+  }
+
+  .checkbox-item.strikethrough .label-text,
+  .checkbox-item.strikethrough .label-title,
+  .checkbox-item.strikethrough .label-description {
+    text-decoration: line-through;
+    opacity: 0.5;
   }
 </style>

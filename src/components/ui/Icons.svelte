@@ -2,6 +2,8 @@
   export type IconName = 
     | 'warning'
     | 'check'
+    | 'check-circle'
+    | 'x-circle'
     | 'chevron-left'
     | 'chevron-right'
     | 'arrow-left'
@@ -18,7 +20,8 @@
     | 'list-bullet'
     | 'list-numbered'
     | 'heart'
-    | 'star';
+    | 'star'
+    | 'grip-vertical';
 </script>
 
 <script lang="ts">
@@ -43,6 +46,12 @@
     <path fill="currentColor" stroke="none" d="M12 2L1 21h22L12 2zm0 3.83L19.13 19H4.87L12 5.83zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
   {:else if name === 'check'}
     <path d="M20 6L9 17l-5-5"/>
+  {:else if name === 'check-circle'}
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M9 12l2 2 4-4"/>
+  {:else if name === 'x-circle'}
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M15 9l-6 6M9 9l6 6"/>
   {:else if name === 'chevron-left'}
     <path d="M15 18l-6-6 6-6"/>
   {:else if name === 'chevron-right'}
@@ -93,5 +102,12 @@
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="currentColor" stroke="none"/>
   {:else if name === 'star'}
     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" stroke="none"/>
+  {:else if name === 'grip-vertical'}
+    <circle cx="9" cy="6" r="1.5" fill="currentColor" stroke="none"/>
+    <circle cx="15" cy="6" r="1.5" fill="currentColor" stroke="none"/>
+    <circle cx="9" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+    <circle cx="15" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+    <circle cx="9" cy="18" r="1.5" fill="currentColor" stroke="none"/>
+    <circle cx="15" cy="18" r="1.5" fill="currentColor" stroke="none"/>
   {/if}
 </svg>

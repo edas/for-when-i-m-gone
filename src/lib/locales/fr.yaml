@@ -1,6 +1,79 @@
 common:
   back: Retour
 
+steps:
+  secret: Quoi
+  who: Qui
+  how: Comment
+  intro: Introduction
+  generate: Générer
+
+whoEditor:
+  title: À qui destinez-vous ce secret ?
+  newRecipient: Personne non-nommée
+  addRecipient: Ajouter une personne
+  removeRecipient: Retirer cette personne
+  addContact: Ajouter une coordonnée
+  removeContact: Retirer cette coordonnée
+  buttons:
+    continueWithoutConfirm: Continuer sans confirmation
+    continueWithoutEssentials: Continuer sans les essentiels
+    continue: Continuer
+  fields:
+    name: Qui est-ce ?
+    contacts: Coordonnées
+  placeholders:
+    name: Cousin Paul Durant
+    contactValue: Valeur...
+    contactComment: Note...
+  contactTypes:
+    phone: Téléphone
+    email: Email
+    address: Adresse postale
+    x: X (Twitter)
+    bluesky: Bluesky
+    mastodon: Mastodon
+    facebook: Facebook
+    telegram: Telegram
+    whatsapp: WhatsApp
+    signal: Signal
+    instagram: Instagram
+    snapchat: Snapchat
+    linkedin: LinkedIn
+    web: Site web
+    other: Autre
+  sidePanel:
+    title: Les destinataires
+    intro: >-
+      Ces personnes recevront chacune une partie du secret. 
+      Elles devront se réunir pour le reconstituer. 
+      Ces renseignements leur permettront de savoir qui contacter et comment.
+    collapse: Replier
+    expand: Conseils
+    recipientCount: personne(s) enregistrée(s)
+    warnings:
+      unnamed: "dont {count} non nommée"
+      unnamedPlural: "dont {count} non nommées"
+      noContacts: "dont {count} sans coordonnées"
+      noContactsAnd: "et {count} sans coordonnées"
+    essentialNote: >-
+      Ces critères sont le minimum pour assurer que les personnes 
+      pourront se retrouver et accéder à votre secret.
+    checklist:
+      atLeast3: Au moins 3 personnes
+      allNamed: Toutes ont un nom pour être contactées
+      allHaveContact: Toutes ont au moins une coordonnée
+      atLeast5: Au moins 5 personnes
+      allHaveAddress: Toutes ont une adresse postale
+      allHaveEmail: Toutes ont une adresse email
+      allHavePhone: Toutes ont un téléphone
+    tip: >-
+      Certaines coordonnées peuvent changer ou disparaître avec le temps. 
+      Plus vous mettez d'information, plus vous faciliterez leur mise en relation.
+    tip2: >-
+      Préférez plus de personnes que pas assez, et pas que des personnes 
+      qui vivent ensemble ou au même endroit, qu'on pourrait perdre en même temps.
+
 securityWarning:
   title: Avertissement de sécurité
   subtitle: "Avant de continuer, veuillez confirmer les points suivants :"
@@ -76,6 +149,45 @@ introEditor:
     # exampleContent est chargé depuis examples/intro-example.fr.html
   buttons:
     continueWithoutConfirm: Continuer sans confirmation
+    continueWithoutEssentials: Continuer sans les essentiels
+    continue: Continuer
+
+howEditor:
+  title: À quelles conditions accéder au secret ?
+  threshold:
+    title: Quorum requis
+    subtitle: Combien de personnes doivent se réunir pour reconstituer le secret ?
+    outOf: sur {count} destinataires
+    errorOne: >-
+      Si une seule personne suffit, transmettez simplement votre secret en clair, 
+      sans utiliser ce programme.
+  conditions:
+    title: Conditions d'ouverture du secret
+    placeholder: "Décrivez dans quels cas le secret doit être ouvert, et dans quels cas il ne doit PAS l'être.\n\nEx : En cas de décès ou d'incapacité prolongée, mais PAS en cas de simple voyage ou d'hospitalisation temporaire..."
+  sidePanel:
+    title: Conditions d'accès
+    collapse: Replier
+    expand: Conseils
+    intro: >-
+      Définissez clairement les règles d'accès à votre secret pour éviter 
+      les malentendus et les abus.
+    essentialNote: >-
+      Ces éléments sont essentiels pour garantir que votre secret 
+      sera ouvert dans les bonnes circonstances.
+    checklist:
+      validThreshold: Quorum d'au moins 2
+      hasConditions: Des conditions d'ouverture définies
+      lowerThanRecipientCount: Quorum inférieur au nombre de destinataires
+      lowerThanRecipientCountHelp: Pour permettre de perdre contact avec au moins un destinataire
+      atLeast3: Quorum d'au moins 3
+      atLeast3Help: Pour rendre plus difficile les manipulations
+      atMost5: Quorum d'au plus 5
+      atMost5Help: Sinon il devient difficile de le mettre en œuvre
+      hasNoOpenConditions: Les conditions précisent les situations qui ne doivent pas mener à l'ouverture du secret
+    tip: >-
+      Les conditions d'ouverture seront communiquées dans le document. 
+      Soyez précis et le plus exhaustif possible pour éviter les interprétations différentes.
+  buttons:
     continueWithoutEssentials: Continuer sans les essentiels
     continue: Continuer
 

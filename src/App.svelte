@@ -1,9 +1,11 @@
 <script lang="ts">
   import SecurityWarning from './components/SecurityWarning.svelte';
   import SecretEditor, { type SecretCheckboxState } from './components/SecretEditor.svelte';
+  import WhoEditor, { type Recipient } from './components/WhoEditor.svelte';
+  import HowEditor, { type HowData } from './components/HowEditor.svelte';
   import IntroMessageEditor, { type IntroCheckboxState } from './components/IntroMessageEditor.svelte';
-  import ThresholdSelector from './components/ThresholdSelector.svelte';
-  import { detectLanguage, type Language } from './lib/i18n';
+  import StepIndicator from './components/ui/StepIndicator.svelte';
+  import { detectLanguage, getTranslations, type Language } from './lib/i18n';
   import { getStoredData, updateStoredData } from './lib/dataStore';
 
   // Default checkbox states
@@ -26,26 +28,36 @@
     directives: false,
   };
 
+  const defaultHowData: Partial<HowData> = {
+    conditions: '',
+    hasNoOpenConditions: false,
+  };
+
   // Load initial data from stored JSON
   const storedData = getStoredData();
 
   let currentLang: Language = $state((storedData.language as Language) ?? detectLanguage());
   let securityConfirmed: boolean = $state(false);
-  let securityChecked: boolean = $state(!!storedData.securityConfirmedAt);
-  let secretContent: string = $state(storedData.secretContent ?? '');
+  let securityChecked: boolean = $state(!!storedData.security?.confirmedAt);
+  let secretContent: string = $state(storedData.what?.content ?? '');
   let secretCheckboxState: SecretCheckboxState = $state({
     ...defaultSecretCheckboxState,
-    ...storedData.secretCheckboxState,
+    ...storedData.what?.checkboxState,
   });
   let secretSubmitted: boolean = $state(false);
+  let recipients: Recipient[] = $state(storedData.recipients ?? []);
+  let whoSubmitted: boolean = $state(false);
+  let howData: Partial<HowData> = $state({
+    ...defaultHowData,
+    ...storedData.howData,
+  });
+  let howSubmitted: boolean = $state(false);
   let introMessage: string = $state(storedData.introMessage ?? '');
   let introCheckboxState: IntroCheckboxState = $state({
     ...defaultIntroCheckboxState,
     ...storedData.introCheckboxState,
   });
   let introSubmitted: boolean = $state(false);
-  let threshold: number = $state(storedData.threshold ?? 3);
-  let thresholdSubmitted: boolean = $state(false);
 
   function handleSecurityContinue(checked: boolean): void {
     securityChecked = checked;
@@ -64,6 +76,26 @@
     securityConfirmed = false;
   }
 
+  function handleWhoContinue(newRecipients: Recipient[]): void {
+    recipients = newRecipients;
+    whoSubmitted = true;
+  }
+
+  function handleWhoBack(newRecipients: Recipient[]): void {
+    recipients = newRecipients;
+    secretSubmitted = false;
+  }
+
+  function handleHowContinue(data: HowData): void {
+    howData = data;
+    howSubmitted = true;
+  }
+
+  function handleHowBack(data: HowData): void {
+    howData = data;
+    whoSubmitted = false;
+  }
+
   function handleIntroContinue(message: string, checkboxState: IntroCheckboxState): void {
     introMessage = message;
     introCheckboxState = checkboxState;
@@ -73,23 +105,31 @@
   function handleIntroBack(message: string, checkboxState: IntroCheckboxState): void {
     introMessage = message;
     introCheckboxState = checkboxState;
-    secretSubmitted = false;
-  }
-
-  function handleThresholdContinue(value: number): void {
-    threshold = value;
-    thresholdSubmitted = true;
-  }
-
-  function handleThresholdBack(value: number): void {
-    threshold = value;
-    introSubmitted = false;
+    howSubmitted = false;
   }
 
   function handleLanguageChange(lang: Language): void {
     currentLang = lang;
     updateStoredData({ language: lang });
   }
+
+  let t = $derived(getTranslations(currentLang));
+
+  let steps = $derived([
+    { key: 'secret', label: t.steps.secret },
+    { key: 'who', label: t.steps.who },
+    { key: 'how', label: t.steps.how },
+    { key: 'intro', label: t.steps.intro },
+    { key: 'generate', label: t.steps.generate },
+  ]);
+
+  let currentStep = $derived.by(() => {
+    if (!secretSubmitted) return 0;
+    if (!whoSubmitted) return 1;
+    if (!howSubmitted) return 2;
+    if (!introSubmitted) return 3;
+    return 4;
+  });
 </script>
 
 {#if !securityConfirmed}
@@ -99,46 +139,74 @@
     onContinue={handleSecurityContinue}
     onLanguageChange={handleLanguageChange}
   />
-{:else if !secretSubmitted}
-  <SecretEditor
-    lang={currentLang}
-    initialValue={secretContent}
-    initialCheckboxState={secretCheckboxState}
-    onContinue={handleSecretContinue}
-    onBack={handleSecretBack}
-  />
-{:else if !introSubmitted}
-  <IntroMessageEditor
-    lang={currentLang}
-    initialValue={introMessage}
-    initialCheckboxState={introCheckboxState}
-    onContinue={handleIntroContinue}
-    onBack={handleIntroBack}
-  />
-{:else if !thresholdSubmitted}
-  <ThresholdSelector
-    lang={currentLang}
-    initialValue={threshold}
-    onContinue={handleThresholdContinue}
-    onBack={handleThresholdBack}
-  />
 {:else}
-  <main>
-    <h1>For When I'm Gone</h1>
-    <p>Secret has been saved. Next steps will appear here.</p>
-  </main>
+  <div class="app-container">
+    <StepIndicator {steps} {currentStep} />
+    
+    <div class="step-content">
+      {#if !secretSubmitted}
+        <SecretEditor
+          lang={currentLang}
+          initialValue={secretContent}
+          initialCheckboxState={secretCheckboxState}
+          onContinue={handleSecretContinue}
+          onBack={handleSecretBack}
+        />
+      {:else if !whoSubmitted}
+        <WhoEditor
+          lang={currentLang}
+          initialRecipients={recipients}
+          onContinue={handleWhoContinue}
+          onBack={handleWhoBack}
+        />
+      {:else if !howSubmitted}
+        <HowEditor
+          lang={currentLang}
+          recipientCount={recipients.length}
+          initialData={howData}
+          onContinue={handleHowContinue}
+          onBack={handleHowBack}
+        />
+      {:else if !introSubmitted}
+        <IntroMessageEditor
+          lang={currentLang}
+          initialValue={introMessage}
+          initialCheckboxState={introCheckboxState}
+          onContinue={handleIntroContinue}
+          onBack={handleIntroBack}
+        />
+      {:else}
+        <main>
+          <h1>For When I'm Gone</h1>
+          <p>Secret has been saved. Next steps will appear here.</p>
+        </main>
+      {/if}
+    </div>
+  </div>
 {/if}
 
 <style>
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  }
+
+  .step-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
   main {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    flex: 1;
     gap: 1.5rem;
     padding: 2rem;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   }
 
   h1 {

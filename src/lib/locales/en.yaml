@@ -1,6 +1,79 @@
 common:
   back: Back
 
+steps:
+  secret: What
+  who: Who
+  how: How
+  intro: Introduction
+  generate: Generate
+
+whoEditor:
+  title: Who will receive this secret?
+  newRecipient: Unnamed person
+  addRecipient: Add a person
+  removeRecipient: Remove this person
+  addContact: Add contact info
+  removeContact: Remove this contact
+  buttons:
+    continueWithoutConfirm: Continue without confirmation
+    continueWithoutEssentials: Continue without essentials
+    continue: Continue
+  fields:
+    name: Who is this?
+    contacts: Contact information
+  placeholders:
+    name: Cousin Paul Smith
+    contactValue: Value...
+    contactComment: Note...
+  contactTypes:
+    phone: Phone
+    email: Email
+    address: Address
+    x: X (Twitter)
+    bluesky: Bluesky
+    mastodon: Mastodon
+    facebook: Facebook
+    telegram: Telegram
+    whatsapp: WhatsApp
+    signal: Signal
+    instagram: Instagram
+    snapchat: Snapchat
+    linkedin: LinkedIn
+    web: Website
+    other: Other
+  sidePanel:
+    title: The recipients
+    intro: >-
+      Each of these people will receive a part of the secret. 
+      They will need to gather together to reconstruct it.
+      This information will help them know who to contact and how.
+    collapse: Collapse
+    expand: Tips
+    recipientCount: person(s) registered
+    warnings:
+      unnamed: "including {count} unnamed"
+      unnamedPlural: "including {count} unnamed"
+      noContacts: "including {count} without contact info"
+      noContactsAnd: "and {count} without contact info"
+    essentialNote: >-
+      These criteria are the minimum to ensure that people 
+      can find each other and access your secret.
+    checklist:
+      atLeast3: At least 3 people
+      allNamed: All have a name to be contacted
+      allHaveContact: All have at least one contact info
+      atLeast5: At least 5 people
+      allHaveAddress: All have a postal address
+      allHaveEmail: All have an email address
+      allHavePhone: All have a phone number
+    tip: >-
+      Some contact information may change or disappear over time. 
+      The more information you provide, the easier it will be for them to connect.
+    tip2: >-
+      Prefer more people rather than too few, and not only people 
+      who live together or in the same place, who could be lost at the same time.
+
 securityWarning:
   title: Security Warning
   subtitle: "Before continuing, please confirm the following:"
@@ -75,6 +148,45 @@ introEditor:
     # exampleContent is loaded from examples/intro-example.en.html
   buttons:
     continueWithoutConfirm: Continue without confirmation
+    continueWithoutEssentials: Continue without essentials
+    continue: Continue
+
+howEditor:
+  title: Under what conditions can the secret be accessed?
+  threshold:
+    title: Required quorum
+    subtitle: How many people must gather to reconstruct the secret?
+    outOf: out of {count} recipients
+    errorOne: >-
+      If only one person is sufficient, simply transmit your secret in plain text, 
+      without using this program.
+  conditions:
+    title: Conditions for opening the secret
+    placeholder: "Describe when the secret should be opened, and when it should NOT be opened.\n\nE.g.: In case of death or prolonged incapacity, but NOT in case of simple travel or temporary hospitalization..."
+  sidePanel:
+    title: Access conditions
+    collapse: Collapse
+    expand: Tips
+    intro: >-
+      Clearly define the rules for accessing your secret to prevent 
+      misunderstandings and abuse.
+    essentialNote: >-
+      These elements are essential to ensure your secret 
+      will be opened under the right circumstances.
+    checklist:
+      validThreshold: Quorum of at least 2
+      hasConditions: Opening conditions defined
+      lowerThanRecipientCount: Quorum lower than the number of recipients
+      lowerThanRecipientCountHelp: To allow losing contact with at least one recipient
+      atLeast3: Quorum of at least 3
+      atLeast3Help: To make manipulations more difficult
+      atMost5: Quorum of at most 5
+      atMost5Help: Otherwise it becomes difficult to implement
+      hasNoOpenConditions: The conditions specify situations that should not lead to opening the secret
+    tip: >-
+      These conditions will be visible to recipients in the introduction message. 
+      Be precise to avoid different interpretations.
+  buttons:
     continueWithoutEssentials: Continue without essentials
     continue: Continue
 

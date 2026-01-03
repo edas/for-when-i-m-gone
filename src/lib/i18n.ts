@@ -13,6 +13,13 @@ export interface Translations {
   common: {
     back: string;
   };
+  steps: {
+    secret: string;
+    who: string;
+    how: string;
+    intro: string;
+    generate: string;
+  };
   securityWarning: {
     title: string;
     subtitle: string;
@@ -20,6 +27,70 @@ export interface Translations {
     checkboxLabelLink: string;
     checkboxLabelEnd: string;
     continueButton: string;
+  };
+  whoEditor: {
+    title: string;
+    newRecipient: string;
+    addRecipient: string;
+    removeRecipient: string;
+    addContact: string;
+    removeContact: string;
+    buttons: {
+      continueWithoutConfirm: string;
+      continueWithoutEssentials: string;
+      continue: string;
+    };
+    fields: {
+      name: string;
+      contacts: string;
+    };
+    placeholders: {
+      name: string;
+      contactValue: string;
+      contactComment: string;
+    };
+    contactTypes: {
+      phone: string;
+      email: string;
+      address: string;
+      x: string;
+      bluesky: string;
+      mastodon: string;
+      facebook: string;
+      telegram: string;
+      whatsapp: string;
+      signal: string;
+      instagram: string;
+      snapchat: string;
+      linkedin: string;
+      web: string;
+      other: string;
+    };
+    sidePanel: {
+      title: string;
+      intro: string;
+      collapse: string;
+      expand: string;
+      recipientCount: string;
+      warnings: {
+        unnamed: string;
+        unnamedPlural: string;
+        noContacts: string;
+        noContactsAnd: string;
+      };
+      essentialNote: string;
+      checklist: {
+        atLeast3: string;
+        allNamed: string;
+        allHaveContact: string;
+        atLeast5: string;
+        allHaveAddress: string;
+        allHaveEmail: string;
+        allHavePhone: string;
+      };
+      tip: string;
+      tip2: string;
+    };
   };
   secretEditor: {
     title: string;
@@ -93,6 +164,42 @@ export interface Translations {
     };
     buttons: {
       continueWithoutConfirm: string;
+      continueWithoutEssentials: string;
+      continue: string;
+    };
+  };
+  howEditor: {
+    title: string;
+    threshold: {
+      title: string;
+      subtitle: string;
+      outOf: string;
+      errorOne: string;
+    };
+    conditions: {
+      title: string;
+      placeholder: string;
+    };
+    sidePanel: {
+      title: string;
+      collapse: string;
+      expand: string;
+      intro: string;
+      essentialNote: string;
+      checklist: {
+        validThreshold: string;
+        hasConditions: string;
+        lowerThanRecipientCount: string;
+        lowerThanRecipientCountHelp: string;
+        atLeast3: string;
+        atLeast3Help: string;
+        atMost5: string;
+        atMost5Help: string;
+        hasNoOpenConditions: string;
+      };
+      tip: string;
+    };
+    buttons: {
       continueWithoutEssentials: string;
       continue: string;
     };

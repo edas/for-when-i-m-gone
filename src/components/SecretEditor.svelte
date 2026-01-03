@@ -68,7 +68,7 @@
   );
 
   let buttonState = $derived(computeButtonState(hasContent, anyChecked, essentialsChecked));
-  let buttonText = $derived(getButtonText(buttonState, t.secretEditor.buttons));
+  let buttonText = $derived(hasContent ? getButtonText(buttonState, t.secretEditor.buttons) : t.secretEditor.buttons.continue);
 
   function getCurrentCheckboxState(): SecretCheckboxState {
     return {
@@ -107,8 +107,10 @@
   $effect(() => {
     const state = getCurrentCheckboxState();
     updateStoredDataDebounced({
-      secretContent: secretText,
-      secretCheckboxState: state,
+      what: {
+        content: secretText,
+        checkboxState: state,
+      },
     });
   });
 </script>
