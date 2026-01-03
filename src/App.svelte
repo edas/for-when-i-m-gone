@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { JSONContent } from '@tiptap/core';
   import SecurityWarning from './components/SecurityWarning.svelte';
   import SecretEditor, { type SecretCheckboxState } from './components/SecretEditor.svelte';
   import WhoEditor, { type Recipient } from './components/WhoEditor.svelte';
@@ -51,7 +52,7 @@
     ...storedData.howData,
   });
   let howSubmitted: boolean = $state(false);
-  let introMessage: string = $state(storedData.introMessage ?? '');
+  let introMessage: JSONContent | null = $state(storedData.introMessage ?? null);
   let introCheckboxState: IntroCheckboxState = $state({
     ...defaultIntroCheckboxState,
     ...storedData.introCheckboxState,
@@ -95,13 +96,13 @@
     whoSubmitted = false;
   }
 
-  function handleIntroContinue(message: string, checkboxState: IntroCheckboxState): void {
+  function handleIntroContinue(message: JSONContent | null, checkboxState: IntroCheckboxState): void {
     introMessage = message;
     introCheckboxState = checkboxState;
     introSubmitted = true;
   }
 
-  function handleIntroBack(message: string, checkboxState: IntroCheckboxState): void {
+  function handleIntroBack(message: JSONContent | null, checkboxState: IntroCheckboxState): void {
     introMessage = message;
     introCheckboxState = checkboxState;
     howSubmitted = false;

@@ -133,6 +133,8 @@ export interface Translations {
       underline: string;
       bulletList: string;
       numberedList: string;
+      insertRecipients: string;
+      insertConditions: string;
     };
     sidePanel: {
       title: string;

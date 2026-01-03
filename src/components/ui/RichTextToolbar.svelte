@@ -1,15 +1,11 @@
 <script lang="ts">
+  import type { Editor } from '@tiptap/core';
   import Icon from './Icons.svelte';
 
-  interface ToolbarAction {
-    icon: 'heading' | 'paragraph' | 'bold' | 'italic' | 'underline' | 'list-bullet' | 'list-numbered';
-    title: string;
-    command: string;
-    isFormatBlock?: boolean;
-  }
+  type IconName = 'heading' | 'paragraph' | 'bold' | 'italic' | 'underline' | 'list-bullet' | 'list-numbered' | 'users' | 'lock';
 
   interface Props {
-    editorElement: HTMLElement | null;
+    editor: Editor | null;
     labels: {
       heading: string;
       paragraph: string;
@@ -18,83 +14,126 @@
       underline: string;
       bulletList: string;
       numberedList: string;
+      insertRecipients: string;
+      insertConditions: string;
     };
   }
 
-  let { editorElement, labels }: Props = $props();
+  let { editor, labels }: Props = $props();
 
-  function execCommand(command: string): void {
-    document.execCommand(command, false);
-    editorElement?.focus();
+  function toggleHeading(): void {
+    editor?.chain().focus().toggleHeading({ level: 2 }).run();
   }
 
-  function formatBlock(tag: string): void {
-    document.execCommand('formatBlock', false, tag);
-    editorElement?.focus();
+  function setParagraph(): void {
+    editor?.chain().focus().setParagraph().run();
   }
 
-  const formatActions: ToolbarAction[] = [
-    { icon: 'heading', title: 'heading', command: 'h2', isFormatBlock: true },
-    { icon: 'paragraph', title: 'paragraph', command: 'p', isFormatBlock: true },
-  ];
-
-  const styleActions: ToolbarAction[] = [
-    { icon: 'bold', title: 'bold', command: 'bold' },
-    { icon: 'italic', title: 'italic', command: 'italic' },
-    { icon: 'underline', title: 'underline', command: 'underline' },
-  ];
-
-  const listActions: ToolbarAction[] = [
-    { icon: 'list-bullet', title: 'bulletList', command: 'insertUnorderedList' },
-    { icon: 'list-numbered', title: 'numberedList', command: 'insertOrderedList' },
-  ];
-
-  function handleAction(action: ToolbarAction): void {
-    if (action.isFormatBlock) {
-      formatBlock(action.command);
-    } else {
-      execCommand(action.command);
-    }
+  function toggleBold(): void {
+    editor?.chain().focus().toggleBold().run();
   }
 
-  function getLabel(key: string): string {
-    return labels[key as keyof typeof labels] ?? key;
+  function toggleItalic(): void {
+    editor?.chain().focus().toggleItalic().run();
   }
+
+  function toggleUnderline(): void {
+    editor?.chain().focus().toggleUnderline().run();
+  }
+
+  function toggleBulletList(): void {
+    editor?.chain().focus().toggleBulletList().run();
+  }
+
+  function toggleOrderedList(): void {
+    editor?.chain().focus().toggleOrderedList().run();
+  }
+
+  function insertRecipientsBlock(): void {
+    editor?.chain().focus().insertRecipientsBlock().run();
+  }
+
+  function insertConditionsBlock(): void {
+    editor?.chain().focus().insertConditionsBlock().run();
+  }
+
+  interface ToolbarButton {
+    icon: IconName;
+    label: string;
+    action: () => void;
+  }
+
+  let formatButtons: ToolbarButton[] = $derived([
+    { icon: 'heading', label: labels.heading, action: toggleHeading },
+    { icon: 'paragraph', label: labels.paragraph, action: setParagraph },
+  ]);
+
+  let styleButtons: ToolbarButton[] = $derived([
+    { icon: 'bold', label: labels.bold, action: toggleBold },
+    { icon: 'italic', label: labels.italic, action: toggleItalic },
+    { icon: 'underline', label: labels.underline, action: toggleUnderline },
+  ]);
+
+  let listButtons: ToolbarButton[] = $derived([
+    { icon: 'list-bullet', label: labels.bulletList, action: toggleBulletList },
+    { icon: 'list-numbered', label: labels.numberedList, action: toggleOrderedList },
+  ]);
+
+  let insertButtons: ToolbarButton[] = $derived([
+    { icon: 'users', label: labels.insertRecipients, action: insertRecipientsBlock },
+    { icon: 'lock', label: labels.insertConditions, action: insertConditionsBlock },
+  ]);
 </script>
 
 <div class="toolbar">
   <div class="toolbar-group">
-    {#each formatActions as action}
+    {#each formatButtons as btn}
       <button 
         class="toolbar-btn" 
-        onclick={() => handleAction(action)} 
-        title={getLabel(action.title)}
+        onclick={btn.action} 
+        title={btn.label}
+        disabled={!editor}
       >
-        <Icon name={action.icon} size={18} />
+        <Icon name={btn.icon} size={18} />
       </button>
     {/each}
   </div>
   <div class="toolbar-divider"></div>
   <div class="toolbar-group">
-    {#each styleActions as action}
+    {#each styleButtons as btn}
       <button 
         class="toolbar-btn" 
-        onclick={() => handleAction(action)} 
-        title={getLabel(action.title)}
+        onclick={btn.action} 
+        title={btn.label}
+        disabled={!editor}
       >
-        <Icon name={action.icon} size={18} />
+        <Icon name={btn.icon} size={18} />
       </button>
     {/each}
   </div>
   <div class="toolbar-divider"></div>
   <div class="toolbar-group">
-    {#each listActions as action}
+    {#each listButtons as btn}
       <button 
         class="toolbar-btn" 
-        onclick={() => handleAction(action)} 
-        title={getLabel(action.title)}
+        onclick={btn.action} 
+        title={btn.label}
+        disabled={!editor}
       >
-        <Icon name={action.icon} size={18} />
+        <Icon name={btn.icon} size={18} />
+      </button>
+    {/each}
+  </div>
+  <div class="toolbar-divider"></div>
+  <div class="toolbar-group insert-group">
+    {#each insertButtons as btn}
+      <button 
+        class="toolbar-btn insert-btn" 
+        onclick={btn.action} 
+        title={btn.label}
+        disabled={!editor}
+      >
+        <Icon name={btn.icon} size={18} />
       </button>
     {/each}
   </div>
@@ -138,14 +177,30 @@
     transition: all 0.2s ease;
   }
 
-  .toolbar-btn:hover {
+  .toolbar-btn:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.1);
     color: #e2e8f0;
     border-color: rgba(255, 255, 255, 0.2);
   }
 
-  .toolbar-btn:active {
+  .toolbar-btn:active:not(:disabled) {
     background: rgba(255, 255, 255, 0.15);
+  }
+
+  .toolbar-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Insert buttons have distinct styling */
+  .insert-btn {
+    color: #93c5fd;
+  }
+
+  .insert-btn:hover:not(:disabled) {
+    background: rgba(96, 165, 250, 0.15);
+    color: #bfdbfe;
+    border-color: rgba(96, 165, 250, 0.3);
   }
 
   @media (max-width: 600px) {

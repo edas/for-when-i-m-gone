@@ -18,5 +18,11 @@
     "typescript": "~5.9.3",
     "vite": "^7.3.0",
     "vite-plugin-singlefile": "^2.3.0"
+  },
+  "dependencies": {
+    "@tiptap/core": "^3.14.0",
+    "@tiptap/extension-underline": "^3.14.0",
+    "@tiptap/pm": "^3.14.0",
+    "@tiptap/starter-kit": "^3.14.0"
   }
 }

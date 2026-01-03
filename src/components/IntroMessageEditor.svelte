@@ -1,13 +1,16 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
+  import { Editor, type JSONContent } from '@tiptap/core';
+  import StarterKit from '@tiptap/starter-kit';
+  import Underline from '@tiptap/extension-underline';
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
   import { updateStoredDataDebounced } from '../lib/dataStore';
+  import { RecipientsBlock, ConditionsBlock } from '../lib/tiptap/extensions';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
-  import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
   import RichTextToolbar from './ui/RichTextToolbar.svelte';
   import TipSection from './ui/TipSection.svelte';
 
@@ -25,17 +28,18 @@
 
   interface Props {
     lang: Language;
-    initialValue?: string;
+    initialValue?: JSONContent | null;
     initialCheckboxState?: IntroCheckboxState;
-    onContinue: (message: string, checkboxState: IntroCheckboxState) => void;
-    onBack: (message: string, checkboxState: IntroCheckboxState) => void;
+    onContinue: (message: JSONContent | null, checkboxState: IntroCheckboxState) => void;
+    onBack: (message: JSONContent | null, checkboxState: IntroCheckboxState) => void;
   }
 
   let { lang, initialValue, initialCheckboxState, onContinue, onBack }: Props = $props();
 
-  let messageHtml: string = $state(untrack(() => initialValue ?? ''));
   let sidePanelOpen: boolean = $state(true);
   let editorElement: HTMLDivElement | null = $state(null);
+  let editor: Editor | null = $state(null);
+  let messageJson: JSONContent | null = $state(untrack(() => initialValue ?? null));
 
   // Checkbox states for verification
   let checkSecretHolders: boolean = $state(untrack(() => initialCheckboxState?.secretHolders ?? false));
@@ -44,7 +48,18 @@
 
   let t = $derived(getTranslations(lang));
 
-  let hasContent = $derived(messageHtml.trim().length > 0);
+  // Check if editor has meaningful content (not just empty paragraph)
+  let hasContent = $derived.by(() => {
+    if (!messageJson) return false;
+    const content = messageJson.content;
+    if (!content || content.length === 0) return false;
+    // Check if it's just an empty paragraph
+    if (content.length === 1 && content[0].type === 'paragraph' && !content[0].content) {
+      return false;
+    }
+    return true;
+  });
+
   let allEssentialsChecked = $derived(checkSecretHolders && checkOpeningConditions);
   let anyChecked = $derived(checkSecretHolders || checkOpeningConditions || checkDirectives);
 
@@ -60,47 +75,61 @@
   }
 
   function handleContinue(): void {
-    if (hasContent && editorElement) {
-      onContinue(editorElement.innerHTML, getCurrentCheckboxState());
+    if (hasContent && editor) {
+      onContinue(editor.getJSON(), getCurrentCheckboxState());
     }
   }
 
   function handleBack(): void {
-    onBack(editorElement?.innerHTML ?? '', getCurrentCheckboxState());
+    onBack(editor?.getJSON() ?? null, getCurrentCheckboxState());
   }
 
-  function handleInput(): void {
-    if (editorElement) {
-      messageHtml = editorElement.innerHTML;
-    }
-  }
-
-  // Initialize editor content with initial value when mounted
+  // Initialize TipTap editor when element is mounted
   $effect(() => {
-    if (editorElement && initialValue && !editorElement.innerHTML) {
-      editorElement.innerHTML = initialValue;
+    if (editorElement && !editor) {
+      const newEditor = new Editor({
+        element: editorElement,
+        extensions: [
+          StarterKit.configure({
+            // Disable features we don't need
+            blockquote: false,
+            code: false,
+            codeBlock: false,
+            hardBreak: false,
+            horizontalRule: false,
+            strike: false,
+            // Keep: document, paragraph, text, bold, italic, heading, bulletList, orderedList, listItem
+          }),
+          Underline,
+          RecipientsBlock,
+          ConditionsBlock,
+        ],
+        content: initialValue ?? undefined,
+        editorProps: {
+          attributes: {
+            class: 'rich-editor-content',
+            'data-placeholder': t.introEditor.placeholder,
+          },
+        },
+        onUpdate: ({ editor: e }) => {
+          messageJson = e.getJSON();
+        },
+      });
+      
+      editor = newEditor;
     }
   });
 
-  function generateExample(): void {
-    if (editorElement) {
-      const example = t.introEditor.sidePanel.exampleContent;
-      const currentContent = editorElement.innerHTML.trim();
-      if (currentContent) {
-        editorElement.innerHTML = currentContent + '<br><br>' + example;
-      } else {
-        editorElement.innerHTML = example;
-      }
-      messageHtml = editorElement.innerHTML;
-      editorElement.focus();
-    }
-  }
+  // Cleanup editor on destroy
+  onDestroy(() => {
+    editor?.destroy();
+  });
 
   // Auto-save to JSON on any change (debounced)
   $effect(() => {
     const state = getCurrentCheckboxState();
     updateStoredDataDebounced({
-      introMessage: messageHtml,
+      introMessage: messageJson,
       introCheckboxState: state,
     });
   });
@@ -116,17 +145,12 @@
   onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
 >
   {#snippet toolbar()}
-    <RichTextToolbar {editorElement} labels={t.introEditor.toolbar} />
+    <RichTextToolbar {editor} labels={t.introEditor.toolbar} />
   {/snippet}
 
   <div
     class="rich-editor"
-    contenteditable="true"
     bind:this={editorElement}
-    oninput={handleInput}
-    role="textbox"
-    aria-multiline="true"
-    data-placeholder={t.introEditor.placeholder}
   ></div>
 
   <ActionButtons
@@ -166,13 +190,6 @@
     </div>
 
     <TipSection text={t.introEditor.sidePanel.tip} />
-
-    <div class="section-divider"></div>
-
-    <GenerateExampleButton
-      label={t.introEditor.sidePanel.generateExample}
-      onclick={generateExample}
-    />
   {/snippet}
 </EditorLayout>
 
@@ -180,28 +197,36 @@
   .rich-editor {
     flex: 1;
     min-height: 350px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0 0 12px 12px;
+    overflow-y: auto;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .rich-editor:focus-within {
+    border-color: rgba(96, 165, 250, 0.5);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+  }
+
+  /* TipTap editor content styles */
+  .rich-editor :global(.rich-editor-content) {
     padding: 1.5rem;
     font-family: 'Georgia', 'Times New Roman', serif;
     font-size: 1.05rem;
     line-height: 1.7;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 0 0 12px 12px;
     color: #e2e8f0;
-    overflow-y: auto;
     outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    min-height: 100%;
   }
 
-  .rich-editor:empty::before {
+  /* Placeholder */
+  .rich-editor :global(.rich-editor-content.is-editor-empty:first-child::before) {
     content: attr(data-placeholder);
     color: rgba(255, 255, 255, 0.4);
     pointer-events: none;
-  }
-
-  .rich-editor:focus {
-    border-color: rgba(96, 165, 250, 0.5);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+    float: left;
+    height: 0;
   }
 
   .rich-editor :global(h2) {
@@ -226,6 +251,47 @@
 
   .rich-editor :global(li) {
     margin-bottom: 0.35rem;
+  }
+
+  /* Atomic blocks styles */
+  .rich-editor :global(.recipients-block),
+  .rich-editor :global(.conditions-block) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0;
+    border-radius: 8px;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.9rem;
+    cursor: default;
+    user-select: none;
+  }
+
+  .rich-editor :global(.recipients-block) {
+    background: rgba(96, 165, 250, 0.15);
+    border: 1px solid rgba(96, 165, 250, 0.4);
+    color: #93c5fd;
+  }
+
+  .rich-editor :global(.conditions-block) {
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    color: #c4b5fd;
+  }
+
+  .rich-editor :global(.recipients-block.ProseMirror-selectednode),
+  .rich-editor :global(.conditions-block.ProseMirror-selectednode) {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+  }
+
+  .rich-editor :global(.block-icon) {
+    font-size: 1.1rem;
+  }
+
+  .rich-editor :global(.block-label) {
+    font-weight: 500;
   }
 
   @media (max-width: 600px) {

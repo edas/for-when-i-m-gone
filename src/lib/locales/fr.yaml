@@ -123,6 +123,8 @@ introEditor:
     underline: Souligné
     bulletList: Liste à puces
     numberedList: Liste numérotée
+    insertRecipients: Insérer la liste des destinataires
+    insertConditions: Insérer les conditions d'ouverture
   sidePanel:
     title: Vérification du contenu
     intro: Assurez-vous que votre message contient les informations essentielles pour que vos proches comprennent comment utiliser ce secret.

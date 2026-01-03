@@ -122,6 +122,8 @@ introEditor:
     underline: Underline
     bulletList: Bullet list
     numberedList: Numbered list
+    insertRecipients: Insert recipients list
+    insertConditions: Insert opening conditions
   sidePanel:
     title: Content Verification
     intro: Make sure your message contains essential information so your loved ones understand how to use this secret.

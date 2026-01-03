@@ -3,6 +3,7 @@
  * The data is stored in a <script type="application/json" id="fwimg-data"> element
  */
 
+import type { JSONContent } from '@tiptap/core';
 import type { SecretCheckboxState } from '../components/SecretEditor.svelte';
 import type { IntroCheckboxState } from '../components/IntroMessageEditor.svelte';
 import type { Recipient } from '../components/WhoEditor.svelte';
@@ -23,7 +24,7 @@ export interface StoredData {
   what?: WhatData;
   recipients?: Recipient[];
   howData?: HowData;
-  introMessage?: string;
+  introMessage?: JSONContent | null;
   introCheckboxState?: IntroCheckboxState;
   threshold?: number;
   language?: string;
