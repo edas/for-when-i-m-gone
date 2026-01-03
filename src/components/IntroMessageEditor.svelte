@@ -1,11 +1,20 @@
 <script lang="ts">
   import { onDestroy, untrack } from 'svelte';
-  import { Editor, type JSONContent, generateHTML } from '@tiptap/core';
+  import { Editor, type JSONContent } from '@tiptap/core';
   import StarterKit from '@tiptap/starter-kit';
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
   import { updateStoredDataDebounced } from '../lib/dataStore';
-  import { RecipientsBlock, ConditionsBlock, DateTimeInline, QuorumInline } from '../lib/tiptap/extensions';
+  import { RecipientsBlock, ConditionsBlock, DateTimeInline, QuorumInline, hasNodeTypeInJSON } from '../lib/tiptap/extensions';
+  import {
+    updateConditionsBlocks,
+    updateConditionsDOM,
+    updateRecipientsBlocks,
+    updateRecipientsDOM,
+    updateQuorumInlines,
+    updateDateTimeDOM,
+    type GenerateRecipientsHtmlOptions,
+  } from '../lib/tiptap/domUpdates';
   import type { Recipient } from './WhoEditor.svelte';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
@@ -45,99 +54,6 @@
 
   let { lang, initialValue, initialCheckboxState, threshold, conditions, recipients, onContinue, onBack }: Props = $props();
 
-  // Generate example content for a given language
-  function getExampleContent(language: Language): JSONContent {
-    return language === 'fr' 
-      ? {
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', text: 'Le ' },
-                { type: 'dateTimeInline' },
-              ],
-            },
-            { type: 'paragraph' },
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', text: 'Je vous ai laissé mes informations à vous tous. Vous pourrez y accéder ensemble, à condition d\'être au moins ' },
-                { type: 'quorumInline' },
-                { type: 'text', text: '. Faites-en un usage raisonné.' },
-              ],
-            },
-            { type: 'paragraph' },
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', text: 'Je vous fais confiance pour ne l\'utiliser qu\'aux conditions suivantes :' },
-              ],
-            },
-            { type: 'conditionsBlock' },
-            { type: 'paragraph' },
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', text: 'Pour vous joindre, voici les personnes qui détiennent un fichier similaire :' },
-              ],
-            },
-            { type: 'recipientsBlock' },
-            { type: 'paragraph' },
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', marks: [{ type: 'italic' }], text: '{xxxx Nom Prénom xxxx}' },
-              ],
-            },
-          ],
-        }
-      : {
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', text: 'On ' },
-                { type: 'dateTimeInline' },
-              ],
-            },
-            { type: 'paragraph' },
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', text: 'I have left my information for all of you. You will be able to access it together, provided at least ' },
-                { type: 'quorumInline' },
-                { type: 'text', text: ' of you are present. Please use it wisely.' },
-              ],
-            },
-            { type: 'paragraph' },
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', text: 'I trust you to only use it under the following conditions:' },
-              ],
-            },
-            { type: 'conditionsBlock' },
-            { type: 'paragraph' },
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', text: 'To reach each other, here are the people who hold a similar file:' },
-              ],
-            },
-            { type: 'recipientsBlock' },
-            { type: 'paragraph' },
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', marks: [{ type: 'italic' }], text: '{xxxx First Name Last Name xxxx}' },
-              ],
-            },
-          ],
-        };
-  }
-
   // Helper function to update quorumInline nodes with threshold
   // Always updates the threshold, even if it already exists
   function updateQuorumNodes(content: JSONContent, thresholdValue: number): JSONContent {
@@ -161,32 +77,16 @@
   }
 
   // Get initial content: use provided value or default example, and update quorum nodes
-  function getInitialContent(): JSONContent {
-    const content = initialValue ?? getExampleContent(lang);
+  // Note: Uses getTranslations(lang) directly since this runs before $derived(t) is available
+  const initialContent = (() => {
+    const translations = getTranslations(lang);
+    const content = initialValue ?? translations.introEditor.sidePanel.exampleContentJson;
     return updateQuorumNodes(content, threshold);
-  }
-
-  // Helper function to check if a node type exists in the JSON content
-  function hasNodeType(json: JSONContent | null, nodeType: string): boolean {
-    if (!json) return false;
-    
-    function searchNode(node: JSONContent): boolean {
-      if (node.type === nodeType) return true;
-      if (node.content) {
-        for (const child of node.content) {
-          if (searchNode(child)) return true;
-        }
-      }
-      return false;
-    }
-    
-    return searchNode(json);
-  }
+  })();
 
   let sidePanelOpen: boolean = $state(true);
   let editorElement: HTMLDivElement | null = $state(null);
   let editor: Editor | null = $state(null);
-  const initialContent = getInitialContent();
   let messageJson: JSONContent | null = $state(initialContent);
   let editorVersion: number = $state(0);
 
@@ -195,10 +95,10 @@
   function getInitialCheckboxStates(content: JSONContent, saved?: IntroCheckboxState) {
     return {
       authorIdentity: saved?.authorIdentity ?? false,
-      secretHolders: hasNodeType(content, 'recipientsBlock') || (saved?.secretHolders ?? false),
-      openingConditions: hasNodeType(content, 'conditionsBlock') || (saved?.openingConditions ?? false),
-      dated: hasNodeType(content, 'dateTimeInline') || (saved?.dated ?? false),
-      quorum: hasNodeType(content, 'quorumInline') || (saved?.quorum ?? false),
+      secretHolders: hasNodeTypeInJSON(content, 'recipientsBlock') || (saved?.secretHolders ?? false),
+      openingConditions: hasNodeTypeInJSON(content, 'conditionsBlock') || (saved?.openingConditions ?? false),
+      dated: hasNodeTypeInJSON(content, 'dateTimeInline') || (saved?.dated ?? false),
+      quorum: hasNodeTypeInJSON(content, 'quorumInline') || (saved?.quorum ?? false),
       directives: saved?.directives ?? false,
     };
   }
@@ -215,16 +115,16 @@
   let t = $derived(getTranslations(lang));
 
   // Auto-detect presence of components in the message
-  let hasRecipientsBlock = $derived(hasNodeType(messageJson, 'recipientsBlock'));
-  let hasConditionsBlock = $derived(hasNodeType(messageJson, 'conditionsBlock'));
-  let hasDateTimeInline = $derived(hasNodeType(messageJson, 'dateTimeInline'));
-  let hasQuorumInline = $derived(hasNodeType(messageJson, 'quorumInline'));
+  let hasRecipientsBlock = $derived(hasNodeTypeInJSON(messageJson, 'recipientsBlock'));
+  let hasConditionsBlock = $derived(hasNodeTypeInJSON(messageJson, 'conditionsBlock'));
+  let hasDateTimeInline = $derived(hasNodeTypeInJSON(messageJson, 'dateTimeInline'));
+  let hasQuorumInline = $derived(hasNodeTypeInJSON(messageJson, 'quorumInline'));
 
   // Track previous component presence to detect additions/removals
-  let prevHasRecipients = $state(hasNodeType(initialContent, 'recipientsBlock'));
-  let prevHasConditions = $state(hasNodeType(initialContent, 'conditionsBlock'));
-  let prevHasDateTime = $state(hasNodeType(initialContent, 'dateTimeInline'));
-  let prevHasQuorum = $state(hasNodeType(initialContent, 'quorumInline'));
+  let prevHasRecipients = $state(hasNodeTypeInJSON(initialContent, 'recipientsBlock'));
+  let prevHasConditions = $state(hasNodeTypeInJSON(initialContent, 'conditionsBlock'));
+  let prevHasDateTime = $state(hasNodeTypeInJSON(initialContent, 'dateTimeInline'));
+  let prevHasQuorum = $state(hasNodeTypeInJSON(initialContent, 'quorumInline'));
 
   // Sync checkboxes when components are added or removed
   $effect(() => {
@@ -312,7 +212,7 @@
   function generateExample(): void {
     if (!editor) return;
 
-    const exampleContent = getExampleContent(lang);
+    const exampleContent = t.introEditor.sidePanel.exampleContentJson;
 
     // If there's existing content, append the example; otherwise replace
     if (hasContent) {
@@ -331,85 +231,12 @@
     editorVersion++;
   }
 
-  // Function to update conditionsBlock nodes with actual conditions content
-  function updateConditionsBlocks(editor: Editor, conditions: JSONContent | null): void {
-    if (!editor) return;
-    
-    const conditionsJson = conditions ? JSON.stringify(conditions) : null;
-    
-    // Collect all positions of conditionsBlock nodes first
-    const positions: number[] = [];
-    editor.state.doc.descendants((node, pos) => {
-      if (node.type.name === 'conditionsBlock') {
-        positions.push(pos);
-      }
-    });
-    
-    // Update all conditionsBlock nodes in a single transaction
-    if (positions.length > 0) {
-      const tr = editor.state.tr;
-      positions.forEach((pos) => {
-        const node = editor.state.doc.nodeAt(pos);
-        if (node && node.type.name === 'conditionsBlock') {
-          tr.setNodeMarkup(pos, undefined, {
-            ...node.attrs,
-            conditions: conditionsJson,
-          });
-        }
-      });
-      editor.view.dispatch(tr);
-    }
-  }
-
-  // Function to update quorumInline nodes with current threshold
-  function updateQuorumInlines(editor: Editor, thresholdValue: number): void {
-    if (!editor) return;
-    
-    // Collect all positions of quorumInline nodes first
-    const positions: number[] = [];
-    editor.state.doc.descendants((node, pos) => {
-      if (node.type.name === 'quorumInline') {
-        positions.push(pos);
-      }
-    });
-    
-    // Update all quorumInline nodes in a single transaction
-    if (positions.length > 0) {
-      const tr = editor.state.tr;
-      positions.forEach((pos) => {
-        const node = editor.state.doc.nodeAt(pos);
-        if (node && node.type.name === 'quorumInline') {
-          tr.setNodeMarkup(pos, undefined, {
-            ...node.attrs,
-            threshold: thresholdValue,
-          });
-        }
-      });
-      editor.view.dispatch(tr);
-    }
-  }
-
-  // Function to update DOM for dateTimeInline nodes with current date/time
-  function updateDateTimeDOM(): void {
-    if (!editorElement) return;
-    
-    requestAnimationFrame(() => {
-      const dateNodes = editorElement?.querySelectorAll('[data-type="datetime-inline"]');
-      dateNodes?.forEach((node) => {
-        const now = new Date();
-        const formattedDate = now.toLocaleDateString(undefined, {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        });
-        const formattedTime = now.toLocaleTimeString(undefined, {
-          hour: '2-digit',
-          minute: '2-digit',
-        });
-        node.textContent = `${formattedDate}, ${formattedTime}`;
-      });
-    });
+  // Helper to get recipients HTML options
+  function getRecipientsHtmlOptions(): GenerateRecipientsHtmlOptions {
+    return {
+      contactTypeLabels: t.whoEditor.contactTypes,
+      lang,
+    };
   }
 
   // Initialize TipTap editor when element is mounted
@@ -433,7 +260,7 @@
           DateTimeInline,
           QuorumInline,
         ],
-        content: getInitialContent(),
+        content: initialContent,
         editorProps: {
           attributes: {
             class: 'rich-editor-content',
@@ -447,13 +274,13 @@
           // Update conditions blocks when content changes (e.g., new block inserted)
           if (conditions !== undefined) {
             updateConditionsBlocks(e, conditions);
-            updateConditionsDOM();
+            updateConditionsDOM(editorElement);
           }
           
           // Update recipients blocks when content changes (e.g., new block inserted)
           if (recipients !== undefined) {
             updateRecipientsBlocks(e, recipients);
-            updateRecipientsDOM();
+            updateRecipientsDOM(editorElement, getRecipientsHtmlOptions());
           }
         },
       });
@@ -467,207 +294,23 @@
         // Update conditions blocks
         if (conditions !== undefined) {
           updateConditionsBlocks(newEditor, conditions);
-          updateConditionsDOM();
+          updateConditionsDOM(editorElement);
         }
         
         // Update recipients blocks
         if (recipients !== undefined) {
           updateRecipientsBlocks(newEditor, recipients);
-          updateRecipientsDOM();
+          updateRecipientsDOM(editorElement, getRecipientsHtmlOptions());
         }
         
         // Update quorumInline nodes with current threshold
         updateQuorumInlines(newEditor, threshold);
         
         // Update dateTimeInline nodes with current date/time
-        updateDateTimeDOM();
+        updateDateTimeDOM(editorElement);
       }, 0);
     }
   });
-
-  // Helper function to update DOM for conditions blocks
-  function updateConditionsDOM(): void {
-    if (!editorElement) return;
-    
-    requestAnimationFrame(() => {
-      const blocks = editorElement?.querySelectorAll('[data-type="conditions-block"]');
-      blocks?.forEach((block) => {
-        const conditionsJson = block.getAttribute('data-conditions');
-        const contentDiv = block.querySelector('.conditions-content');
-        
-        if (conditionsJson && contentDiv) {
-          try {
-            const conditionsData: JSONContent = JSON.parse(conditionsJson);
-            const html = generateHTML(conditionsData, [
-              StarterKit.configure({
-                blockquote: false,
-                code: false,
-                codeBlock: false,
-                hardBreak: false,
-                horizontalRule: false,
-                strike: false,
-                heading: false,
-              }),
-            ]);
-            contentDiv.innerHTML = html;
-          } catch (e) {
-            console.error('Failed to render conditions:', e);
-          }
-        } else if (!conditionsJson) {
-          // Remove content div if no conditions
-          contentDiv?.remove();
-        }
-      });
-    });
-  }
-
-  // Function to update recipientsBlock nodes with actual recipients data
-  function updateRecipientsBlocks(editor: Editor, recipientsList: Recipient[] | undefined): void {
-    if (!editor) return;
-    
-    const recipientsJson = recipientsList && recipientsList.length > 0 
-      ? JSON.stringify(recipientsList) 
-      : null;
-    
-    // Collect all positions of recipientsBlock nodes first
-    const positions: number[] = [];
-    editor.state.doc.descendants((node, pos) => {
-      if (node.type.name === 'recipientsBlock') {
-        positions.push(pos);
-      }
-    });
-    
-    // Update all recipientsBlock nodes in a single transaction
-    if (positions.length > 0) {
-      const tr = editor.state.tr;
-      positions.forEach((pos) => {
-        const node = editor.state.doc.nodeAt(pos);
-        if (node && node.type.name === 'recipientsBlock') {
-          tr.setNodeMarkup(pos, undefined, {
-            ...node.attrs,
-            recipients: recipientsJson,
-          });
-        }
-      });
-      editor.view.dispatch(tr);
-    }
-  }
-
-  // Helper function to generate HTML for recipients list
-  function generateRecipientsHtml(recipientsList: Recipient[]): string {
-    const items: string[] = [];
-    const contactTypeLabels = t.whoEditor.contactTypes;
-    // French typography: non-breaking space before colon; English: no space
-    const colonSeparator = lang === 'fr' ? '\u00A0: ' : ': ';
-    
-    // Filter out recipients that are marked as private
-    const publicRecipients = recipientsList.filter(r => !r.isPrivate);
-    
-    for (const recipient of publicRecipients) {
-      // Build contacts list
-      const contactParts: string[] = [];
-      for (const contact of recipient.contacts) {
-        if (!contact.value.trim()) continue;
-        
-        let contactStr = '';
-        
-        // Add type prefix (except for "other")
-        if (contact.type !== 'other') {
-          const typeLabel = contactTypeLabels[contact.type as keyof typeof contactTypeLabels] || contact.type;
-          contactStr = `${typeLabel}${colonSeparator}${escapeHtml(contact.value)}`;
-        } else {
-          contactStr = escapeHtml(contact.value);
-        }
-        
-        // Add comment in parentheses if present
-        if (contact.comment.trim()) {
-          contactStr += ` (${escapeHtml(contact.comment)})`;
-        }
-        
-        contactParts.push(contactStr);
-      }
-      
-      // Skip if no name and no contacts
-      if (!recipient.name.trim() && contactParts.length === 0) continue;
-      
-      // Build the list item
-      let itemHtml = '';
-      
-      // Add name in bold if present
-      if (recipient.name.trim()) {
-        itemHtml += `<strong>${escapeHtml(recipient.name)}</strong>`;
-        if (contactParts.length > 0) {
-          itemHtml += ' — ';
-        }
-      }
-      
-      // Add contacts
-      itemHtml += contactParts.join(' — ');
-      
-      items.push(`<li>${itemHtml}</li>`);
-    }
-    
-    if (items.length === 0) return '';
-    
-    return `<ul>${items.join('')}</ul>`;
-  }
-
-  // Helper function to escape HTML special characters
-  function escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  // Helper function to update DOM for recipients blocks
-  function updateRecipientsDOM(): void {
-    if (!editorElement) return;
-    
-    requestAnimationFrame(() => {
-      const blocks = editorElement?.querySelectorAll('[data-type="recipients-block"]');
-      blocks?.forEach((block) => {
-        const recipientsJson = block.getAttribute('data-recipients');
-        let contentDiv = block.querySelector('.recipients-content');
-        
-        if (recipientsJson) {
-          try {
-            const recipientsList: Recipient[] = JSON.parse(recipientsJson);
-            const html = generateRecipientsHtml(recipientsList);
-            
-            // Create content div if it doesn't exist
-            if (!contentDiv) {
-              // Remove placeholder elements if present
-              const icon = block.querySelector('.block-icon');
-              const label = block.querySelector('.block-label');
-              icon?.remove();
-              label?.remove();
-              
-              contentDiv = document.createElement('div');
-              contentDiv.className = 'recipients-content';
-              block.appendChild(contentDiv);
-            }
-            
-            contentDiv.innerHTML = html;
-          } catch (e) {
-            console.error('Failed to render recipients:', e);
-          }
-        } else if (!recipientsJson && contentDiv) {
-          // If no recipients data, restore placeholder
-          contentDiv.remove();
-          if (!block.querySelector('.block-icon')) {
-            const icon = document.createElement('span');
-            icon.className = 'block-icon';
-            icon.textContent = '👥';
-            const label = document.createElement('span');
-            label.className = 'block-label';
-            label.textContent = 'Liste des destinataires';
-            block.appendChild(icon);
-            block.appendChild(label);
-          }
-        }
-      });
-    });
-  }
 
   // Update all dynamic content (conditions, quorum, date, recipients) when props change
   // This ensures everything is up-to-date when returning to this screen
@@ -677,13 +320,13 @@
       // Update conditions blocks
       if (conditions !== undefined) {
         updateConditionsBlocks(editor, conditions);
-        updateConditionsDOM();
+        updateConditionsDOM(editorElement);
       }
       
       // Update recipients blocks
       if (recipients !== undefined) {
         updateRecipientsBlocks(editor, recipients);
-        updateRecipientsDOM();
+        updateRecipientsDOM(editorElement, getRecipientsHtmlOptions());
       }
       
       // Update quorumInline nodes with current threshold
@@ -692,7 +335,7 @@
       // Update dateTimeInline nodes with current date/time
       // Use setTimeout to ensure this runs after the editor is fully rendered
       setTimeout(() => {
-        updateDateTimeDOM();
+        updateDateTimeDOM(editorElement);
       }, 0);
     }
   });
@@ -703,7 +346,7 @@
     if (editor) {
       // Update date after editor is ready
       const timeoutId = setTimeout(() => {
-        updateDateTimeDOM();
+        updateDateTimeDOM(editorElement);
       }, 50);
       return () => clearTimeout(timeoutId);
     }

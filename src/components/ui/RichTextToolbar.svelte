@@ -5,42 +5,53 @@
 
   type IconName = 'heading' | 'paragraph' | 'bold' | 'italic' | 'underline' | 'list-bullet' | 'list-numbered' | 'users' | 'lock' | 'calendar' | 'quorum';
 
+  interface BaseLabels {
+    bold: string;
+    italic: string;
+    underline: string;
+    bulletList: string;
+    numberedList: string;
+  }
+
+  interface FullLabels extends BaseLabels {
+    heading: string;
+    paragraph: string;
+    insertRecipients: string;
+    insertConditions: string;
+    insertDateTime: string;
+    insertQuorum: string;
+  }
+
   interface Props {
     editor: Editor | null;
-    labels: {
-      heading: string;
-      paragraph: string;
-      bold: string;
-      italic: string;
-      underline: string;
-      bulletList: string;
-      numberedList: string;
-      insertRecipients: string;
-      insertConditions: string;
-      insertDateTime: string;
-      insertQuorum: string;
-    };
+    labels: BaseLabels | FullLabels;
+    /** Compact mode: smaller buttons, no format/insert groups (for conditions editor) */
+    compact?: boolean;
     /** Counter that increments on editor updates, used to trigger reactivity */
     editorVersion?: number;
     /** Threshold value for quorum insertion */
     threshold?: number;
   }
 
-  let { editor, labels, editorVersion = 0, threshold }: Props = $props();
+  let { editor, labels, compact = false, editorVersion = 0, threshold }: Props = $props();
+
+  // Type guard to check if labels has full properties
+  function isFullLabels(l: BaseLabels | FullLabels): l is FullLabels {
+    return 'heading' in l;
+  }
 
   // Check if blocks already exist (reactive based on editorVersion)
   let recipientsBlockExists = $derived.by(() => {
-    // Reference editorVersion to make this reactive when editor content changes
     void editorVersion;
     return hasRecipientsBlock(editor);
   });
 
   let conditionsBlockExists = $derived.by(() => {
-    // Reference editorVersion to make this reactive when editor content changes
     void editorVersion;
     return hasConditionsBlock(editor);
   });
 
+  // Editor commands
   function toggleHeading(): void {
     editor?.chain().focus().toggleHeading({ level: 2 }).run();
   }
@@ -92,10 +103,15 @@
     disabled?: boolean;
   }
 
-  let formatButtons: ToolbarButton[] = $derived([
-    { icon: 'heading', label: labels.heading, action: toggleHeading },
-    { icon: 'paragraph', label: labels.paragraph, action: setParagraph },
-  ]);
+  // Button groups (some are conditional based on compact mode and labels)
+  let formatButtons: ToolbarButton[] | null = $derived(
+    !compact && isFullLabels(labels)
+      ? [
+          { icon: 'heading', label: labels.heading, action: toggleHeading },
+          { icon: 'paragraph', label: labels.paragraph, action: setParagraph },
+        ]
+      : null
+  );
 
   let styleButtons: ToolbarButton[] = $derived([
     { icon: 'bold', label: labels.bold, action: toggleBold },
@@ -108,28 +124,35 @@
     { icon: 'list-numbered', label: labels.numberedList, action: toggleOrderedList },
   ]);
 
-  let insertButtons: ToolbarButton[] = $derived([
-    { icon: 'users', label: labels.insertRecipients, action: insertRecipientsBlock, disabled: recipientsBlockExists },
-    { icon: 'lock', label: labels.insertConditions, action: insertConditionsBlock, disabled: conditionsBlockExists },
-    { icon: 'calendar', label: labels.insertDateTime, action: insertDateTimeInline },
-    { icon: 'quorum', label: labels.insertQuorum, action: insertQuorumInline },
-  ]);
+  let insertButtons: ToolbarButton[] | null = $derived(
+    !compact && isFullLabels(labels)
+      ? [
+          { icon: 'users', label: labels.insertRecipients, action: insertRecipientsBlock, disabled: recipientsBlockExists },
+          { icon: 'lock', label: labels.insertConditions, action: insertConditionsBlock, disabled: conditionsBlockExists },
+          { icon: 'calendar', label: labels.insertDateTime, action: insertDateTimeInline },
+          { icon: 'quorum', label: labels.insertQuorum, action: insertQuorumInline },
+        ]
+      : null
+  );
 </script>
 
-<div class="toolbar">
-  <div class="toolbar-group">
-    {#each formatButtons as btn}
-      <button 
-        class="toolbar-btn" 
-        onclick={btn.action} 
-        title={btn.label}
-        disabled={!editor}
-      >
-        <Icon name={btn.icon} size={18} />
-      </button>
-    {/each}
-  </div>
-  <div class="toolbar-divider"></div>
+<div class="toolbar" class:compact>
+  {#if formatButtons}
+    <div class="toolbar-group">
+      {#each formatButtons as btn}
+        <button 
+          class="toolbar-btn" 
+          onclick={btn.action} 
+          title={btn.label}
+          disabled={!editor}
+        >
+          <Icon name={btn.icon} size={compact ? 18 : 18} />
+        </button>
+      {/each}
+    </div>
+    <div class="toolbar-divider"></div>
+  {/if}
+  
   <div class="toolbar-group">
     {#each styleButtons as btn}
       <button 
@@ -155,20 +178,23 @@
       </button>
     {/each}
   </div>
-  <div class="toolbar-divider"></div>
-  <div class="toolbar-group insert-group">
-    {#each insertButtons as btn}
-      <button 
-        class="toolbar-btn insert-btn" 
-        class:already-inserted={btn.disabled}
-        onclick={btn.action} 
-        title={btn.label}
-        disabled={!editor || btn.disabled}
-      >
-        <Icon name={btn.icon} size={18} />
-      </button>
-    {/each}
-  </div>
+  
+  {#if insertButtons}
+    <div class="toolbar-divider"></div>
+    <div class="toolbar-group insert-group">
+      {#each insertButtons as btn}
+        <button 
+          class="toolbar-btn insert-btn" 
+          class:already-inserted={btn.disabled}
+          onclick={btn.action} 
+          title={btn.label}
+          disabled={!editor || btn.disabled}
+        >
+          <Icon name={btn.icon} size={18} />
+        </button>
+      {/each}
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -183,6 +209,11 @@
     border-radius: 12px 12px 0 0;
   }
 
+  .toolbar.compact {
+    padding: 0.5rem 0.75rem;
+    border-radius: 10px 10px 0 0;
+  }
+
   .toolbar-group {
     display: flex;
     gap: 0.25rem;
@@ -193,6 +224,11 @@
     height: 24px;
     background: rgba(255, 255, 255, 0.2);
     margin: 0 0.5rem;
+  }
+
+  .toolbar.compact .toolbar-divider {
+    height: 20px;
+    margin: 0 0.25rem;
   }
 
   .toolbar-btn {
@@ -207,6 +243,11 @@
     color: #a0aec0;
     cursor: pointer;
     transition: all 0.2s ease;
+  }
+
+  .toolbar.compact .toolbar-btn {
+    width: 32px;
+    height: 32px;
   }
 
   .toolbar-btn:hover:not(:disabled) {

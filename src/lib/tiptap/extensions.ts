@@ -7,9 +7,9 @@ import StarterKit from '@tiptap/starter-kit';
 import type { JSONContent } from '@tiptap/core';
 
 /**
- * Check if a node type already exists in the document
+ * Check if a node type already exists in the editor document
  */
-function hasNodeType(editor: Editor, nodeType: string): boolean {
+function hasNodeTypeInEditor(editor: Editor, nodeType: string): boolean {
   let found = false;
   editor.state.doc.descendants((node) => {
     if (node.type.name === nodeType) {
@@ -22,11 +22,30 @@ function hasNodeType(editor: Editor, nodeType: string): boolean {
 }
 
 /**
+ * Check if a node type exists in JSONContent
+ */
+export function hasNodeTypeInJSON(json: JSONContent | null, nodeType: string): boolean {
+  if (!json) return false;
+  
+  function searchNode(node: JSONContent): boolean {
+    if (node.type === nodeType) return true;
+    if (node.content) {
+      for (const child of node.content) {
+        if (searchNode(child)) return true;
+      }
+    }
+    return false;
+  }
+  
+  return searchNode(json);
+}
+
+/**
  * Helper to check if recipients block exists in an editor
  */
 export function hasRecipientsBlock(editor: Editor | null): boolean {
   if (!editor) return false;
-  return hasNodeType(editor, 'recipientsBlock');
+  return hasNodeTypeInEditor(editor, 'recipientsBlock');
 }
 
 /**
@@ -34,7 +53,7 @@ export function hasRecipientsBlock(editor: Editor | null): boolean {
  */
 export function hasConditionsBlock(editor: Editor | null): boolean {
   if (!editor) return false;
-  return hasNodeType(editor, 'conditionsBlock');
+  return hasNodeTypeInEditor(editor, 'conditionsBlock');
 }
 
 /**
@@ -112,7 +131,7 @@ export const RecipientsBlock = Node.create({
         () =>
         ({ commands, editor }) => {
           // Prevent inserting if already exists
-          if (hasNodeType(editor, 'recipientsBlock')) {
+          if (hasNodeTypeInEditor(editor, 'recipientsBlock')) {
             return false;
           }
           // Insert block followed by empty paragraph to ensure next content is on new line
@@ -226,7 +245,7 @@ export const ConditionsBlock = Node.create({
         () =>
         ({ commands, editor }) => {
           // Prevent inserting if already exists
-          if (hasNodeType(editor, 'conditionsBlock')) {
+          if (hasNodeTypeInEditor(editor, 'conditionsBlock')) {
             return false;
           }
           // Insert block followed by empty paragraph to ensure next content is on new line

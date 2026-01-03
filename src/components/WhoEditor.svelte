@@ -3,6 +3,15 @@
   import { getTranslations, type Language } from '../lib/i18n';
   import { updateStoredDataDebounced } from '../lib/dataStore';
   import { type ButtonState } from '../lib/buttonState';
+  import {
+    handleDragStart as dndDragStart,
+    handleDragEnd as dndDragEnd,
+    handleDropZoneDragOver as dndDragOver,
+    handleDropZoneDragLeave as dndDragLeave,
+    handleDrop as dndDrop,
+    isDropZoneHidden as dndIsHidden,
+    type DragDropState,
+  } from '../lib/dragAndDrop';
   import EditorLayout from './ui/EditorLayout.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
   import TipSection from './ui/TipSection.svelte';
@@ -88,8 +97,11 @@
   let actionButtonsElement: HTMLDivElement | null = $state(null);
 
   // Drag and drop state
-  let draggedRecipientId: string | null = $state(null);
-  let activeDropZone: number | null = $state(null); // Index where the item would be inserted
+  let dragState: DragDropState = $state({ draggedItemId: null, activeDropZone: null });
+  
+  function setDragState(state: Partial<DragDropState>): void {
+    dragState = { ...dragState, ...state };
+  }
 
   let t = $derived(getTranslations(lang));
 
@@ -217,69 +229,32 @@
     onBack(recipients);
   }
 
-  // Drag and drop handlers
+  // Drag and drop handlers (using imported utilities)
   function handleDragStart(e: DragEvent, recipientId: string): void {
-    if (!e.dataTransfer) return;
-    draggedRecipientId = recipientId;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', recipientId);
+    dndDragStart(e, recipientId, setDragState);
   }
 
   function handleDragEnd(): void {
-    draggedRecipientId = null;
-    activeDropZone = null;
+    dndDragEnd(setDragState);
   }
 
   function handleDropZoneDragOver(e: DragEvent, insertIndex: number): void {
-    e.preventDefault();
-    if (!e.dataTransfer || !draggedRecipientId) return;
-    e.dataTransfer.dropEffect = 'move';
-    activeDropZone = insertIndex;
+    dndDragOver(e, insertIndex, dragState.draggedItemId, setDragState);
   }
 
   function handleDropZoneDragLeave(): void {
-    activeDropZone = null;
+    dndDragLeave(setDragState);
   }
 
   function handleDropZoneDrop(e: DragEvent, insertIndex: number): void {
-    e.preventDefault();
-    if (!draggedRecipientId) {
-      handleDragEnd();
-      return;
+    const result = dndDrop(e, insertIndex, recipients, dragState.draggedItemId, setDragState);
+    if (result) {
+      recipients = result;
     }
-
-    const draggedIndex = recipients.findIndex(r => r.id === draggedRecipientId);
-    if (draggedIndex === -1) {
-      handleDragEnd();
-      return;
-    }
-
-    // Don't move if dropping in same position or adjacent position
-    if (insertIndex === draggedIndex || insertIndex === draggedIndex + 1) {
-      handleDragEnd();
-      return;
-    }
-
-    // Remove the dragged item
-    const newRecipients = [...recipients];
-    const [draggedItem] = newRecipients.splice(draggedIndex, 1);
-    
-    // Adjust insert index if we removed an item before the insert point
-    const adjustedIndex = draggedIndex < insertIndex ? insertIndex - 1 : insertIndex;
-    
-    // Insert at new position
-    newRecipients.splice(adjustedIndex, 0, draggedItem);
-    recipients = newRecipients;
-    
-    handleDragEnd();
   }
 
-  // Check if a drop zone should be hidden (adjacent to dragged item)
   function isDropZoneHidden(zoneIndex: number): boolean {
-    if (!draggedRecipientId) return true;
-    const draggedIndex = recipients.findIndex(r => r.id === draggedRecipientId);
-    // Hide zones immediately before or after the dragged item
-    return zoneIndex === draggedIndex || zoneIndex === draggedIndex + 1;
+    return dndIsHidden(zoneIndex, recipients, dragState.draggedItemId);
   }
 
   // Auto-save to JSON on any change (debounced)
@@ -325,7 +300,7 @@
       <!-- Drop zone before this card -->
       <div 
         class="drop-zone"
-        class:active={activeDropZone === index}
+        class:active={dragState.activeDropZone === index}
         class:hidden={isDropZoneHidden(index)}
         role="presentation"
         ondragover={(e) => handleDropZoneDragOver(e, index)}
@@ -338,7 +313,7 @@
       <div 
         class="recipient-card" 
         class:expanded={expandedRecipientId === recipient.id}
-        class:dragging={draggedRecipientId === recipient.id}
+        class:dragging={dragState.draggedItemId === recipient.id}
         data-recipient-id={recipient.id}
         role="listitem"
         draggable="true"
@@ -456,7 +431,7 @@
     <!-- Drop zone at the end of the list -->
     <div 
       class="drop-zone"
-      class:active={activeDropZone === recipients.length}
+      class:active={dragState.activeDropZone === recipients.length}
       class:hidden={isDropZoneHidden(recipients.length)}
       role="presentation"
       ondragover={(e) => handleDropZoneDragOver(e, recipients.length)}

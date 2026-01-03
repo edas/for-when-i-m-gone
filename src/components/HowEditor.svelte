@@ -5,12 +5,13 @@
   import { getTranslations, type Language } from '../lib/i18n';
   import { updateStoredDataDebounced } from '../lib/dataStore';
   import { type ButtonState } from '../lib/buttonState';
+  import { parseHtmlToJson } from '../lib/htmlParser';
   import EditorLayout from './ui/EditorLayout.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import TipSection from './ui/TipSection.svelte';
-  import ConditionsToolbar from './ui/ConditionsToolbar.svelte';
+  import RichTextToolbar from './ui/RichTextToolbar.svelte';
   import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
   import Icon from './ui/Icons.svelte';
 
@@ -38,92 +39,6 @@
     if (count <= 3) return 2;
     if (count <= 6) return 3;
     return 4;
-  }
-
-  // Parse HTML example content to TipTap JSON
-  function parseHtmlToJson(html: string): JSONContent {
-    // Create a temporary div to parse the HTML
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    
-    const content: JSONContent[] = [];
-    
-    temp.childNodes.forEach((node) => {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const el = node as Element;
-        if (el.tagName === 'P') {
-          content.push({
-            type: 'paragraph',
-            content: parseInlineContent(el),
-          });
-        } else if (el.tagName === 'UL') {
-          content.push({
-            type: 'bulletList',
-            content: parseListItems(el),
-          });
-        } else if (el.tagName === 'OL') {
-          content.push({
-            type: 'orderedList',
-            content: parseListItems(el),
-          });
-        }
-      }
-    });
-    
-    return { type: 'doc', content };
-  }
-
-  function parseInlineContent(el: Element): JSONContent[] {
-    const result: JSONContent[] = [];
-    
-    el.childNodes.forEach((node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent;
-        if (text) {
-          result.push({ type: 'text', text });
-        }
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const childEl = node as Element;
-        const marks: { type: string }[] = [];
-        
-        if (childEl.tagName === 'STRONG' || childEl.tagName === 'B') {
-          marks.push({ type: 'bold' });
-        }
-        if (childEl.tagName === 'EM' || childEl.tagName === 'I') {
-          marks.push({ type: 'italic' });
-        }
-        if (childEl.tagName === 'U') {
-          marks.push({ type: 'underline' });
-        }
-        
-        const text = childEl.textContent;
-        if (text) {
-          if (marks.length > 0) {
-            result.push({ type: 'text', text, marks });
-          } else {
-            result.push({ type: 'text', text });
-          }
-        }
-      }
-    });
-    
-    return result;
-  }
-
-  function parseListItems(el: Element): JSONContent[] {
-    const items: JSONContent[] = [];
-    
-    el.querySelectorAll(':scope > li').forEach((li) => {
-      items.push({
-        type: 'listItem',
-        content: [{
-          type: 'paragraph',
-          content: parseInlineContent(li),
-        }],
-      });
-    });
-    
-    return items;
   }
 
   // Get default example content
@@ -431,7 +346,7 @@
       </label>
       
       <div class="editor-wrapper">
-        <ConditionsToolbar {editor} labels={t.howEditor.toolbar} />
+        <RichTextToolbar {editor} labels={t.howEditor.toolbar} compact />
         <div
           class="conditions-editor"
           bind:this={editorElement}

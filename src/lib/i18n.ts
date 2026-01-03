@@ -8,6 +8,11 @@ import secretExampleFr from './locales/examples/secret-example.fr.txt?raw';
 import conditionsExampleEn from './locales/examples/conditions-example.en.html?raw';
 import conditionsExampleFr from './locales/examples/conditions-example.fr.html?raw';
 
+import introExampleEn from './locales/examples/intro-example.en.json';
+import introExampleFr from './locales/examples/intro-example.fr.json';
+
+import type { JSONContent } from '@tiptap/core';
+
 export type Language = 'fr' | 'en';
 
 export interface Translations {
@@ -175,6 +180,7 @@ export interface Translations {
       tip: string;
       generateExample: string;
       exampleContent: string;
+      exampleContentJson: JSONContent;
     };
     buttons: {
       continueWithoutConfirm: string;
@@ -253,19 +259,19 @@ export interface Translations {
 function buildTranslations(
   yamlContent: Record<string, unknown>,
   secretExample: string,
-
-  conditionsExample: string
+  conditionsExample: string,
+  introExample: JSONContent
 ): Translations {
   const result = yamlContent as unknown as Translations;
   result.secretEditor.sidePanel.exampleContent = secretExample;
-
   result.howEditor.sidePanel.exampleContent = conditionsExample;
+  result.introEditor.sidePanel.exampleContentJson = introExample;
   return result;
 }
 
 const translations: Record<Language, Translations> = {
-  fr: buildTranslations(fr as Record<string, unknown>, secretExampleFr, conditionsExampleFr),
-  en: buildTranslations(en as Record<string, unknown>, secretExampleEn, conditionsExampleEn),
+  fr: buildTranslations(fr as Record<string, unknown>, secretExampleFr, conditionsExampleFr, introExampleFr as JSONContent),
+  en: buildTranslations(en as Record<string, unknown>, secretExampleEn, conditionsExampleEn, introExampleEn as JSONContent),
 };
 
 export function getTranslations(lang: Language): Translations {

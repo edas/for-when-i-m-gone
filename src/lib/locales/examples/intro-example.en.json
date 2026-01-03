@@ -1,0 +1,44 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "On " },
+        { "type": "dateTimeInline" }
+      ]
+    },
+    { "type": "paragraph" },
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "I have left my information for all of you. You will be able to access it together, provided at least " },
+        { "type": "quorumInline" },
+        { "type": "text", "text": " of you are present. Please use it wisely." }
+      ]
+    },
+    { "type": "paragraph" },
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "I trust you to only use it under the following conditions:" }
+      ]
+    },
+    { "type": "conditionsBlock" },
+    { "type": "paragraph" },
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "To reach each other, here are the people who hold a similar file:" }
+      ]
+    },
+    { "type": "recipientsBlock" },
+    { "type": "paragraph" },
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "marks": [{ "type": "italic" }], "text": "{xxxx First Name Last Name xxxx}" }
+      ]
+    }
+  ]
+}
