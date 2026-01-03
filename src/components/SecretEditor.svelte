@@ -2,6 +2,7 @@
   import { untrack } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
+  import { updateStoredDataDebounced } from '../lib/dataStore';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
@@ -101,6 +102,15 @@
       secretText = example;
     }
   }
+
+  // Auto-save to JSON on any change (debounced)
+  $effect(() => {
+    const state = getCurrentCheckboxState();
+    updateStoredDataDebounced({
+      secretContent: secretText,
+      secretCheckboxState: state,
+    });
+  });
 </script>
 
 <EditorLayout

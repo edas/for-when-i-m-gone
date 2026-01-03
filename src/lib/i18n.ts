@@ -97,6 +97,26 @@ export interface Translations {
       continue: string;
     };
   };
+  thresholdSelector: {
+    title: string;
+    subtitle: string;
+    sidePanel: {
+      title: string;
+      collapse: string;
+      expand: string;
+      intro: string;
+      warningTooSmall: {
+        title: string;
+        text: string;
+      };
+      warningTooLarge: {
+        title: string;
+        text: string;
+      };
+    };
+    errorOne: string;
+    continueButton: string;
+  };
 }
 
 // Build translations by merging YAML content with example files

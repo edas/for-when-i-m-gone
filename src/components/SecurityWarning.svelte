@@ -1,6 +1,7 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
+  import { recordSecurityConfirmation } from '../lib/dataStore';
   import LanguageSelector from './ui/LanguageSelector.svelte';
   import Icon from './ui/Icons.svelte';
 
@@ -18,7 +19,13 @@
   let t = $derived(getTranslations(lang));
 
   function handleCheckboxChange(event: Event): void {
-    isChecked = (event.target as HTMLInputElement).checked;
+    const checked = (event.target as HTMLInputElement).checked;
+    isChecked = checked;
+    
+    // Record timestamp each time the checkbox is checked
+    if (checked) {
+      recordSecurityConfirmation();
+    }
   }
 
   function handleContinue(): void {

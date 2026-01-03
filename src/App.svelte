@@ -2,13 +2,12 @@
   import SecurityWarning from './components/SecurityWarning.svelte';
   import SecretEditor, { type SecretCheckboxState } from './components/SecretEditor.svelte';
   import IntroMessageEditor, { type IntroCheckboxState } from './components/IntroMessageEditor.svelte';
+  import ThresholdSelector from './components/ThresholdSelector.svelte';
   import { detectLanguage, type Language } from './lib/i18n';
+  import { getStoredData, updateStoredData } from './lib/dataStore';
 
-  let currentLang: Language = $state(detectLanguage());
-  let securityConfirmed: boolean = $state(false);
-  let securityChecked: boolean = $state(false);
-  let secretContent: string = $state('');
-  let secretCheckboxState: SecretCheckboxState = $state({
+  // Default checkbox states
+  const defaultSecretCheckboxState: SecretCheckboxState = {
     emails: false,
     phoneCodes: false,
     cloudAccounts: false,
@@ -18,16 +17,35 @@
     passwordManager: false,
     backups: false,
     crypto: false,
-  });
-  let secretSubmitted: boolean = $state(false);
-  let introMessage: string = $state('');
-  let introCheckboxState: IntroCheckboxState = $state({
+  };
+
+  const defaultIntroCheckboxState: IntroCheckboxState = {
     secretHolders: false,
     openCases: false,
     noOpenCases: false,
     directives: false,
+  };
+
+  // Load initial data from stored JSON
+  const storedData = getStoredData();
+
+  let currentLang: Language = $state((storedData.language as Language) ?? detectLanguage());
+  let securityConfirmed: boolean = $state(false);
+  let securityChecked: boolean = $state(!!storedData.securityConfirmedAt);
+  let secretContent: string = $state(storedData.secretContent ?? '');
+  let secretCheckboxState: SecretCheckboxState = $state({
+    ...defaultSecretCheckboxState,
+    ...storedData.secretCheckboxState,
+  });
+  let secretSubmitted: boolean = $state(false);
+  let introMessage: string = $state(storedData.introMessage ?? '');
+  let introCheckboxState: IntroCheckboxState = $state({
+    ...defaultIntroCheckboxState,
+    ...storedData.introCheckboxState,
   });
   let introSubmitted: boolean = $state(false);
+  let threshold: number = $state(storedData.threshold ?? 3);
+  let thresholdSubmitted: boolean = $state(false);
 
   function handleSecurityContinue(checked: boolean): void {
     securityChecked = checked;
@@ -58,8 +76,19 @@
     secretSubmitted = false;
   }
 
+  function handleThresholdContinue(value: number): void {
+    threshold = value;
+    thresholdSubmitted = true;
+  }
+
+  function handleThresholdBack(value: number): void {
+    threshold = value;
+    introSubmitted = false;
+  }
+
   function handleLanguageChange(lang: Language): void {
     currentLang = lang;
+    updateStoredData({ language: lang });
   }
 </script>
 
@@ -85,6 +114,13 @@
     initialCheckboxState={introCheckboxState}
     onContinue={handleIntroContinue}
     onBack={handleIntroBack}
+  />
+{:else if !thresholdSubmitted}
+  <ThresholdSelector
+    lang={currentLang}
+    initialValue={threshold}
+    onContinue={handleThresholdContinue}
+    onBack={handleThresholdBack}
   />
 {:else}
   <main>

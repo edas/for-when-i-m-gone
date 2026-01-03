@@ -3,7 +3,7 @@
   import SidePanel from './SidePanel.svelte';
 
   interface Props {
-    title: string;
+    title?: string;
     subtitle?: string;
     sidePanelOpen: boolean;
     collapseLabel: string;
@@ -16,7 +16,7 @@
   }
 
   let { 
-    title, 
+    title,
     subtitle,
     sidePanelOpen, 
     collapseLabel, 
@@ -32,7 +32,9 @@
 <div class="editor-container">
   <main class="main-content" class:panel-closed={!sidePanelOpen}>
     <div class="editor-wrapper">
-      <h1 class="editor-title">{title}</h1>
+      {#if title}
+        <h1 class="editor-title">{title}</h1>
+      {/if}
       {#if subtitle}
         <p class="editor-subtitle">{subtitle}</p>
       {/if}

@@ -2,6 +2,7 @@
   import { untrack } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
+  import { updateStoredDataDebounced } from '../lib/dataStore';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
@@ -47,10 +48,10 @@
   let t = $derived(getTranslations(lang));
 
   let hasContent = $derived(messageHtml.trim().length > 0);
-  let allChecked = $derived(checkSecretHolders && checkOpenCases && checkNoOpenCases && checkDirectives);
+  let allEssentialsChecked = $derived(checkSecretHolders && checkOpenCases && checkNoOpenCases);
   let anyChecked = $derived(checkSecretHolders || checkOpenCases || checkNoOpenCases || checkDirectives);
 
-  let buttonState = $derived(computeButtonState(hasContent, anyChecked, allChecked));
+  let buttonState = $derived(computeButtonState(hasContent, anyChecked, allEssentialsChecked));
   let buttonText = $derived(getButtonText(buttonState, t.introEditor.buttons));
 
   function getCurrentCheckboxState(): IntroCheckboxState {
@@ -98,6 +99,15 @@
       editorElement.focus();
     }
   }
+
+  // Auto-save to JSON on any change (debounced)
+  $effect(() => {
+    const state = getCurrentCheckboxState();
+    updateStoredDataDebounced({
+      introMessage: messageHtml,
+      introCheckboxState: state,
+    });
+  });
 </script>
 
 <EditorLayout

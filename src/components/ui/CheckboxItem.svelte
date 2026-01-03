@@ -69,11 +69,6 @@
     border-color: #10b981;
   }
 
-  .checkbox-item.essential input:checked ~ .custom-checkbox {
-    background: #8b5cf6;
-    border-color: #8b5cf6;
-  }
-
   .custom-checkbox::after {
     content: '';
     position: absolute;
