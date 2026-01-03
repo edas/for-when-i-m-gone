@@ -44,6 +44,7 @@ export interface Translations {
     fields: {
       name: string;
       contacts: string;
+      notListedPublicly: string;
     };
     placeholders: {
       name: string;

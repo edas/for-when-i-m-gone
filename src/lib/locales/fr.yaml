@@ -22,6 +22,7 @@ whoEditor:
   fields:
     name: Qui est-ce ?
     contacts: Coordonnées
+    notListedPublicly: Ne pas lister publiquement
   placeholders:
     name: Cousin Paul Durant
     contactValue: Valeur...

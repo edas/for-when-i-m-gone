@@ -22,6 +22,7 @@ whoEditor:
   fields:
     name: Who is this?
     contacts: Contact information
+    notListedPublicly: Do not list publicly
   placeholders:
     name: Cousin Paul Smith
     contactValue: Value...

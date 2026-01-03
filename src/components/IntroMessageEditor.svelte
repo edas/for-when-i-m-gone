@@ -560,7 +560,10 @@
     // French typography: non-breaking space before colon; English: no space
     const colonSeparator = lang === 'fr' ? '\u00A0: ' : ': ';
     
-    for (const recipient of recipientsList) {
+    // Filter out recipients that are marked as private
+    const publicRecipients = recipientsList.filter(r => !r.isPrivate);
+    
+    for (const recipient of publicRecipients) {
       // Build contacts list
       const contactParts: string[] = [];
       for (const contact of recipient.contacts) {

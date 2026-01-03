@@ -38,6 +38,7 @@
     id: string;
     name: string;
     contacts: ContactInfo[];
+    isPrivate?: boolean; // If true, this recipient should not be listed publicly in the intro message
   }
 
   export function createEmptyContact(): ContactInfo {
@@ -58,6 +59,7 @@
         { ...createEmptyContact(), type: 'email' },
         { ...createEmptyContact(), type: 'address' },
       ],
+      isPrivate: false,
     };
   }
 
@@ -168,7 +170,7 @@
     expandedRecipientId = expandedRecipientId === id ? null : id;
   }
 
-  function updateRecipient(id: string, field: keyof Omit<Recipient, 'contacts'>, value: string): void {
+  function updateRecipient(id: string, field: keyof Omit<Recipient, 'contacts'>, value: string | boolean): void {
     recipients = recipients.map(r => 
       r.id === id ? { ...r, [field]: value } : r
     );
@@ -389,6 +391,14 @@
                 value={recipient.name}
                 oninput={(e) => updateRecipient(recipient.id, 'name', e.currentTarget.value)}
                 placeholder={t.whoEditor.placeholders.name}
+              />
+            </div>
+            
+            <div class="form-field private-field">
+              <CheckboxItem
+                checked={recipient.isPrivate ?? false}
+                label={t.whoEditor.fields.notListedPublicly}
+                onchange={(checked) => updateRecipient(recipient.id, 'isPrivate', checked)}
               />
             </div>
             
