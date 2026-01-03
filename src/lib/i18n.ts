@@ -145,11 +145,7 @@ export interface Translations {
           title: string;
           description: string;
         };
-        openCases: {
-          title: string;
-          description: string;
-        };
-        noOpenCases: {
+        openingConditions: {
           title: string;
           description: string;
         };

@@ -13,15 +13,13 @@
 
   export interface IntroCheckboxState {
     secretHolders: boolean;
-    openCases: boolean;
-    noOpenCases: boolean;
+    openingConditions: boolean;
     directives: boolean;
   }
 
   export const defaultIntroCheckboxState: IntroCheckboxState = {
     secretHolders: false,
-    openCases: false,
-    noOpenCases: false,
+    openingConditions: false,
     directives: false,
   };
 
@@ -41,15 +39,14 @@
 
   // Checkbox states for verification
   let checkSecretHolders: boolean = $state(untrack(() => initialCheckboxState?.secretHolders ?? false));
-  let checkOpenCases: boolean = $state(untrack(() => initialCheckboxState?.openCases ?? false));
-  let checkNoOpenCases: boolean = $state(untrack(() => initialCheckboxState?.noOpenCases ?? false));
+  let checkOpeningConditions: boolean = $state(untrack(() => initialCheckboxState?.openingConditions ?? false));
   let checkDirectives: boolean = $state(untrack(() => initialCheckboxState?.directives ?? false));
 
   let t = $derived(getTranslations(lang));
 
   let hasContent = $derived(messageHtml.trim().length > 0);
-  let allEssentialsChecked = $derived(checkSecretHolders && checkOpenCases && checkNoOpenCases);
-  let anyChecked = $derived(checkSecretHolders || checkOpenCases || checkNoOpenCases || checkDirectives);
+  let allEssentialsChecked = $derived(checkSecretHolders && checkOpeningConditions);
+  let anyChecked = $derived(checkSecretHolders || checkOpeningConditions || checkDirectives);
 
   let buttonState = $derived(computeButtonState(hasContent, anyChecked, allEssentialsChecked));
   let buttonText = $derived(getButtonText(buttonState, t.introEditor.buttons));
@@ -57,8 +54,7 @@
   function getCurrentCheckboxState(): IntroCheckboxState {
     return {
       secretHolders: checkSecretHolders,
-      openCases: checkOpenCases,
-      noOpenCases: checkNoOpenCases,
+      openingConditions: checkOpeningConditions,
       directives: checkDirectives,
     };
   }
@@ -154,15 +150,9 @@
         essential
       />
       <CheckboxItem
-        bind:checked={checkOpenCases}
-        label={t.introEditor.sidePanel.checkboxes.openCases.title}
-        description={t.introEditor.sidePanel.checkboxes.openCases.description}
-        essential
-      />
-      <CheckboxItem
-        bind:checked={checkNoOpenCases}
-        label={t.introEditor.sidePanel.checkboxes.noOpenCases.title}
-        description={t.introEditor.sidePanel.checkboxes.noOpenCases.description}
+        bind:checked={checkOpeningConditions}
+        label={t.introEditor.sidePanel.checkboxes.openingConditions.title}
+        description={t.introEditor.sidePanel.checkboxes.openingConditions.description}
         essential
       />
     </EssentialSection>

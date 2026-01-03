@@ -5,7 +5,7 @@ steps:
   secret: Quoi
   who: Qui
   how: Comment
-  intro: Introduction
+  intro: Intro
   generate: Générer
 
 whoEditor:
@@ -129,18 +129,15 @@ introEditor:
     collapse: Replier
     expand: Guide de rédaction
     essentialNote: >-
-      Les trois premiers éléments sont essentiels pour que vos proches 
+      Ces éléments sont essentiels pour que vos proches 
       sachent qui contacter et dans quelles circonstances.
     checkboxes:
       secretHolders:
         title: Liste des détenteurs du secret
         description: Noms et coordonnées complètes (téléphone, email, adresse postale, réseaux sociaux) des personnes qui détiennent une partie du secret
-      openCases:
-        title: Cas d'ouverture
-        description: Les situations dans lesquelles le secret doit être ouvert (décès, incapacité, etc.)
-      noOpenCases:
-        title: Cas de non-ouverture
-        description: Les situations où le secret ne doit PAS être ouvert (simple voyage, hospitalisation temporaire, etc.)
+      openingConditions:
+        title: Conditions d'ouverture
+        description: Les situations dans lesquelles le secret doit être ouvert (décès, incapacité, etc.) et celles où il ne doit PAS l'être (simple voyage, hospitalisation temporaire, etc.)
       directives:
         title: Directives d'utilisation
         description: Instructions sur ce qu'il faut faire avec les informations contenues dans le secret

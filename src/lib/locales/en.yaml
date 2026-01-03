@@ -5,7 +5,7 @@ steps:
   secret: What
   who: Who
   how: How
-  intro: Introduction
+  intro: Intro
   generate: Generate
 
 whoEditor:
@@ -134,12 +134,9 @@ introEditor:
       secretHolders:
         title: List of secret holders
         description: Names and full contact details (phone, email, postal address, social media) of people who hold a part of the secret
-      openCases:
-        title: Opening cases
-        description: Situations in which the secret should be opened (death, incapacity, etc.)
-      noOpenCases:
-        title: Non-opening cases
-        description: Situations where the secret should NOT be opened (simple travel, temporary hospitalization, etc.)
+      openingConditions:
+        title: Opening conditions
+        description: Situations in which the secret should be opened (death, incapacity, etc.) and those where it should NOT (simple travel, temporary hospitalization, etc.)
       directives:
         title: Usage directives
         description: Instructions on what to do with the information contained in the secret

@@ -23,8 +23,7 @@
 
   const defaultIntroCheckboxState: IntroCheckboxState = {
     secretHolders: false,
-    openCases: false,
-    noOpenCases: false,
+    openingConditions: false,
     directives: false,
   };
 
