@@ -6,6 +6,8 @@ import secretExampleEn from './locales/examples/secret-example.en.txt?raw';
 import secretExampleFr from './locales/examples/secret-example.fr.txt?raw';
 import introExampleEn from './locales/examples/intro-example.en.html?raw';
 import introExampleFr from './locales/examples/intro-example.fr.html?raw';
+import conditionsExampleEn from './locales/examples/conditions-example.en.html?raw';
+import conditionsExampleFr from './locales/examples/conditions-example.fr.html?raw';
 
 export type Language = 'fr' | 'en';
 
@@ -135,6 +137,8 @@ export interface Translations {
       numberedList: string;
       insertRecipients: string;
       insertConditions: string;
+      insertDateTime: string;
+      insertQuorum: string;
     };
     sidePanel: {
       title: string;
@@ -143,11 +147,23 @@ export interface Translations {
       expand: string;
       essentialNote: string;
       checkboxes: {
+        authorIdentity: {
+          title: string;
+          description: string;
+        };
         secretHolders: {
           title: string;
           description: string;
         };
         openingConditions: {
+          title: string;
+          description: string;
+        };
+        dated: {
+          title: string;
+          description: string;
+        };
+        quorum: {
           title: string;
           description: string;
         };
@@ -178,6 +194,13 @@ export interface Translations {
       title: string;
       placeholder: string;
     };
+    toolbar: {
+      bold: string;
+      italic: string;
+      underline: string;
+      bulletList: string;
+      numberedList: string;
+    };
     sidePanel: {
       title: string;
       collapse: string;
@@ -196,6 +219,8 @@ export interface Translations {
         hasNoOpenConditions: string;
       };
       tip: string;
+      generateExample: string;
+      exampleContent: string;
     };
     buttons: {
       continueWithoutEssentials: string;
@@ -228,17 +253,19 @@ export interface Translations {
 function buildTranslations(
   yamlContent: Record<string, unknown>,
   secretExample: string,
-  introExample: string
+  introExample: string,
+  conditionsExample: string
 ): Translations {
   const result = yamlContent as unknown as Translations;
   result.secretEditor.sidePanel.exampleContent = secretExample;
   result.introEditor.sidePanel.exampleContent = introExample;
+  result.howEditor.sidePanel.exampleContent = conditionsExample;
   return result;
 }
 
 const translations: Record<Language, Translations> = {
-  fr: buildTranslations(fr as Record<string, unknown>, secretExampleFr, introExampleFr),
-  en: buildTranslations(en as Record<string, unknown>, secretExampleEn, introExampleEn),
+  fr: buildTranslations(fr as Record<string, unknown>, secretExampleFr, introExampleFr, conditionsExampleFr),
+  en: buildTranslations(en as Record<string, unknown>, secretExampleEn, introExampleEn, conditionsExampleEn),
 };
 
 export function getTranslations(lang: Language): Translations {

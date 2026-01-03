@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
+  import { Editor, type JSONContent } from '@tiptap/core';
+  import StarterKit from '@tiptap/starter-kit';
   import { getTranslations, type Language } from '../lib/i18n';
   import { updateStoredDataDebounced } from '../lib/dataStore';
   import { type ButtonState } from '../lib/buttonState';
@@ -8,12 +10,15 @@
   import EssentialSection from './ui/EssentialSection.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import TipSection from './ui/TipSection.svelte';
+  import ConditionsToolbar from './ui/ConditionsToolbar.svelte';
+  import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
   import Icon from './ui/Icons.svelte';
 
   export interface HowData {
     threshold: number;
-    conditions: string;
+    conditions: JSONContent | null;
     hasNoOpenConditions: boolean;
+    isConditionsUnmodified?: boolean; // Track if conditions are still default/unmodified
   }
 
   interface Props {
@@ -26,11 +31,104 @@
 
   let { lang, recipientCount, initialData, onContinue, onBack }: Props = $props();
 
+  let t = $derived(getTranslations(lang));
+
   // Calculate default threshold based on recipient count
   function getDefaultThreshold(count: number): number {
     if (count <= 3) return 2;
     if (count <= 6) return 3;
     return 4;
+  }
+
+  // Parse HTML example content to TipTap JSON
+  function parseHtmlToJson(html: string): JSONContent {
+    // Create a temporary div to parse the HTML
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    
+    const content: JSONContent[] = [];
+    
+    temp.childNodes.forEach((node) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as Element;
+        if (el.tagName === 'P') {
+          content.push({
+            type: 'paragraph',
+            content: parseInlineContent(el),
+          });
+        } else if (el.tagName === 'UL') {
+          content.push({
+            type: 'bulletList',
+            content: parseListItems(el),
+          });
+        } else if (el.tagName === 'OL') {
+          content.push({
+            type: 'orderedList',
+            content: parseListItems(el),
+          });
+        }
+      }
+    });
+    
+    return { type: 'doc', content };
+  }
+
+  function parseInlineContent(el: Element): JSONContent[] {
+    const result: JSONContent[] = [];
+    
+    el.childNodes.forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent;
+        if (text) {
+          result.push({ type: 'text', text });
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const childEl = node as Element;
+        const marks: { type: string }[] = [];
+        
+        if (childEl.tagName === 'STRONG' || childEl.tagName === 'B') {
+          marks.push({ type: 'bold' });
+        }
+        if (childEl.tagName === 'EM' || childEl.tagName === 'I') {
+          marks.push({ type: 'italic' });
+        }
+        if (childEl.tagName === 'U') {
+          marks.push({ type: 'underline' });
+        }
+        
+        const text = childEl.textContent;
+        if (text) {
+          if (marks.length > 0) {
+            result.push({ type: 'text', text, marks });
+          } else {
+            result.push({ type: 'text', text });
+          }
+        }
+      }
+    });
+    
+    return result;
+  }
+
+  function parseListItems(el: Element): JSONContent[] {
+    const items: JSONContent[] = [];
+    
+    el.querySelectorAll(':scope > li').forEach((li) => {
+      items.push({
+        type: 'listItem',
+        content: [{
+          type: 'paragraph',
+          content: parseInlineContent(li),
+        }],
+      });
+    });
+    
+    return items;
+  }
+
+  // Get default example content
+  function getDefaultConditions(): JSONContent {
+    return parseHtmlToJson(t.howEditor.sidePanel.exampleContent);
   }
 
   // Use string to capture all user input including invalid values
@@ -39,11 +137,30 @@
       ? String(initialData.threshold) 
       : String(getDefaultThreshold(recipientCount))
   ));
-  let conditions: string = $state(untrack(() => initialData?.conditions ?? ''));
-  let hasNoOpenConditions: boolean = $state(untrack(() => initialData?.hasNoOpenConditions ?? false));
+  let conditionsJson: JSONContent | null = $state(untrack(() => 
+    initialData?.conditions ?? getDefaultConditions()
+  ));
+  
+  // Calculate initial "unmodified" state once - true if no saved conditions (using default content)
+  const initialIsUnmodified = initialData?.isConditionsUnmodified ?? !initialData?.conditions;
+  
+  // Track if conditions are still in their default/unmodified state
+  let isConditionsUnmodified: boolean = $state(initialIsUnmodified);
+  
+  // If content is unmodified (default), checkbox MUST be checked
+  // Otherwise, use saved value (for user-modified content)
+  let hasNoOpenConditions: boolean = $state(
+    initialIsUnmodified ? true : (initialData?.hasNoOpenConditions ?? false)
+  );
+  
+  // Flag to ignore programmatic updates to the editor
+  let programmaticUpdateInProgress = false;
+  
   let sidePanelOpen: boolean = $state(true);
 
-  let t = $derived(getTranslations(lang));
+  // TipTap editor state
+  let editorElement: HTMLDivElement | null = $state(null);
+  let editor: Editor | null = $state(null);
 
   // Parse and validate the threshold input
   let parsedValue = $derived(() => {
@@ -62,8 +179,25 @@
   let isValidThreshold = $derived(threshold !== null && threshold >= 2);
   let isTooHigh = $derived(threshold !== null && threshold > recipientCount);
   let isLowerThanRecipientCount = $derived(threshold !== null && threshold < recipientCount);
-  let hasConditions = $derived(conditions.trim().length > 0);
-  let allEssentialsChecked = $derived(isValidThreshold && isLowerThanRecipientCount && hasConditions);
+
+  // Check if editor has meaningful content
+  let hasConditions = $derived.by(() => {
+    if (!conditionsJson) return false;
+    const content = conditionsJson.content;
+    if (!content || content.length === 0) return false;
+    // Check if it's just an empty paragraph
+    if (content.length === 1 && content[0].type === 'paragraph' && !content[0].content) {
+      return false;
+    }
+    return true;
+  });
+
+  // When recipientCount <= 2, ignore isLowerThanRecipientCount (impossible to satisfy with minimum threshold of 2)
+  let allEssentialsChecked = $derived(
+    isValidThreshold && 
+    (recipientCount <= 2 || isLowerThanRecipientCount) && 
+    hasConditions
+  );
 
   // Non-essential conditions (for display in side panel)
   let isAtLeast3 = $derived(threshold !== null && threshold >= 3);
@@ -102,8 +236,9 @@
   function getCurrentData(): HowData {
     return {
       threshold: threshold ?? getDefaultThreshold(recipientCount),
-      conditions,
+      conditions: conditionsJson,
       hasNoOpenConditions,
+      isConditionsUnmodified,
     };
   }
 
@@ -136,11 +271,92 @@
     inputValue = target.value;
   }
 
+  function generateExample(): void {
+    if (!editor) return;
+
+    const exampleContent = getDefaultConditions();
+
+    // Mark as programmatic update to avoid triggering the "first modification" logic
+    programmaticUpdateInProgress = true;
+
+    // If there's existing content, append the example; otherwise replace
+    if (hasConditions) {
+      // Insert at end: add separator paragraphs then example content
+      editor.commands.setTextSelection(editor.state.doc.content.size);
+      editor.commands.insertContent([
+        { type: 'paragraph' },
+        { type: 'paragraph' },
+        ...exampleContent.content!,
+      ]);
+    } else {
+      // Replacing with default content - reset the "unmodified" state
+      editor.commands.setContent(exampleContent);
+      isConditionsUnmodified = true;
+      hasNoOpenConditions = true;
+    }
+    
+    conditionsJson = editor.getJSON();
+    
+    // Reset the flag after all synchronous updates have been processed
+    requestAnimationFrame(() => {
+      programmaticUpdateInProgress = false;
+    });
+  }
+
   // Auto-uncheck hasNoOpenConditions when conditions become empty
   $effect(() => {
     if (!hasConditions && hasNoOpenConditions) {
       hasNoOpenConditions = false;
     }
+  });
+
+  // Initialize TipTap editor when element is mounted
+  $effect(() => {
+    if (editorElement && !editor) {
+      const initialContent = conditionsJson ?? getDefaultConditions();
+      
+      const newEditor = new Editor({
+        element: editorElement,
+        extensions: [
+          StarterKit.configure({
+            // Disable features we don't need
+            blockquote: false,
+            code: false,
+            codeBlock: false,
+            hardBreak: false,
+            horizontalRule: false,
+            strike: false,
+            heading: false, // No headings for conditions
+          }),
+        ],
+        content: initialContent,
+        editorProps: {
+          attributes: {
+            class: 'conditions-editor-content',
+            'data-placeholder': t.howEditor.conditions.placeholder,
+          },
+        },
+        onUpdate: ({ editor: e }) => {
+          conditionsJson = e.getJSON();
+          
+          // Skip programmatic updates (from generateExample)
+          if (programmaticUpdateInProgress) return;
+          
+          // On first user modification of default content, uncheck the checkbox
+          if (isConditionsUnmodified) {
+            isConditionsUnmodified = false;
+            hasNoOpenConditions = false;
+          }
+        },
+      });
+      
+      editor = newEditor;
+    }
+  });
+
+  // Cleanup editor on destroy
+  onDestroy(() => {
+    editor?.destroy();
   });
 
   // Auto-save to JSON on any change (debounced)
@@ -209,17 +425,17 @@
 
     <!-- Conditions Section -->
     <section class="conditions-section">
-      <div class="condition-group">
-        <label for="conditions" class="condition-label">
-          <Icon name="info" size={20} />
-          {t.howEditor.conditions.title}
-        </label>
-        <textarea
-          id="conditions"
-          class="condition-textarea"
-          placeholder={t.howEditor.conditions.placeholder}
-          bind:value={conditions}
-        ></textarea>
+      <label class="condition-label">
+        <Icon name="info" size={20} />
+        {t.howEditor.conditions.title}
+      </label>
+      
+      <div class="editor-wrapper">
+        <ConditionsToolbar {editor} labels={t.howEditor.toolbar} />
+        <div
+          class="conditions-editor"
+          bind:this={editorElement}
+        ></div>
       </div>
     </section>
   </div>
@@ -278,6 +494,13 @@
     </div>
 
     <TipSection text={t.howEditor.sidePanel.tip} />
+
+    <div class="section-divider"></div>
+
+    <GenerateExampleButton
+      label={t.howEditor.sidePanel.generateExample}
+      onclick={generateExample}
+    />
   {/snippet}
 </EditorLayout>
 
@@ -286,7 +509,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
+    gap: 2rem;
     padding: 2rem 1.5rem;
     overflow-y: auto;
   }
@@ -416,15 +639,7 @@
   /* Conditions styles */
   .conditions-section {
     flex: 1;
-    gap: 1.5rem;
-    min-height: 0;
-  }
-
-  .condition-group {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
     min-height: 0;
   }
 
@@ -442,29 +657,59 @@
     color: #60a5fa;
   }
 
-  .condition-textarea {
+  .editor-wrapper {
     flex: 1;
-    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 180px;
+  }
+
+  .conditions-editor {
+    flex: 1;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
-    color: #e2e8f0;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    resize: none;
-    min-height: 120px;
+    border-radius: 0 0 10px 10px;
+    overflow-y: auto;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    font-family: inherit;
   }
 
-  .condition-textarea::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-  }
-
-  .condition-textarea:focus {
-    outline: none;
+  .conditions-editor:focus-within {
     border-color: rgba(96, 165, 250, 0.5);
     box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+  }
+
+  /* TipTap editor content styles */
+  .conditions-editor :global(.conditions-editor-content) {
+    padding: 1rem;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #e2e8f0;
+    outline: none;
+    min-height: 100%;
+  }
+
+  /* Placeholder */
+  .conditions-editor :global(.conditions-editor-content.is-editor-empty:first-child::before) {
+    content: attr(data-placeholder);
+    color: rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+    float: left;
+    height: 0;
+    white-space: pre-wrap;
+  }
+
+  .conditions-editor :global(p) {
+    margin-bottom: 0.6rem;
+  }
+
+  .conditions-editor :global(ul), .conditions-editor :global(ol) {
+    margin: 0.6rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .conditions-editor :global(li) {
+    margin-bottom: 0.25rem;
   }
 
   /* Side panel styles */
@@ -472,10 +717,16 @@
     margin-top: 1rem;
   }
 
+  .section-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 1.5rem 0;
+  }
+
   @media (max-width: 600px) {
     .how-content {
       padding: 1.5rem 1rem;
-      gap: 2rem;
+      gap: 1.5rem;
     }
 
     .section-title {
@@ -491,6 +742,10 @@
     .number-button {
       width: 40px;
       height: 40px;
+    }
+
+    .editor-wrapper {
+      min-height: 150px;
     }
   }
 </style>

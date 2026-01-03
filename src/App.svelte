@@ -29,7 +29,7 @@
   };
 
   const defaultHowData: Partial<HowData> = {
-    conditions: '',
+    conditions: null,
     hasNoOpenConditions: false,
   };
 

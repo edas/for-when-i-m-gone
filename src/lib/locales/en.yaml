@@ -124,21 +124,32 @@ introEditor:
     numberedList: Numbered list
     insertRecipients: Insert recipients list
     insertConditions: Insert opening conditions
+    insertDateTime: Insert today's date
+    insertQuorum: Insert required quorum
   sidePanel:
     title: Content Verification
     intro: Make sure your message contains essential information so your loved ones understand how to use this secret.
     collapse: Collapse
     expand: Writing guide
     essentialNote: >-
-      The first three elements are essential so your loved ones 
+      These elements are essential so your loved ones 
       know who to contact and under what circumstances.
     checkboxes:
+      authorIdentity:
+        title: Author identity
+        description: Your full name so recipients know who this message is from
       secretHolders:
         title: List of secret holders
         description: Names and full contact details (phone, email, postal address, social media) of people who hold a part of the secret
       openingConditions:
         title: Opening conditions
         description: Situations in which the secret should be opened (death, incapacity, etc.) and those where it should NOT (simple travel, temporary hospitalization, etc.)
+      dated:
+        title: Dated message
+        description: The date when you wrote this message
+      quorum:
+        title: Required quorum
+        description: The number of people who must gather to access the secret
       directives:
         title: Usage directives
         description: Instructions on what to do with the information contained in the secret
@@ -162,6 +173,12 @@ howEditor:
   conditions:
     title: Conditions for opening the secret
     placeholder: "Describe when the secret should be opened, and when it should NOT be opened.\n\nE.g.: In case of death or prolonged incapacity, but NOT in case of simple travel or temporary hospitalization..."
+  toolbar:
+    bold: Bold
+    italic: Italic
+    underline: Underline
+    bulletList: Bullet list
+    numberedList: Numbered list
   sidePanel:
     title: Access conditions
     collapse: Collapse
@@ -185,6 +202,8 @@ howEditor:
     tip: >-
       These conditions will be visible to recipients in the introduction message. 
       Be precise to avoid different interpretations.
+    generateExample: Generate an example
+    # exampleContent is loaded from examples/conditions-example.en.html
   buttons:
     continueWithoutEssentials: Continue without essentials
     continue: Continue

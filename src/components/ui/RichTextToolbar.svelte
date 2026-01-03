@@ -1,8 +1,9 @@
 <script lang="ts">
   import type { Editor } from '@tiptap/core';
+  import { hasRecipientsBlock, hasConditionsBlock } from '../../lib/tiptap/extensions';
   import Icon from './Icons.svelte';
 
-  type IconName = 'heading' | 'paragraph' | 'bold' | 'italic' | 'underline' | 'list-bullet' | 'list-numbered' | 'users' | 'lock';
+  type IconName = 'heading' | 'paragraph' | 'bold' | 'italic' | 'underline' | 'list-bullet' | 'list-numbered' | 'users' | 'lock' | 'calendar' | 'quorum';
 
   interface Props {
     editor: Editor | null;
@@ -16,10 +17,27 @@
       numberedList: string;
       insertRecipients: string;
       insertConditions: string;
+      insertDateTime: string;
+      insertQuorum: string;
     };
+    /** Counter that increments on editor updates, used to trigger reactivity */
+    editorVersion?: number;
   }
 
-  let { editor, labels }: Props = $props();
+  let { editor, labels, editorVersion = 0 }: Props = $props();
+
+  // Check if blocks already exist (reactive based on editorVersion)
+  let recipientsBlockExists = $derived.by(() => {
+    // Reference editorVersion to make this reactive when editor content changes
+    void editorVersion;
+    return hasRecipientsBlock(editor);
+  });
+
+  let conditionsBlockExists = $derived.by(() => {
+    // Reference editorVersion to make this reactive when editor content changes
+    void editorVersion;
+    return hasConditionsBlock(editor);
+  });
 
   function toggleHeading(): void {
     editor?.chain().focus().toggleHeading({ level: 2 }).run();
@@ -57,10 +75,19 @@
     editor?.chain().focus().insertConditionsBlock().run();
   }
 
+  function insertDateTimeInline(): void {
+    editor?.chain().focus().insertDateTimeInline().run();
+  }
+
+  function insertQuorumInline(): void {
+    editor?.chain().focus().insertQuorumInline().run();
+  }
+
   interface ToolbarButton {
     icon: IconName;
     label: string;
     action: () => void;
+    disabled?: boolean;
   }
 
   let formatButtons: ToolbarButton[] = $derived([
@@ -80,8 +107,10 @@
   ]);
 
   let insertButtons: ToolbarButton[] = $derived([
-    { icon: 'users', label: labels.insertRecipients, action: insertRecipientsBlock },
-    { icon: 'lock', label: labels.insertConditions, action: insertConditionsBlock },
+    { icon: 'users', label: labels.insertRecipients, action: insertRecipientsBlock, disabled: recipientsBlockExists },
+    { icon: 'lock', label: labels.insertConditions, action: insertConditionsBlock, disabled: conditionsBlockExists },
+    { icon: 'calendar', label: labels.insertDateTime, action: insertDateTimeInline },
+    { icon: 'quorum', label: labels.insertQuorum, action: insertQuorumInline },
   ]);
 </script>
 
@@ -129,9 +158,10 @@
     {#each insertButtons as btn}
       <button 
         class="toolbar-btn insert-btn" 
+        class:already-inserted={btn.disabled}
         onclick={btn.action} 
         title={btn.label}
-        disabled={!editor}
+        disabled={!editor || btn.disabled}
       >
         <Icon name={btn.icon} size={18} />
       </button>
@@ -201,6 +231,14 @@
     background: rgba(96, 165, 250, 0.15);
     color: #bfdbfe;
     border-color: rgba(96, 165, 250, 0.3);
+  }
+
+  /* Already inserted buttons show as "done" */
+  .insert-btn.already-inserted {
+    color: #4ade80;
+    opacity: 0.6;
+    background: rgba(74, 222, 128, 0.1);
+    border-color: rgba(74, 222, 128, 0.2);
   }
 
   @media (max-width: 600px) {

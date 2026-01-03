@@ -2,27 +2,33 @@
   import { onDestroy, untrack } from 'svelte';
   import { Editor, type JSONContent } from '@tiptap/core';
   import StarterKit from '@tiptap/starter-kit';
-  import Underline from '@tiptap/extension-underline';
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
   import { updateStoredDataDebounced } from '../lib/dataStore';
-  import { RecipientsBlock, ConditionsBlock } from '../lib/tiptap/extensions';
+  import { RecipientsBlock, ConditionsBlock, DateTimeInline, QuorumInline } from '../lib/tiptap/extensions';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
   import RichTextToolbar from './ui/RichTextToolbar.svelte';
   import TipSection from './ui/TipSection.svelte';
+  import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
 
   export interface IntroCheckboxState {
+    authorIdentity: boolean;
     secretHolders: boolean;
     openingConditions: boolean;
+    dated: boolean;
+    quorum: boolean;
     directives: boolean;
   }
 
   export const defaultIntroCheckboxState: IntroCheckboxState = {
+    authorIdentity: false,
     secretHolders: false,
     openingConditions: false,
+    dated: false,
+    quorum: false,
     directives: false,
   };
 
@@ -36,17 +42,207 @@
 
   let { lang, initialValue, initialCheckboxState, onContinue, onBack }: Props = $props();
 
+  // Generate example content for a given language
+  function getExampleContent(language: Language): JSONContent {
+    return language === 'fr' 
+      ? {
+          type: 'doc',
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'Le ' },
+                { type: 'dateTimeInline' },
+              ],
+            },
+            { type: 'paragraph' },
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'Je vous ai laissé mes informations à vous tous. Vous pourrez y accéder ensemble, à condition d\'être au moins ' },
+                { type: 'quorumInline' },
+                { type: 'text', text: '. Faites-en un usage raisonné.' },
+              ],
+            },
+            { type: 'paragraph' },
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'Je vous fais confiance pour ne l\'utiliser qu\'aux conditions suivantes :' },
+              ],
+            },
+            { type: 'conditionsBlock' },
+            { type: 'paragraph' },
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'Pour vous joindre, voici les personnes qui détiennent un fichier similaire :' },
+              ],
+            },
+            { type: 'recipientsBlock' },
+            { type: 'paragraph' },
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', marks: [{ type: 'italic' }], text: '{xxxx Nom Prénom xxxx}' },
+              ],
+            },
+          ],
+        }
+      : {
+          type: 'doc',
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'On ' },
+                { type: 'dateTimeInline' },
+              ],
+            },
+            { type: 'paragraph' },
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'I have left my information for all of you. You will be able to access it together, provided at least ' },
+                { type: 'quorumInline' },
+                { type: 'text', text: ' of you are present. Please use it wisely.' },
+              ],
+            },
+            { type: 'paragraph' },
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'I trust you to only use it under the following conditions:' },
+              ],
+            },
+            { type: 'conditionsBlock' },
+            { type: 'paragraph' },
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'To reach each other, here are the people who hold a similar file:' },
+              ],
+            },
+            { type: 'recipientsBlock' },
+            { type: 'paragraph' },
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', marks: [{ type: 'italic' }], text: '{xxxx First Name Last Name xxxx}' },
+              ],
+            },
+          ],
+        };
+  }
+
+  // Get initial content: use provided value or default example
+  function getInitialContent(): JSONContent {
+    return initialValue ?? getExampleContent(lang);
+  }
+
+  // Helper function to check if a node type exists in the JSON content
+  function hasNodeType(json: JSONContent | null, nodeType: string): boolean {
+    if (!json) return false;
+    
+    function searchNode(node: JSONContent): boolean {
+      if (node.type === nodeType) return true;
+      if (node.content) {
+        for (const child of node.content) {
+          if (searchNode(child)) return true;
+        }
+      }
+      return false;
+    }
+    
+    return searchNode(json);
+  }
+
   let sidePanelOpen: boolean = $state(true);
   let editorElement: HTMLDivElement | null = $state(null);
   let editor: Editor | null = $state(null);
-  let messageJson: JSONContent | null = $state(untrack(() => initialValue ?? null));
+  const initialContent = getInitialContent();
+  let messageJson: JSONContent | null = $state(initialContent);
+  let editorVersion: number = $state(0);
+
+  // Compute initial checkbox states based on content detection or saved state
+  // Checkbox is checked if component is present OR if user manually checked it
+  function getInitialCheckboxStates(content: JSONContent, saved?: IntroCheckboxState) {
+    return {
+      authorIdentity: saved?.authorIdentity ?? false,
+      secretHolders: hasNodeType(content, 'recipientsBlock') || (saved?.secretHolders ?? false),
+      openingConditions: hasNodeType(content, 'conditionsBlock') || (saved?.openingConditions ?? false),
+      dated: hasNodeType(content, 'dateTimeInline') || (saved?.dated ?? false),
+      quorum: hasNodeType(content, 'quorumInline') || (saved?.quorum ?? false),
+      directives: saved?.directives ?? false,
+    };
+  }
+  const initCheckboxes = (() => getInitialCheckboxStates(initialContent, initialCheckboxState))();
 
   // Checkbox states for verification
-  let checkSecretHolders: boolean = $state(untrack(() => initialCheckboxState?.secretHolders ?? false));
-  let checkOpeningConditions: boolean = $state(untrack(() => initialCheckboxState?.openingConditions ?? false));
-  let checkDirectives: boolean = $state(untrack(() => initialCheckboxState?.directives ?? false));
+  let checkAuthorIdentity: boolean = $state(initCheckboxes.authorIdentity);
+  let checkSecretHolders: boolean = $state(initCheckboxes.secretHolders);
+  let checkOpeningConditions: boolean = $state(initCheckboxes.openingConditions);
+  let checkDated: boolean = $state(initCheckboxes.dated);
+  let checkQuorum: boolean = $state(initCheckboxes.quorum);
+  let checkDirectives: boolean = $state(initCheckboxes.directives);
 
   let t = $derived(getTranslations(lang));
+
+  // Auto-detect presence of components in the message
+  let hasRecipientsBlock = $derived(hasNodeType(messageJson, 'recipientsBlock'));
+  let hasConditionsBlock = $derived(hasNodeType(messageJson, 'conditionsBlock'));
+  let hasDateTimeInline = $derived(hasNodeType(messageJson, 'dateTimeInline'));
+  let hasQuorumInline = $derived(hasNodeType(messageJson, 'quorumInline'));
+
+  // Track previous component presence to detect additions/removals
+  let prevHasRecipients = $state(hasNodeType(initialContent, 'recipientsBlock'));
+  let prevHasConditions = $state(hasNodeType(initialContent, 'conditionsBlock'));
+  let prevHasDateTime = $state(hasNodeType(initialContent, 'dateTimeInline'));
+  let prevHasQuorum = $state(hasNodeType(initialContent, 'quorumInline'));
+
+  // Sync checkboxes when components are added or removed
+  $effect(() => {
+    const current = hasRecipientsBlock;
+    const prev = untrack(() => prevHasRecipients);
+    if (current && !prev) {
+      // Component added → check
+      checkSecretHolders = true;
+    } else if (!current && prev) {
+      // Component removed → uncheck
+      checkSecretHolders = false;
+    }
+    prevHasRecipients = current;
+  });
+  $effect(() => {
+    const current = hasConditionsBlock;
+    const prev = untrack(() => prevHasConditions);
+    if (current && !prev) {
+      checkOpeningConditions = true;
+    } else if (!current && prev) {
+      checkOpeningConditions = false;
+    }
+    prevHasConditions = current;
+  });
+  $effect(() => {
+    const current = hasDateTimeInline;
+    const prev = untrack(() => prevHasDateTime);
+    if (current && !prev) {
+      checkDated = true;
+    } else if (!current && prev) {
+      checkDated = false;
+    }
+    prevHasDateTime = current;
+  });
+  $effect(() => {
+    const current = hasQuorumInline;
+    const prev = untrack(() => prevHasQuorum);
+    if (current && !prev) {
+      checkQuorum = true;
+    } else if (!current && prev) {
+      checkQuorum = false;
+    }
+    prevHasQuorum = current;
+  });
 
   // Check if editor has meaningful content (not just empty paragraph)
   let hasContent = $derived.by(() => {
@@ -60,16 +256,19 @@
     return true;
   });
 
-  let allEssentialsChecked = $derived(checkSecretHolders && checkOpeningConditions);
-  let anyChecked = $derived(checkSecretHolders || checkOpeningConditions || checkDirectives);
+  let allEssentialsChecked = $derived(checkAuthorIdentity && checkSecretHolders && checkOpeningConditions && checkDated && checkQuorum);
+  let anyChecked = $derived(checkAuthorIdentity || checkSecretHolders || checkOpeningConditions || checkDated || checkQuorum || checkDirectives);
 
   let buttonState = $derived(computeButtonState(hasContent, anyChecked, allEssentialsChecked));
   let buttonText = $derived(getButtonText(buttonState, t.introEditor.buttons));
 
   function getCurrentCheckboxState(): IntroCheckboxState {
     return {
+      authorIdentity: checkAuthorIdentity,
       secretHolders: checkSecretHolders,
       openingConditions: checkOpeningConditions,
+      dated: checkDated,
+      quorum: checkQuorum,
       directives: checkDirectives,
     };
   }
@@ -82,6 +281,28 @@
 
   function handleBack(): void {
     onBack(editor?.getJSON() ?? null, getCurrentCheckboxState());
+  }
+
+  function generateExample(): void {
+    if (!editor) return;
+
+    const exampleContent = getExampleContent(lang);
+
+    // If there's existing content, append the example; otherwise replace
+    if (hasContent) {
+      // Insert at end: add separator paragraphs then example content
+      editor.commands.setTextSelection(editor.state.doc.content.size);
+      editor.commands.insertContent([
+        { type: 'paragraph' },
+        { type: 'paragraph' },
+        ...exampleContent.content!,
+      ]);
+    } else {
+      editor.commands.setContent(exampleContent);
+    }
+    
+    messageJson = editor.getJSON();
+    editorVersion++;
   }
 
   // Initialize TipTap editor when element is mounted
@@ -98,13 +319,14 @@
             hardBreak: false,
             horizontalRule: false,
             strike: false,
-            // Keep: document, paragraph, text, bold, italic, heading, bulletList, orderedList, listItem
+            // Keep: document, paragraph, text, bold, italic, underline, heading, bulletList, orderedList, listItem
           }),
-          Underline,
           RecipientsBlock,
           ConditionsBlock,
+          DateTimeInline,
+          QuorumInline,
         ],
-        content: initialValue ?? undefined,
+        content: getInitialContent(),
         editorProps: {
           attributes: {
             class: 'rich-editor-content',
@@ -113,10 +335,12 @@
         },
         onUpdate: ({ editor: e }) => {
           messageJson = e.getJSON();
+          editorVersion++; // Trigger reactivity for toolbar button states
         },
       });
       
       editor = newEditor;
+      editorVersion++; // Trigger initial check for existing blocks
     }
   });
 
@@ -145,7 +369,7 @@
   onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
 >
   {#snippet toolbar()}
-    <RichTextToolbar {editor} labels={t.introEditor.toolbar} />
+    <RichTextToolbar {editor} {editorVersion} labels={t.introEditor.toolbar} />
   {/snippet}
 
   <div
@@ -168,16 +392,38 @@
 
     <EssentialSection note={t.introEditor.sidePanel.essentialNote}>
       <CheckboxItem
+        bind:checked={checkAuthorIdentity}
+        label={t.introEditor.sidePanel.checkboxes.authorIdentity.title}
+        description={t.introEditor.sidePanel.checkboxes.authorIdentity.description}
+        essential
+      />
+      <CheckboxItem
         bind:checked={checkSecretHolders}
         label={t.introEditor.sidePanel.checkboxes.secretHolders.title}
         description={t.introEditor.sidePanel.checkboxes.secretHolders.description}
         essential
+        readonly={hasRecipientsBlock}
       />
       <CheckboxItem
         bind:checked={checkOpeningConditions}
         label={t.introEditor.sidePanel.checkboxes.openingConditions.title}
         description={t.introEditor.sidePanel.checkboxes.openingConditions.description}
         essential
+        readonly={hasConditionsBlock}
+      />
+      <CheckboxItem
+        bind:checked={checkDated}
+        label={t.introEditor.sidePanel.checkboxes.dated.title}
+        description={t.introEditor.sidePanel.checkboxes.dated.description}
+        essential
+        readonly={hasDateTimeInline}
+      />
+      <CheckboxItem
+        bind:checked={checkQuorum}
+        label={t.introEditor.sidePanel.checkboxes.quorum.title}
+        description={t.introEditor.sidePanel.checkboxes.quorum.description}
+        essential
+        readonly={hasQuorumInline}
       />
     </EssentialSection>
 
@@ -190,6 +436,13 @@
     </div>
 
     <TipSection text={t.introEditor.sidePanel.tip} />
+
+    <div class="section-divider"></div>
+
+    <GenerateExampleButton
+      label={t.introEditor.sidePanel.generateExample}
+      onclick={generateExample}
+    />
   {/snippet}
 </EditorLayout>
 
@@ -256,7 +509,7 @@
   /* Atomic blocks styles */
   .rich-editor :global(.recipients-block),
   .rich-editor :global(.conditions-block) {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
@@ -266,6 +519,7 @@
     font-size: 0.9rem;
     cursor: default;
     user-select: none;
+    width: fit-content;
   }
 
   .rich-editor :global(.recipients-block) {
@@ -292,6 +546,48 @@
 
   .rich-editor :global(.block-label) {
     font-weight: 500;
+  }
+
+  /* Inline datetime styles */
+  .rich-editor :global(.datetime-inline) {
+    display: inline;
+    padding: 0.15rem 0.5rem;
+    margin: 0 0.1rem;
+    border-radius: 4px;
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    color: #fcd34d;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.9em;
+    white-space: nowrap;
+    cursor: default;
+    user-select: none;
+  }
+
+  .rich-editor :global(.datetime-inline.ProseMirror-selectednode) {
+    outline: 2px solid rgba(251, 191, 36, 0.6);
+    outline-offset: 1px;
+  }
+
+  /* Inline quorum styles */
+  .rich-editor :global(.quorum-inline) {
+    display: inline;
+    padding: 0.15rem 0.5rem;
+    margin: 0 0.1rem;
+    border-radius: 4px;
+    background: rgba(74, 222, 128, 0.15);
+    border: 1px solid rgba(74, 222, 128, 0.4);
+    color: #86efac;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.9em;
+    white-space: nowrap;
+    cursor: default;
+    user-select: none;
+  }
+
+  .rich-editor :global(.quorum-inline.ProseMirror-selectednode) {
+    outline: 2px solid rgba(74, 222, 128, 0.6);
+    outline-offset: 1px;
   }
 
   @media (max-width: 600px) {
