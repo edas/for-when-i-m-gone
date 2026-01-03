@@ -6,6 +6,7 @@
   import { computeButtonState, getButtonText } from '../lib/buttonState';
   import { updateStoredDataDebounced } from '../lib/dataStore';
   import { RecipientsBlock, ConditionsBlock, DateTimeInline, QuorumInline } from '../lib/tiptap/extensions';
+  import type { Recipient } from './WhoEditor.svelte';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
@@ -37,11 +38,12 @@
     initialCheckboxState?: IntroCheckboxState;
     threshold: number;
     conditions?: JSONContent | null;
+    recipients?: Recipient[];
     onContinue: (message: JSONContent | null, checkboxState: IntroCheckboxState) => void;
     onBack: (message: JSONContent | null, checkboxState: IntroCheckboxState) => void;
   }
 
-  let { lang, initialValue, initialCheckboxState, threshold, conditions, onContinue, onBack }: Props = $props();
+  let { lang, initialValue, initialCheckboxState, threshold, conditions, recipients, onContinue, onBack }: Props = $props();
 
   // Generate example content for a given language
   function getExampleContent(language: Language): JSONContent {
@@ -447,6 +449,12 @@
             updateConditionsBlocks(e, conditions);
             updateConditionsDOM();
           }
+          
+          // Update recipients blocks when content changes (e.g., new block inserted)
+          if (recipients !== undefined) {
+            updateRecipientsBlocks(e, recipients);
+            updateRecipientsDOM();
+          }
         },
       });
       
@@ -460,6 +468,12 @@
         if (conditions !== undefined) {
           updateConditionsBlocks(newEditor, conditions);
           updateConditionsDOM();
+        }
+        
+        // Update recipients blocks
+        if (recipients !== undefined) {
+          updateRecipientsBlocks(newEditor, recipients);
+          updateRecipientsDOM();
         }
         
         // Update quorumInline nodes with current threshold
@@ -507,15 +521,166 @@
     });
   }
 
-  // Update all dynamic content (conditions, quorum, date) when props change
+  // Function to update recipientsBlock nodes with actual recipients data
+  function updateRecipientsBlocks(editor: Editor, recipientsList: Recipient[] | undefined): void {
+    if (!editor) return;
+    
+    const recipientsJson = recipientsList && recipientsList.length > 0 
+      ? JSON.stringify(recipientsList) 
+      : null;
+    
+    // Collect all positions of recipientsBlock nodes first
+    const positions: number[] = [];
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'recipientsBlock') {
+        positions.push(pos);
+      }
+    });
+    
+    // Update all recipientsBlock nodes in a single transaction
+    if (positions.length > 0) {
+      const tr = editor.state.tr;
+      positions.forEach((pos) => {
+        const node = editor.state.doc.nodeAt(pos);
+        if (node && node.type.name === 'recipientsBlock') {
+          tr.setNodeMarkup(pos, undefined, {
+            ...node.attrs,
+            recipients: recipientsJson,
+          });
+        }
+      });
+      editor.view.dispatch(tr);
+    }
+  }
+
+  // Helper function to generate HTML for recipients list
+  function generateRecipientsHtml(recipientsList: Recipient[]): string {
+    const items: string[] = [];
+    const contactTypeLabels = t.whoEditor.contactTypes;
+    // French typography: non-breaking space before colon; English: no space
+    const colonSeparator = lang === 'fr' ? '\u00A0: ' : ': ';
+    
+    for (const recipient of recipientsList) {
+      // Build contacts list
+      const contactParts: string[] = [];
+      for (const contact of recipient.contacts) {
+        if (!contact.value.trim()) continue;
+        
+        let contactStr = '';
+        
+        // Add type prefix (except for "other")
+        if (contact.type !== 'other') {
+          const typeLabel = contactTypeLabels[contact.type as keyof typeof contactTypeLabels] || contact.type;
+          contactStr = `${typeLabel}${colonSeparator}${escapeHtml(contact.value)}`;
+        } else {
+          contactStr = escapeHtml(contact.value);
+        }
+        
+        // Add comment in parentheses if present
+        if (contact.comment.trim()) {
+          contactStr += ` (${escapeHtml(contact.comment)})`;
+        }
+        
+        contactParts.push(contactStr);
+      }
+      
+      // Skip if no name and no contacts
+      if (!recipient.name.trim() && contactParts.length === 0) continue;
+      
+      // Build the list item
+      let itemHtml = '';
+      
+      // Add name in bold if present
+      if (recipient.name.trim()) {
+        itemHtml += `<strong>${escapeHtml(recipient.name)}</strong>`;
+        if (contactParts.length > 0) {
+          itemHtml += ' — ';
+        }
+      }
+      
+      // Add contacts
+      itemHtml += contactParts.join(' — ');
+      
+      items.push(`<li>${itemHtml}</li>`);
+    }
+    
+    if (items.length === 0) return '';
+    
+    return `<ul>${items.join('')}</ul>`;
+  }
+
+  // Helper function to escape HTML special characters
+  function escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Helper function to update DOM for recipients blocks
+  function updateRecipientsDOM(): void {
+    if (!editorElement) return;
+    
+    requestAnimationFrame(() => {
+      const blocks = editorElement?.querySelectorAll('[data-type="recipients-block"]');
+      blocks?.forEach((block) => {
+        const recipientsJson = block.getAttribute('data-recipients');
+        let contentDiv = block.querySelector('.recipients-content');
+        
+        if (recipientsJson) {
+          try {
+            const recipientsList: Recipient[] = JSON.parse(recipientsJson);
+            const html = generateRecipientsHtml(recipientsList);
+            
+            // Create content div if it doesn't exist
+            if (!contentDiv) {
+              // Remove placeholder elements if present
+              const icon = block.querySelector('.block-icon');
+              const label = block.querySelector('.block-label');
+              icon?.remove();
+              label?.remove();
+              
+              contentDiv = document.createElement('div');
+              contentDiv.className = 'recipients-content';
+              block.appendChild(contentDiv);
+            }
+            
+            contentDiv.innerHTML = html;
+          } catch (e) {
+            console.error('Failed to render recipients:', e);
+          }
+        } else if (!recipientsJson && contentDiv) {
+          // If no recipients data, restore placeholder
+          contentDiv.remove();
+          if (!block.querySelector('.block-icon')) {
+            const icon = document.createElement('span');
+            icon.className = 'block-icon';
+            icon.textContent = '👥';
+            const label = document.createElement('span');
+            label.className = 'block-label';
+            label.textContent = 'Liste des destinataires';
+            block.appendChild(icon);
+            block.appendChild(label);
+          }
+        }
+      });
+    });
+  }
+
+  // Update all dynamic content (conditions, quorum, date, recipients) when props change
   // This ensures everything is up-to-date when returning to this screen
-  // We track threshold and conditions to trigger updates when they change
+  // We track threshold, conditions and recipients to trigger updates when they change
   $effect(() => {
     if (editor) {
       // Update conditions blocks
       if (conditions !== undefined) {
         updateConditionsBlocks(editor, conditions);
         updateConditionsDOM();
+      }
+      
+      // Update recipients blocks
+      if (recipients !== undefined) {
+        updateRecipientsBlocks(editor, recipients);
+        updateRecipientsDOM();
       }
       
       // Update quorumInline nodes with current threshold
@@ -703,24 +868,6 @@
     margin-bottom: 0.35rem;
   }
 
-  /* Atomic blocks styles */
-  .rich-editor :global(.recipients-block) {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    margin: 0.5rem 0;
-    border-radius: 8px;
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 0.9rem;
-    cursor: default;
-    user-select: none;
-    width: fit-content;
-    background: rgba(96, 165, 250, 0.15);
-    border: 1px solid rgba(96, 165, 250, 0.4);
-    color: #93c5fd;
-  }
-
   /* Conditions block - no box, just subtle color like dateTimeInline and quorumInline */
   .rich-editor :global(.conditions-block) {
     display: block;
@@ -731,7 +878,7 @@
     font-family: 'Georgia', 'Times New Roman', serif;
     font-size: 1.05rem;
     line-height: 1.7;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(167, 199, 231, 0.85);
     cursor: default;
     user-select: none;
   }
@@ -747,7 +894,7 @@
     font-family: 'Georgia', 'Times New Roman', serif;
     font-size: 1.05rem;
     line-height: 1.7;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(167, 199, 231, 0.85);
     display: block;
   }
 
@@ -765,9 +912,55 @@
     margin-bottom: 0.35rem;
   }
 
+  /* Recipients block - similar styling to conditions block */
+  .rich-editor :global(.recipients-block) {
+    display: block;
+    margin: 0.5rem 0;
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: rgba(167, 199, 231, 0.85);
+    cursor: default;
+    user-select: none;
+  }
+
   .rich-editor :global(.recipients-block.ProseMirror-selectednode) {
-    outline: 2px solid rgba(255, 255, 255, 0.5);
-    outline-offset: 2px;
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+    outline-offset: 1px;
+    border-radius: 2px;
+  }
+
+  /* Recipients content styles */
+  .rich-editor :global(.recipients-block .recipients-content) {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: rgba(167, 199, 231, 0.85);
+    display: block;
+  }
+
+  .rich-editor :global(.recipients-block .recipients-content p) {
+    margin-bottom: 0.5rem;
+  }
+
+  .rich-editor :global(.recipients-block .recipients-content strong) {
+    color: rgba(187, 215, 243, 0.95);
+    font-weight: 600;
+  }
+
+  /* Placeholder style for recipients block without data */
+  .rich-editor :global(.recipients-block .block-icon),
+  .rich-editor :global(.recipients-block .block-label) {
+    display: inline;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+  }
+
+  .rich-editor :global(.recipients-block .block-icon) {
+    margin-right: 0.5rem;
   }
 
   .rich-editor :global(.block-icon) {
@@ -781,7 +974,7 @@
   /* Inline datetime styles */
   .rich-editor :global(.datetime-inline) {
     display: inline;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(167, 199, 231, 0.85);
     font-family: 'Georgia', 'Times New Roman', serif;
     font-size: inherit;
     white-space: nowrap;
@@ -797,7 +990,7 @@
   /* Inline quorum styles */
   .rich-editor :global(.quorum-inline) {
     display: inline;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(167, 199, 231, 0.85);
     font-family: 'Georgia', 'Times New Roman', serif;
     font-size: inherit;
     white-space: nowrap;

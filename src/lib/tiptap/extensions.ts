@@ -49,6 +49,26 @@ export const RecipientsBlock = Node.create({
   draggable: true,
   selectable: true,
 
+  addAttributes() {
+    return {
+      recipients: {
+        default: null,
+        parseHTML: (element) => {
+          const value = element.getAttribute('data-recipients');
+          return value || null;
+        },
+        renderHTML: (attributes) => {
+          if (attributes.recipients) {
+            return {
+              'data-recipients': attributes.recipients,
+            };
+          }
+          return {};
+        },
+      },
+    };
+  },
+
   parseHTML() {
     return [
       {
@@ -57,15 +77,30 @@ export const RecipientsBlock = Node.create({
     ];
   },
 
-  renderHTML({ HTMLAttributes }) {
+  renderHTML({ node, HTMLAttributes }) {
+    const recipientsJson = node.attrs.recipients;
+    const hasRecipients = !!recipientsJson;
+    
+    // Store recipients JSON in data attribute for later rendering
+    const attrs = mergeAttributes(HTMLAttributes, {
+      'data-type': 'recipients-block',
+      'class': 'recipients-block',
+      'contenteditable': 'false',
+    });
+    
+    if (hasRecipients) {
+      attrs['data-recipients'] = recipientsJson;
+      return [
+        'div',
+        attrs,
+        ['div', { class: 'recipients-content' }],
+      ];
+    }
+    
+    // Placeholder content when no recipients are available
     return [
       'div',
-      mergeAttributes(HTMLAttributes, {
-        'data-type': 'recipients-block',
-        'class': 'recipients-block',
-        'contenteditable': 'false',
-      }),
-      // Placeholder content - will be replaced with actual recipient list later
+      attrs,
       ['span', { class: 'block-icon' }, '👥'],
       ['span', { class: 'block-label' }, 'Liste des destinataires'],
     ];

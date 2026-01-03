@@ -177,6 +177,7 @@
           initialCheckboxState={introCheckboxState}
           threshold={howData.threshold!}
           conditions={howData.conditions ?? null}
+          {recipients}
           onContinue={handleIntroContinue}
           onBack={handleIntroBack}
         />
