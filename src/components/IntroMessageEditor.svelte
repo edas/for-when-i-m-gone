@@ -7,21 +7,14 @@
   import { type IntroCheckboxState, defaultIntroCheckboxState } from '../lib/types/editorTypes';
   import { RecipientsBlock, ConditionsBlock, DateTimeInline, QuorumInline, hasNodeTypeInJSON } from '../lib/tiptap/extensions';
   import { createTiptapEditor } from '../lib/tiptap/createEditor';
-  import { hasJsonContent, updateNodeAttrs } from '../lib/tiptap/utils';
+  import { hasJsonContent } from '../lib/tiptap/utils';
+  import { setDynamicData } from '../lib/tiptap/dataProvider';
+  import { refreshDynamicContent } from '../lib/tiptap/domUpdates';
   import {
     createCheckboxSyncState,
     syncCheckboxWithNode,
     computeInitialCheckboxState,
   } from '../lib/checkboxSync';
-  import {
-    updateConditionsBlocks,
-    updateConditionsDOM,
-    updateRecipientsBlocks,
-    updateRecipientsDOM,
-    updateQuorumInlines,
-    updateDateTimeDOM,
-    type GenerateRecipientsHtmlOptions,
-  } from '../lib/tiptap/domUpdates';
   import type { Recipient } from '../lib/types/recipient';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
@@ -47,11 +40,10 @@
 
   let { lang, initialValue, initialCheckboxState, threshold, conditions, recipients, onContinue, onBack }: Props = $props();
 
-  // Get initial content with updated quorum nodes
+  // Get initial content (no need to update quorum attrs - they're read from dynamicData)
   const initialContent = (() => {
     const translations = getTranslations(lang);
-    const content = initialValue ?? translations.introEditor.sidePanel.exampleContentJson;
-    return updateNodeAttrs(content, 'quorumInline', { threshold });
+    return initialValue ?? translations.introEditor.sidePanel.exampleContentJson;
   })();
 
   let sidePanelOpen: boolean = $state(true);
@@ -148,26 +140,32 @@
     editorVersion++;
   }
 
-  function getRecipientsHtmlOptions(): GenerateRecipientsHtmlOptions {
-    return { contactTypeLabels: t.whoEditor.contactTypes, lang };
-  }
-
-  function updateDynamicContent(ed: Editor): void {
-    if (conditions !== undefined) {
-      updateConditionsBlocks(ed, conditions);
-      updateConditionsDOM(editorElement);
-    }
-    if (recipients !== undefined) {
-      updateRecipientsBlocks(ed, recipients);
-      updateRecipientsDOM(editorElement, getRecipientsHtmlOptions());
-    }
-    updateQuorumInlines(ed, threshold);
-    updateDateTimeDOM(editorElement);
+  /**
+   * Update dynamic data store and refresh the editor view
+   */
+  function updateAndRefresh(): void {
+    setDynamicData({
+      recipients: recipients ?? [],
+      conditions: conditions ?? null,
+      threshold,
+      lang,
+      contactTypeLabels: t.whoEditor.contactTypes,
+    });
+    refreshDynamicContent(editor, editorElement);
   }
 
   // Initialize TipTap editor
   $effect(() => {
     if (editorElement && !editor) {
+      // Set dynamic data before creating editor
+      setDynamicData({
+        recipients: recipients ?? [],
+        conditions: conditions ?? null,
+        threshold,
+        lang,
+        contactTypeLabels: t.whoEditor.contactTypes,
+      });
+
       const newEditor = createTiptapEditor({
         element: editorElement,
         content: initialContent,
@@ -178,20 +176,26 @@
         onUpdate: (json) => {
           messageJson = json;
           editorVersion++;
-          updateDynamicContent(newEditor);
+          updateAndRefresh();
         },
       });
       
       editor = newEditor;
       editorVersion++;
-      setTimeout(() => updateDynamicContent(newEditor), 0);
+      setTimeout(() => updateAndRefresh(), 0);
     }
   });
 
   // Update dynamic content when props change
   $effect(() => {
+    // Track dependencies
+    recipients;
+    conditions;
+    threshold;
+    lang;
+    
     if (editor) {
-      updateDynamicContent(editor);
+      updateAndRefresh();
     }
   });
 

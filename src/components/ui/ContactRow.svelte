@@ -41,14 +41,14 @@
     {/each}
   </select>
   <input
-    class="form-input small contact-value"
+    class="form-input contact-value"
     type="text"
     value={contact.value}
     oninput={(e) => onValueChange(e.currentTarget.value)}
     placeholder={placeholders.value}
   />
   <input
-    class="form-input small contact-comment"
+    class="form-input contact-comment"
     type="text"
     value={contact.comment}
     oninput={(e) => onCommentChange(e.currentTarget.value)}

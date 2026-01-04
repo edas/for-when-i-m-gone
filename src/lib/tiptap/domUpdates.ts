@@ -1,11 +1,14 @@
 /**
  * TipTap DOM update utilities
- * Functions to synchronize TipTap editor content with dynamic data
+ * 
+ * Functions to refresh TipTap editor view when dynamic data changes.
+ * The actual data is stored in dataProvider.ts and read by extensions.
  */
 
-import { generateHTML, type Editor, type JSONContent } from '@tiptap/core';
+import type { Editor } from '@tiptap/core';
+import { generateHTML } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
-import type { Recipient } from '../types/recipient';
+import { dynamicData } from './dataProvider';
 
 // ============================================================================
 // Utilities
@@ -21,7 +24,7 @@ function escapeHtml(text: string): string {
 }
 
 /**
- * StarterKit configuration for rendering JSON to HTML
+ * StarterKit configuration for rendering conditions JSON to HTML
  */
 const starterKitConfig = StarterKit.configure({
   blockquote: false,
@@ -34,184 +37,32 @@ const starterKitConfig = StarterKit.configure({
 });
 
 // ============================================================================
-// Generic Editor Node Updates
+// HTML Generation (for DOM updates)
 // ============================================================================
 
 /**
- * Generic function to update all nodes of a given type in the editor
+ * Generate HTML for the recipients list from dynamicData
  */
-function updateEditorNodes(
-  editor: Editor,
-  nodeType: string,
-  getNewAttrs: (currentAttrs: Record<string, unknown>) => Record<string, unknown>
-): void {
-  if (!editor) return;
-
-  const positions: number[] = [];
-  editor.state.doc.descendants((node, pos) => {
-    if (node.type.name === nodeType) {
-      positions.push(pos);
-    }
-  });
-
-  if (positions.length > 0) {
-    const tr = editor.state.tr;
-    positions.forEach((pos) => {
-      const node = editor.state.doc.nodeAt(pos);
-      if (node && node.type.name === nodeType) {
-        tr.setNodeMarkup(pos, undefined, getNewAttrs(node.attrs));
-      }
-    });
-    editor.view.dispatch(tr);
-  }
-}
-
-// ============================================================================
-// Editor Node Update Functions
-// ============================================================================
-
-/**
- * Update conditionsBlock nodes in the editor with actual conditions content
- */
-export function updateConditionsBlocks(editor: Editor, conditions: JSONContent | null): void {
-  const conditionsJson = conditions ? JSON.stringify(conditions) : null;
-  updateEditorNodes(editor, 'conditionsBlock', (attrs) => ({
-    ...attrs,
-    conditions: conditionsJson,
-  }));
-}
-
-/**
- * Update recipientsBlock nodes in the editor with actual recipients data
- */
-export function updateRecipientsBlocks(editor: Editor, recipientsList: Recipient[] | undefined): void {
-  const recipientsJson = recipientsList?.length ? JSON.stringify(recipientsList) : null;
-  updateEditorNodes(editor, 'recipientsBlock', (attrs) => ({
-    ...attrs,
-    recipients: recipientsJson,
-  }));
-}
-
-/**
- * Update quorumInline nodes in the editor with current threshold
- */
-export function updateQuorumInlines(editor: Editor, thresholdValue: number): void {
-  updateEditorNodes(editor, 'quorumInline', (attrs) => ({
-    ...attrs,
-    threshold: thresholdValue,
-  }));
-}
-
-// ============================================================================
-// DOM Update Functions
-// ============================================================================
-
-/**
- * Update DOM for conditions blocks (renders the conditions content)
- */
-export function updateConditionsDOM(editorElement: HTMLElement | null): void {
-  if (!editorElement) return;
-
-  requestAnimationFrame(() => {
-    editorElement.querySelectorAll('[data-type="conditions-block"]').forEach((block) => {
-      const conditionsJson = block.getAttribute('data-conditions');
-      const contentDiv = block.querySelector('.conditions-content');
-
-      if (conditionsJson && contentDiv) {
-        try {
-          const conditionsData: JSONContent = JSON.parse(conditionsJson);
-          contentDiv.innerHTML = generateHTML(conditionsData, [starterKitConfig]);
-        } catch (e) {
-          console.error('Failed to render conditions:', e);
-        }
-      } else if (!conditionsJson) {
-        contentDiv?.remove();
-      }
-    });
-  });
-}
-
-/**
- * Update DOM for dateTimeInline nodes with current date/time
- */
-export function updateDateTimeDOM(editorElement: HTMLElement | null): void {
-  if (!editorElement) return;
-
-  requestAnimationFrame(() => {
-    const now = new Date();
-    const formattedDate = now.toLocaleDateString(undefined, {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    const formattedTime = now.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    const dateTimeText = `${formattedDate}, ${formattedTime}`;
-
-    editorElement.querySelectorAll('[data-type="datetime-inline"]').forEach((node) => {
-      node.textContent = dateTimeText;
-    });
-  });
-}
-
-// ============================================================================
-// Recipients HTML Generation
-// ============================================================================
-
-/**
- * Contact type labels interface for generateRecipientsHtml
- */
-export interface ContactTypeLabels {
-  phone: string;
-  email: string;
-  address: string;
-  x: string;
-  bluesky: string;
-  mastodon: string;
-  facebook: string;
-  telegram: string;
-  whatsapp: string;
-  signal: string;
-  instagram: string;
-  snapchat: string;
-  linkedin: string;
-  web: string;
-  other: string;
-}
-
-/**
- * Options for generating recipients HTML
- */
-export interface GenerateRecipientsHtmlOptions {
-  contactTypeLabels: ContactTypeLabels;
-  lang: 'en' | 'fr';
-}
-
-/**
- * Generate HTML for recipients list
- */
-function generateRecipientsHtml(
-  recipientsList: Recipient[],
-  options: GenerateRecipientsHtmlOptions
-): string {
-  const { contactTypeLabels, lang } = options;
+function generateRecipientsHtml(): string {
+  const { recipients, contactTypeLabels, lang } = dynamicData;
+  
+  // Filter out recipients that are marked as private
+  const publicRecipients = recipients.filter((r) => !r.isPrivate);
+  
+  if (publicRecipients.length === 0) return '';
+  
   // French typography: non-breaking space before colon; English: no space
   const colonSeparator = lang === 'fr' ? '\u00A0: ' : ': ';
-
-  // Filter out recipients that are marked as private
-  const publicRecipients = recipientsList.filter((r) => !r.isPrivate);
 
   const items = publicRecipients
     .map((recipient) => {
       const contactParts = recipient.contacts
         .filter((c) => c.value.trim())
         .map((contact) => {
+          const label = contactTypeLabels[contact.type as keyof typeof contactTypeLabels] || contact.type;
           const valueStr =
             contact.type !== 'other'
-              ? `${contactTypeLabels[contact.type as keyof ContactTypeLabels] || contact.type}${colonSeparator}${escapeHtml(contact.value)}`
+              ? `${label}${colonSeparator}${escapeHtml(contact.value)}`
               : escapeHtml(contact.value);
           return contact.comment.trim()
             ? `${valueStr} (${escapeHtml(contact.comment)})`
@@ -233,52 +84,154 @@ function generateRecipientsHtml(
 }
 
 /**
- * Update DOM for recipients blocks
+ * Generate HTML for conditions from dynamicData
  */
-export function updateRecipientsDOM(
-  editorElement: HTMLElement | null,
-  options: GenerateRecipientsHtmlOptions
-): void {
+function generateConditionsHtml(): string {
+  const { conditions } = dynamicData;
+  if (!conditions) return '';
+  
+  try {
+    return generateHTML(conditions, [starterKitConfig]);
+  } catch (e) {
+    console.error('Failed to render conditions:', e);
+    return '';
+  }
+}
+
+// ============================================================================
+// DOM Update Functions
+// ============================================================================
+
+/**
+ * Update DOM for recipients blocks
+ * Reads data from dynamicData and updates the DOM directly
+ */
+function updateRecipientsDOM(editorElement: HTMLElement | null): void {
   if (!editorElement) return;
 
-  requestAnimationFrame(() => {
-    editorElement.querySelectorAll('[data-type="recipients-block"]').forEach((block) => {
-      const recipientsJson = block.getAttribute('data-recipients');
-      let contentDiv = block.querySelector('.recipients-content');
+  editorElement.querySelectorAll('[data-type="recipients-block"]').forEach((block) => {
+    const html = generateRecipientsHtml();
+    let contentDiv = block.querySelector('.recipients-content');
 
-      if (recipientsJson) {
-        try {
-          const recipientsList: Recipient[] = JSON.parse(recipientsJson);
-          const html = generateRecipientsHtml(recipientsList, options);
+    if (html) {
+      if (!contentDiv) {
+        // Remove placeholder elements if present
+        block.querySelector('.block-icon')?.remove();
+        block.querySelector('.block-label')?.remove();
 
-          if (!contentDiv) {
-            // Remove placeholder elements if present
-            block.querySelector('.block-icon')?.remove();
-            block.querySelector('.block-label')?.remove();
-
-            contentDiv = document.createElement('div');
-            contentDiv.className = 'recipients-content';
-            block.appendChild(contentDiv);
-          }
-
-          contentDiv.innerHTML = html;
-        } catch (e) {
-          console.error('Failed to render recipients:', e);
-        }
-      } else if (contentDiv) {
-        // If no recipients data, restore placeholder
-        contentDiv.remove();
-        if (!block.querySelector('.block-icon')) {
-          const icon = document.createElement('span');
-          icon.className = 'block-icon';
-          icon.textContent = '👥';
-          const label = document.createElement('span');
-          label.className = 'block-label';
-          label.textContent = 'Liste des destinataires';
-          block.appendChild(icon);
-          block.appendChild(label);
-        }
+        contentDiv = document.createElement('div');
+        contentDiv.className = 'recipients-content';
+        block.appendChild(contentDiv);
       }
-    });
+      contentDiv.innerHTML = html;
+    } else if (contentDiv) {
+      // If no recipients data, restore placeholder
+      contentDiv.remove();
+      if (!block.querySelector('.block-icon')) {
+        const icon = document.createElement('span');
+        icon.className = 'block-icon';
+        icon.textContent = '👥';
+        const label = document.createElement('span');
+        label.className = 'block-label';
+        label.textContent = 'Liste des destinataires';
+        block.appendChild(icon);
+        block.appendChild(label);
+      }
+    }
+  });
+}
+
+/**
+ * Update DOM for conditions blocks
+ * Reads data from dynamicData and updates the DOM directly
+ */
+function updateConditionsDOM(editorElement: HTMLElement | null): void {
+  if (!editorElement) return;
+
+  editorElement.querySelectorAll('[data-type="conditions-block"]').forEach((block) => {
+    const html = generateConditionsHtml();
+    let contentDiv = block.querySelector('.conditions-content');
+
+    if (html) {
+      if (!contentDiv) {
+        // Remove placeholder text
+        const textNodes = Array.from(block.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
+        textNodes.forEach(n => n.remove());
+        
+        contentDiv = document.createElement('div');
+        contentDiv.className = 'conditions-content';
+        block.appendChild(contentDiv);
+      }
+      contentDiv.innerHTML = html;
+    } else if (contentDiv) {
+      contentDiv.remove();
+      // Restore placeholder if needed
+      if (!block.textContent?.trim()) {
+        block.textContent = "Conditions d'ouverture";
+      }
+    }
+  });
+}
+
+/**
+ * Update DOM for quorum inline elements
+ * Reads threshold from dynamicData
+ */
+function updateQuorumDOM(editorElement: HTMLElement | null): void {
+  if (!editorElement) return;
+
+  const { threshold } = dynamicData;
+  const displayText = threshold > 0 ? String(threshold) : '[Quorum]';
+
+  editorElement.querySelectorAll('[data-type="quorum-inline"]').forEach((node) => {
+    node.textContent = displayText;
+  });
+}
+
+/**
+ * Update DOM for dateTimeInline nodes with current date/time
+ */
+function updateDateTimeDOM(editorElement: HTMLElement | null): void {
+  if (!editorElement) return;
+
+  const now = new Date();
+  const formattedDate = now.toLocaleDateString(undefined, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  const formattedTime = now.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const dateTimeText = `${formattedDate}, ${formattedTime}`;
+
+  editorElement.querySelectorAll('[data-type="datetime-inline"]').forEach((node) => {
+    node.textContent = dateTimeText;
+  });
+}
+
+// ============================================================================
+// Main Refresh Function
+// ============================================================================
+
+/**
+ * Refresh all dynamic content in the TipTap editor
+ * 
+ * Call this after updating dynamicData to reflect changes in the editor.
+ * This updates the DOM directly without modifying TipTap's internal state.
+ * 
+ * @param editor - The TipTap editor instance
+ * @param editorElement - The editor's DOM element
+ */
+export function refreshDynamicContent(editor: Editor | null, editorElement: HTMLElement | null): void {
+  if (!editor || !editorElement) return;
+
+  requestAnimationFrame(() => {
+    updateRecipientsDOM(editorElement);
+    updateConditionsDOM(editorElement);
+    updateQuorumDOM(editorElement);
+    updateDateTimeDOM(editorElement);
   });
 }

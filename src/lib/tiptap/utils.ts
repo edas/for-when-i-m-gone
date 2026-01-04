@@ -18,30 +18,3 @@ export function hasJsonContent(json: JSONContent | null | undefined): boolean {
   }
   return true;
 }
-
-/**
- * Recursively update all nodes of a specific type with new attributes
- */
-export function updateNodeAttrs(
-  content: JSONContent,
-  nodeType: string,
-  attrs: Record<string, unknown>
-): JSONContent {
-  function updateNode(node: JSONContent): JSONContent {
-    if (node.type === nodeType) {
-      return {
-        ...node,
-        attrs: { ...(node.attrs || {}), ...attrs },
-      };
-    }
-    if (node.content) {
-      return {
-        ...node,
-        content: node.content.map(updateNode),
-      };
-    }
-    return node;
-  }
-  
-  return updateNode(content);
-}

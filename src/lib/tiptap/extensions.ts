@@ -1,9 +1,15 @@
 /**
  * Custom TipTap extensions for non-editable atomic blocks and inline elements
+ * 
+ * These extensions read dynamic data from dataProvider instead of storing
+ * data in node attributes, keeping the TipTap JSON clean.
  */
 
 import { Node, mergeAttributes, type Editor } from '@tiptap/core';
 import type { JSONContent } from '@tiptap/core';
+import { generateHTML } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import { dynamicData } from './dataProvider';
 
 /**
  * Check if a node type already exists in the editor document
@@ -56,102 +62,87 @@ export function hasConditionsBlock(editor: Editor | null): boolean {
 }
 
 // ============================================================================
-// Atomic Block Factory
+// HTML Generation Utilities
 // ============================================================================
 
-interface AtomicBlockConfig {
-  /** Node name (e.g. 'recipientsBlock') */
-  name: string;
-  /** Data attribute key (e.g. 'recipients' -> data-recipients) */
-  attrKey: string;
-  /** CSS class name */
-  className: string;
-  /** Content class for when data is present */
-  contentClass: string;
-  /** Placeholder content when no data [icon, label] or just text */
-  placeholder: [string, string] | string;
-  /** Command name (e.g. 'insertRecipientsBlock') */
-  commandName: string;
+/**
+ * Escape HTML special characters
+ */
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 /**
- * Factory to create atomic block extensions with similar behavior.
- * These blocks are non-editable, draggable, and can only be inserted once per document.
+ * StarterKit configuration for rendering conditions JSON to HTML
  */
-function createAtomicBlock(config: AtomicBlockConfig) {
-  const { name, attrKey, className, contentClass, placeholder, commandName } = config;
-  const dataType = name.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
-  const dataAttr = `data-${attrKey}`;
+const starterKitConfig = StarterKit.configure({
+  blockquote: false,
+  code: false,
+  codeBlock: false,
+  hardBreak: false,
+  horizontalRule: false,
+  strike: false,
+  heading: false,
+});
 
-  return Node.create({
-    name,
-    group: 'block',
-    atom: true,
-    draggable: true,
-    selectable: true,
+/**
+ * Generate HTML for the recipients list from dynamicData
+ */
+function generateRecipientsHtml(): string {
+  const { recipients, contactTypeLabels, lang } = dynamicData;
+  
+  // Filter out recipients that are marked as private
+  const publicRecipients = recipients.filter((r) => !r.isPrivate);
+  
+  if (publicRecipients.length === 0) return '';
+  
+  // French typography: non-breaking space before colon; English: no space
+  const colonSeparator = lang === 'fr' ? '\u00A0: ' : ': ';
 
-    addAttributes() {
-      return {
-        [attrKey]: {
-          default: null,
-          parseHTML: (element: Element) => element.getAttribute(dataAttr) || null,
-          renderHTML: (attributes: Record<string, unknown>) => {
-            if (attributes[attrKey]) {
-              return { [dataAttr]: attributes[attrKey] };
-            }
-            return {};
-          },
-        },
-      };
-    },
+  const items = publicRecipients
+    .map((recipient) => {
+      const contactParts = recipient.contacts
+        .filter((c) => c.value.trim())
+        .map((contact) => {
+          const label = contactTypeLabels[contact.type as keyof typeof contactTypeLabels] || contact.type;
+          const valueStr =
+            contact.type !== 'other'
+              ? `${label}${colonSeparator}${escapeHtml(contact.value)}`
+              : escapeHtml(contact.value);
+          return contact.comment.trim()
+            ? `${valueStr} (${escapeHtml(contact.comment)})`
+            : valueStr;
+        });
 
-    parseHTML() {
-      return [{ tag: `div[data-type="${dataType}"]` }];
-    },
+      if (!recipient.name.trim() && contactParts.length === 0) return null;
 
-    renderHTML({ node, HTMLAttributes }) {
-      const dataValue = node.attrs[attrKey];
-      const hasData = !!dataValue;
+      const namePart = recipient.name.trim()
+        ? `<strong>${escapeHtml(recipient.name)}</strong>`
+        : '';
+      const separator = namePart && contactParts.length > 0 ? ' — ' : '';
 
-      const attrs = mergeAttributes(HTMLAttributes, {
-        'data-type': dataType,
-        'class': className,
-        'contenteditable': 'false',
-      });
+      return `<li>${namePart}${separator}${contactParts.join(' — ')}</li>`;
+    })
+    .filter(Boolean);
 
-      if (hasData) {
-        attrs[dataAttr] = dataValue;
-        return ['div', attrs, ['div', { class: contentClass }]];
-      }
+  return items.length > 0 ? `<ul>${items.join('')}</ul>` : '';
+}
 
-      // Placeholder content
-      if (Array.isArray(placeholder)) {
-        return [
-          'div',
-          attrs,
-          ['span', { class: 'block-icon' }, placeholder[0]],
-          ['span', { class: 'block-label' }, placeholder[1]],
-        ];
-      }
-      return ['div', attrs, placeholder];
-    },
-
-    addCommands() {
-      return {
-        [commandName]:
-          () =>
-          ({ commands, editor }: { commands: any; editor: Editor }) => {
-            if (hasNodeTypeInEditor(editor, name)) {
-              return false;
-            }
-            return commands.insertContent([
-              { type: name },
-              { type: 'paragraph' },
-            ]);
-          },
-      };
-    },
-  });
+/**
+ * Generate HTML for conditions from dynamicData
+ */
+function generateConditionsHtml(): string {
+  const { conditions } = dynamicData;
+  if (!conditions) return '';
+  
+  try {
+    return generateHTML(conditions, [starterKitConfig]);
+  } catch (e) {
+    console.error('Failed to render conditions:', e);
+    return '';
+  }
 }
 
 // ============================================================================
@@ -160,26 +151,117 @@ function createAtomicBlock(config: AtomicBlockConfig) {
 
 /**
  * RecipientsBlock - Atomic block for displaying the list of recipients
+ * Reads data from dynamicData.recipients instead of node attributes
  */
-export const RecipientsBlock = createAtomicBlock({
+export const RecipientsBlock = Node.create({
   name: 'recipientsBlock',
-  attrKey: 'recipients',
-  className: 'recipients-block',
-  contentClass: 'recipients-content',
-  placeholder: ['👥', 'Liste des destinataires'],
-  commandName: 'insertRecipientsBlock',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  selectable: true,
+
+  parseHTML() {
+    return [{ tag: 'div[data-type="recipients-block"]' }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    const html = generateRecipientsHtml();
+    const hasData = html.length > 0;
+
+    const attrs = mergeAttributes(HTMLAttributes, {
+      'data-type': 'recipients-block',
+      'class': 'recipients-block',
+      'contenteditable': 'false',
+    });
+
+    if (hasData) {
+      // Return structure with content div - innerHTML will be set via NodeView or DOM update
+      const wrapper = document.createElement('div');
+      Object.entries(attrs).forEach(([key, value]) => {
+        wrapper.setAttribute(key, value as string);
+      });
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'recipients-content';
+      contentDiv.innerHTML = html;
+      wrapper.appendChild(contentDiv);
+      
+      return ['div', attrs, ['div', { class: 'recipients-content' }]];
+    }
+
+    // Placeholder content
+    return [
+      'div',
+      attrs,
+      ['span', { class: 'block-icon' }, '👥'],
+      ['span', { class: 'block-label' }, 'Liste des destinataires'],
+    ];
+  },
+
+  addCommands() {
+    return {
+      insertRecipientsBlock:
+        () =>
+        ({ commands, editor }: { commands: any; editor: Editor }) => {
+          if (hasNodeTypeInEditor(editor, 'recipientsBlock')) {
+            return false;
+          }
+          return commands.insertContent([
+            { type: 'recipientsBlock' },
+            { type: 'paragraph' },
+          ]);
+        },
+    };
+  },
 });
 
 /**
  * ConditionsBlock - Atomic block for displaying the opening conditions
+ * Reads data from dynamicData.conditions instead of node attributes
  */
-export const ConditionsBlock = createAtomicBlock({
+export const ConditionsBlock = Node.create({
   name: 'conditionsBlock',
-  attrKey: 'conditions',
-  className: 'conditions-block',
-  contentClass: 'conditions-content',
-  placeholder: "Conditions d'ouverture",
-  commandName: 'insertConditionsBlock',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  selectable: true,
+
+  parseHTML() {
+    return [{ tag: 'div[data-type="conditions-block"]' }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    const html = generateConditionsHtml();
+    const hasData = html.length > 0;
+
+    const attrs = mergeAttributes(HTMLAttributes, {
+      'data-type': 'conditions-block',
+      'class': 'conditions-block',
+      'contenteditable': 'false',
+    });
+
+    if (hasData) {
+      return ['div', attrs, ['div', { class: 'conditions-content' }]];
+    }
+
+    // Placeholder content
+    return ['div', attrs, "Conditions d'ouverture"];
+  },
+
+  addCommands() {
+    return {
+      insertConditionsBlock:
+        () =>
+        ({ commands, editor }: { commands: any; editor: Editor }) => {
+          if (hasNodeTypeInEditor(editor, 'conditionsBlock')) {
+            return false;
+          }
+          return commands.insertContent([
+            { type: 'conditionsBlock' },
+            { type: 'paragraph' },
+          ]);
+        },
+    };
+  },
 });
 
 // ============================================================================
@@ -238,7 +320,7 @@ export const DateTimeInline = Node.create({
 
 /**
  * QuorumInline - Inline element for displaying the required quorum
- * Non-editable, can be inserted anywhere inline with text
+ * Reads threshold from dynamicData instead of node attributes
  */
 export const QuorumInline = Node.create({
   name: 'quorumInline',
@@ -247,31 +329,13 @@ export const QuorumInline = Node.create({
   atom: true,
   selectable: true,
 
-  addAttributes() {
-    return {
-      threshold: {
-        default: null,
-        parseHTML: (element) => {
-          const value = element.getAttribute('data-threshold');
-          return value ? parseInt(value, 10) : null;
-        },
-        renderHTML: (attributes) => {
-          if (attributes.threshold !== null && attributes.threshold !== undefined) {
-            return { 'data-threshold': String(attributes.threshold) };
-          }
-          return {};
-        },
-      },
-    };
-  },
-
   parseHTML() {
     return [{ tag: 'span[data-type="quorum-inline"]' }];
   },
 
-  renderHTML({ node, HTMLAttributes }) {
-    const threshold = node.attrs.threshold;
-    const displayText = threshold !== null && threshold !== undefined ? String(threshold) : '[Quorum]';
+  renderHTML({ HTMLAttributes }) {
+    const { threshold } = dynamicData;
+    const displayText = threshold > 0 ? String(threshold) : '[Quorum]';
 
     return [
       'span',
@@ -287,10 +351,9 @@ export const QuorumInline = Node.create({
   addCommands() {
     return {
       insertQuorumInline:
-        (options?: { threshold?: number }) =>
+        () =>
         ({ commands }) => {
-          const attrs = options?.threshold !== undefined ? { threshold: options.threshold } : {};
-          return commands.insertContent({ type: this.name, attrs });
+          return commands.insertContent({ type: this.name });
         },
     };
   },
@@ -312,7 +375,7 @@ declare module '@tiptap/core' {
       insertDateTimeInline: () => ReturnType;
     };
     quorumInline: {
-      insertQuorumInline: (options?: { threshold?: number }) => ReturnType;
+      insertQuorumInline: () => ReturnType;
     };
   }
 }
