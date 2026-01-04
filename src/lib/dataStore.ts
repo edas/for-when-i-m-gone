@@ -7,20 +7,20 @@ import type { JSONContent } from '@tiptap/core';
 import type { SecretCheckboxState, IntroCheckboxState, HowData } from './types/editorTypes';
 import type { Recipient } from './types/recipient';
 
-export interface SecurityData {
+interface SecurityData {
   confirmedAt?: string; // ISO datetime with timezone
 }
 
-export interface WhatData {
+interface WhatData {
   content?: string;
   checkboxState?: SecretCheckboxState;
 }
 
-export interface WhoData {
+interface WhoData {
   recipients?: Recipient[];
 }
 
-export interface IntroData {
+interface IntroData {
   message?: JSONContent | null;
   checkboxState?: IntroCheckboxState;
 }
@@ -108,7 +108,7 @@ export function updateStoredData(updates: Partial<StoredData>): Promise<StoredDa
 /**
  * Get the current datetime in ISO format with timezone
  */
-export function getCurrentISODateTime(): string {
+function getCurrentISODateTime(): string {
   return new Date().toISOString();
 }
 

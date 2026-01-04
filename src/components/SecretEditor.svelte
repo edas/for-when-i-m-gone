@@ -12,7 +12,6 @@
   import '../styles/form-controls.css';
 
   export type { SecretCheckboxState };
-  export { defaultSecretCheckboxState };
 
   interface Props {
     lang: Language;

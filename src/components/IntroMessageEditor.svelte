@@ -5,11 +5,16 @@
   import { computeButtonState, getButtonText } from '../lib/buttonState';
   import { updateStoredDataDebounced } from '../lib/dataStore';
   import { type IntroCheckboxState, defaultIntroCheckboxState } from '../lib/types/editorTypes';
-  import { RecipientsBlock, ConditionsBlock, DateTimeInline, QuorumInline, hasNodeTypeInJSON } from '../lib/tiptap/extensions';
+  import { 
+    RecipientsBlock, 
+    ConditionsBlock, 
+    DateTimeInline, 
+    QuorumInline, 
+    DynamicDataExtension,
+    hasNodeTypeInJSON 
+  } from '../lib/tiptap/extensions';
   import { createTiptapEditor } from '../lib/tiptap/createEditor';
   import { hasJsonContent } from '../lib/tiptap/utils';
-  import { setDynamicData } from '../lib/tiptap/dataProvider';
-  import { refreshDynamicContent } from '../lib/tiptap/domUpdates';
   import {
     createCheckboxSyncState,
     syncCheckboxWithNode,
@@ -25,7 +30,6 @@
   import '../styles/tiptap-editor.css';
 
   export type { IntroCheckboxState };
-  export { defaultIntroCheckboxState };
 
   interface Props {
     lang: Language;
@@ -40,7 +44,7 @@
 
   let { lang, initialValue, initialCheckboxState, threshold, conditions, recipients, onContinue, onBack }: Props = $props();
 
-  // Get initial content (no need to update quorum attrs - they're read from dynamicData)
+  // Get initial content
   const initialContent = (() => {
     const translations = getTranslations(lang);
     return initialValue ?? translations.introEditor.sidePanel.exampleContentJson;
@@ -141,48 +145,47 @@
   }
 
   /**
-   * Update dynamic data store and refresh the editor view
+   * Update dynamic data via TipTap command (triggers NodeView updates)
    */
-  function updateAndRefresh(): void {
-    setDynamicData({
+  function updateDynamicData(): void {
+    if (!editor) return;
+    editor.commands.setDynamicData({
       recipients: recipients ?? [],
       conditions: conditions ?? null,
       threshold,
       lang,
       contactTypeLabels: t.whoEditor.contactTypes,
     });
-    refreshDynamicContent(editor, editorElement);
   }
 
   // Initialize TipTap editor
   $effect(() => {
     if (editorElement && !editor) {
-      // Set dynamic data before creating editor
-      setDynamicData({
-        recipients: recipients ?? [],
-        conditions: conditions ?? null,
-        threshold,
-        lang,
-        contactTypeLabels: t.whoEditor.contactTypes,
-      });
-
+      // Create editor with DynamicDataExtension for reactive data binding
       const newEditor = createTiptapEditor({
         element: editorElement,
         content: initialContent,
         placeholder: t.introEditor.placeholder,
         contentClass: 'tiptap-content',
         enableHeadings: true,
-        extensions: [RecipientsBlock, ConditionsBlock, DateTimeInline, QuorumInline],
+        extensions: [
+          DynamicDataExtension,
+          RecipientsBlock, 
+          ConditionsBlock, 
+          DateTimeInline, 
+          QuorumInline
+        ],
         onUpdate: (json) => {
           messageJson = json;
           editorVersion++;
-          updateAndRefresh();
         },
       });
       
       editor = newEditor;
       editorVersion++;
-      setTimeout(() => updateAndRefresh(), 0);
+      
+      // Set initial dynamic data after editor is ready
+      setTimeout(() => updateDynamicData(), 0);
     }
   });
 
@@ -195,7 +198,7 @@
     lang;
     
     if (editor) {
-      updateAndRefresh();
+      updateDynamicData();
     }
   });
 
@@ -239,26 +242,6 @@
 
     <EssentialSection note={t.introEditor.sidePanel.essentialNote}>
       <CheckboxItem
-        bind:checked={checkAuthorIdentity}
-        label={t.introEditor.sidePanel.checkboxes.authorIdentity.title}
-        description={t.introEditor.sidePanel.checkboxes.authorIdentity.description}
-        essential
-      />
-      <CheckboxItem
-        bind:checked={checkSecretHolders}
-        label={t.introEditor.sidePanel.checkboxes.secretHolders.title}
-        description={t.introEditor.sidePanel.checkboxes.secretHolders.description}
-        essential
-        readonly={hasRecipientsBlock}
-      />
-      <CheckboxItem
-        bind:checked={checkOpeningConditions}
-        label={t.introEditor.sidePanel.checkboxes.openingConditions.title}
-        description={t.introEditor.sidePanel.checkboxes.openingConditions.description}
-        essential
-        readonly={hasConditionsBlock}
-      />
-      <CheckboxItem
         bind:checked={checkDated}
         label={t.introEditor.sidePanel.checkboxes.dated.title}
         description={t.introEditor.sidePanel.checkboxes.dated.description}
@@ -271,6 +254,26 @@
         description={t.introEditor.sidePanel.checkboxes.quorum.description}
         essential
         readonly={hasQuorumInline}
+      />
+      <CheckboxItem
+        bind:checked={checkOpeningConditions}
+        label={t.introEditor.sidePanel.checkboxes.openingConditions.title}
+        description={t.introEditor.sidePanel.checkboxes.openingConditions.description}
+        essential
+        readonly={hasConditionsBlock}
+      />
+      <CheckboxItem
+        bind:checked={checkSecretHolders}
+        label={t.introEditor.sidePanel.checkboxes.secretHolders.title}
+        description={t.introEditor.sidePanel.checkboxes.secretHolders.description}
+        essential
+        readonly={hasRecipientsBlock}
+      />
+      <CheckboxItem
+        bind:checked={checkAuthorIdentity}
+        label={t.introEditor.sidePanel.checkboxes.authorIdentity.title}
+        description={t.introEditor.sidePanel.checkboxes.authorIdentity.description}
+        essential
       />
     </EssentialSection>
 

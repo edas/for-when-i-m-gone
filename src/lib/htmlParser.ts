@@ -8,7 +8,7 @@ import type { JSONContent } from '@tiptap/core';
 /**
  * Parse inline content (text, bold, italic, underline) from an element
  */
-export function parseInlineContent(el: Element): JSONContent[] {
+function parseInlineContent(el: Element): JSONContent[] {
   const result: JSONContent[] = [];
   
   el.childNodes.forEach((node) => {
@@ -48,7 +48,7 @@ export function parseInlineContent(el: Element): JSONContent[] {
 /**
  * Parse list items (li elements) from a list element
  */
-export function parseListItems(el: Element): JSONContent[] {
+function parseListItems(el: Element): JSONContent[] {
   const items: JSONContent[] = [];
   
   el.querySelectorAll(':scope > li').forEach((li) => {

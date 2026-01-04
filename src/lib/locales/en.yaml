@@ -140,8 +140,8 @@ introEditor:
         title: Author identity
         description: Your full name so recipients know who this message is from
       secretHolders:
-        title: List of secret holders
-        description: Names and full contact details (phone, email, postal address, social media) of people who hold a part of the secret
+        title: List of recipients
+        description: Names and full contact details (phone, email, postal address, social media) of recipients
       openingConditions:
         title: Opening conditions
         description: Situations in which the secret should be opened (death, incapacity, etc.) and those where it should NOT (simple travel, temporary hospitalization, etc.)

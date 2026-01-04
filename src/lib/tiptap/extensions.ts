@@ -1,15 +1,63 @@
 /**
  * Custom TipTap extensions for non-editable atomic blocks and inline elements
  * 
- * These extensions read dynamic data from dataProvider instead of storing
- * data in node attributes, keeping the TipTap JSON clean.
+ * Uses factory functions with closures to capture dynamic data,
+ * and NodeViews for reactive rendering when data changes.
  */
 
-import { Node, mergeAttributes, type Editor } from '@tiptap/core';
+import { Node, mergeAttributes, type Editor, Extension } from '@tiptap/core';
 import type { JSONContent } from '@tiptap/core';
 import { generateHTML } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
-import { dynamicData } from './dataProvider';
+import type { Recipient } from '../types/recipient';
+import type { Language } from '../i18n';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+/**
+ * Contact type labels for rendering recipients
+ */
+interface ContactTypeLabels {
+  phone: string;
+  email: string;
+  address: string;
+  x: string;
+  bluesky: string;
+  mastodon: string;
+  facebook: string;
+  telegram: string;
+  whatsapp: string;
+  signal: string;
+  instagram: string;
+  snapchat: string;
+  linkedin: string;
+  web: string;
+  other: string;
+}
+
+/**
+ * Dynamic data passed to extension factories
+ */
+interface DynamicExtensionData {
+  recipients: Recipient[];
+  conditions: JSONContent | null;
+  threshold: number;
+  lang: Language;
+  contactTypeLabels: ContactTypeLabels;
+}
+
+/**
+ * Storage interface for dynamic data extension
+ */
+interface DynamicDataStorage {
+  data: DynamicExtensionData;
+}
+
+// ============================================================================
+// Utilities
+// ============================================================================
 
 /**
  * Check if a node type already exists in the editor document
@@ -19,11 +67,27 @@ function hasNodeTypeInEditor(editor: Editor, nodeType: string): boolean {
   editor.state.doc.descendants((node) => {
     if (node.type.name === nodeType) {
       found = true;
-      return false; // Stop traversal
+      return false;
     }
     return true;
   });
   return found;
+}
+
+/**
+ * Helper to check if recipients block exists in an editor
+ */
+export function hasRecipientsBlock(editor: Editor | null): boolean {
+  if (!editor) return false;
+  return hasNodeTypeInEditor(editor, 'recipientsBlock');
+}
+
+/**
+ * Helper to check if conditions block exists in an editor
+ */
+export function hasConditionsBlock(editor: Editor | null): boolean {
+  if (!editor) return false;
+  return hasNodeTypeInEditor(editor, 'conditionsBlock');
 }
 
 /**
@@ -44,26 +108,6 @@ export function hasNodeTypeInJSON(json: JSONContent | null, nodeType: string): b
   
   return searchNode(json);
 }
-
-/**
- * Helper to check if recipients block exists in an editor
- */
-export function hasRecipientsBlock(editor: Editor | null): boolean {
-  if (!editor) return false;
-  return hasNodeTypeInEditor(editor, 'recipientsBlock');
-}
-
-/**
- * Helper to check if conditions block exists in an editor
- */
-export function hasConditionsBlock(editor: Editor | null): boolean {
-  if (!editor) return false;
-  return hasNodeTypeInEditor(editor, 'conditionsBlock');
-}
-
-// ============================================================================
-// HTML Generation Utilities
-// ============================================================================
 
 /**
  * Escape HTML special characters
@@ -87,62 +131,282 @@ const starterKitConfig = StarterKit.configure({
   heading: false,
 });
 
+// ============================================================================
+// HTML Generation Functions (closures over data)
+// ============================================================================
+
 /**
- * Generate HTML for the recipients list from dynamicData
+ * Create a function that generates recipients HTML from captured data
  */
-function generateRecipientsHtml(): string {
-  const { recipients, contactTypeLabels, lang } = dynamicData;
-  
-  // Filter out recipients that are marked as private
-  const publicRecipients = recipients.filter((r) => !r.isPrivate);
-  
-  if (publicRecipients.length === 0) return '';
-  
-  // French typography: non-breaking space before colon; English: no space
-  const colonSeparator = lang === 'fr' ? '\u00A0: ' : ': ';
+function createRecipientsRenderer(getData: () => DynamicExtensionData): () => RenderResult {
+  return () => {
+    const { recipients, contactTypeLabels, lang } = getData();
+    
+    const publicRecipients = recipients.filter((r) => !r.isPrivate);
+    
+    // No recipients at all - show placeholder
+    if (recipients.length === 0) {
+      return { hasData: false, html: '' };
+    }
+    
+    // Has recipients (even if all private or no displayable info) - don't show placeholder
+    const colonSeparator = lang === 'fr' ? '\u00A0: ' : ': ';
 
-  const items = publicRecipients
-    .map((recipient) => {
-      const contactParts = recipient.contacts
-        .filter((c) => c.value.trim())
-        .map((contact) => {
-          const label = contactTypeLabels[contact.type as keyof typeof contactTypeLabels] || contact.type;
-          const valueStr =
-            contact.type !== 'other'
-              ? `${label}${colonSeparator}${escapeHtml(contact.value)}`
-              : escapeHtml(contact.value);
-          return contact.comment.trim()
-            ? `${valueStr} (${escapeHtml(contact.comment)})`
-            : valueStr;
-        });
+    const items = publicRecipients
+      .map((recipient) => {
+        const contactParts = recipient.contacts
+          .filter((c) => c.value.trim())
+          .map((contact) => {
+            const label = contactTypeLabels[contact.type as keyof typeof contactTypeLabels] || contact.type;
+            const valueStr =
+              contact.type !== 'other'
+                ? `${label}${colonSeparator}${escapeHtml(contact.value)}`
+                : escapeHtml(contact.value);
+            return contact.comment.trim()
+              ? `${valueStr} (${escapeHtml(contact.comment)})`
+              : valueStr;
+          });
 
-      if (!recipient.name.trim() && contactParts.length === 0) return null;
+        if (!recipient.name.trim() && contactParts.length === 0) return null;
 
-      const namePart = recipient.name.trim()
-        ? `<strong>${escapeHtml(recipient.name)}</strong>`
-        : '';
-      const separator = namePart && contactParts.length > 0 ? ' — ' : '';
+        const namePart = recipient.name.trim()
+          ? `<strong>${escapeHtml(recipient.name)}</strong>`
+          : '';
+        const separator = namePart && contactParts.length > 0 ? ' — ' : '';
 
-      return `<li>${namePart}${separator}${contactParts.join(' — ')}</li>`;
-    })
-    .filter(Boolean);
+        return `<li>${namePart}${separator}${contactParts.join(' — ')}</li>`;
+      })
+      .filter(Boolean);
 
-  return items.length > 0 ? `<ul>${items.join('')}</ul>` : '';
+    const html = items.length > 0 ? `<ul>${items.join('')}</ul>` : '';
+    return { hasData: true, html };
+  };
 }
 
 /**
- * Generate HTML for conditions from dynamicData
+ * Create a function that generates conditions HTML from captured data
  */
-function generateConditionsHtml(): string {
-  const { conditions } = dynamicData;
-  if (!conditions) return '';
-  
-  try {
-    return generateHTML(conditions, [starterKitConfig]);
-  } catch (e) {
-    console.error('Failed to render conditions:', e);
-    return '';
+function createConditionsRenderer(getData: () => DynamicExtensionData): () => RenderResult {
+  return () => {
+    const { conditions } = getData();
+    
+    // No conditions data - show placeholder
+    if (!conditions) {
+      return { hasData: false, html: '' };
+    }
+    
+    // Has conditions data - render it
+    try {
+      const html = generateHTML(conditions, [starterKitConfig]);
+      return { hasData: true, html };
+    } catch (e) {
+      console.error('Failed to render conditions:', e);
+      return { hasData: true, html: '' };
+    }
+  };
+}
+
+// ============================================================================
+// Dynamic Data Extension
+// ============================================================================
+
+/**
+ * Extension that stores dynamic data and provides commands to update it
+ */
+export const DynamicDataExtension = Extension.create<{}, DynamicDataStorage>({
+  name: 'dynamicData',
+
+  addStorage() {
+    return {
+      data: {
+        recipients: [],
+        conditions: null,
+        threshold: 0,
+        lang: 'en' as Language,
+        contactTypeLabels: {
+          phone: 'Phone',
+          email: 'Email',
+          address: 'Address',
+          x: 'X',
+          bluesky: 'Bluesky',
+          mastodon: 'Mastodon',
+          facebook: 'Facebook',
+          telegram: 'Telegram',
+          whatsapp: 'WhatsApp',
+          signal: 'Signal',
+          instagram: 'Instagram',
+          snapchat: 'Snapchat',
+          linkedin: 'LinkedIn',
+          web: 'Web',
+          other: 'Other',
+        },
+      },
+    };
+  },
+
+  addCommands() {
+    return {
+      setDynamicData: (data: Partial<DynamicExtensionData>) => ({ editor }) => {
+        Object.assign(editor.storage.dynamicData.data, data);
+        // Update all registered NodeViews with new data
+        updateAllNodeViews(editor);
+        return true;
+      },
+    };
+  },
+});
+
+/**
+ * Get dynamic data from editor storage
+ */
+function getDataFromEditor(editor: Editor): DynamicExtensionData {
+  return editor.storage.dynamicData?.data ?? {
+    recipients: [],
+    conditions: null,
+    threshold: 0,
+    lang: 'en',
+    contactTypeLabels: {} as ContactTypeLabels,
+  };
+}
+
+// ============================================================================
+// NodeView Registry (for reactive updates)
+// ============================================================================
+
+/**
+ * Registry of active NodeView render functions, keyed by editor instance
+ * This allows us to update all NodeViews when dynamic data changes
+ */
+const nodeViewRegistry = new WeakMap<Editor, Set<() => void>>();
+
+/**
+ * Register a NodeView render function for an editor
+ */
+function registerNodeView(editor: Editor, renderFn: () => void): void {
+  if (!nodeViewRegistry.has(editor)) {
+    nodeViewRegistry.set(editor, new Set());
   }
+  nodeViewRegistry.get(editor)!.add(renderFn);
+}
+
+/**
+ * Unregister a NodeView render function
+ */
+function unregisterNodeView(editor: Editor, renderFn: () => void): void {
+  nodeViewRegistry.get(editor)?.delete(renderFn);
+}
+
+/**
+ * Update all registered NodeViews for an editor
+ */
+function updateAllNodeViews(editor: Editor): void {
+  const renderFns = nodeViewRegistry.get(editor);
+  if (renderFns) {
+    renderFns.forEach(fn => fn());
+  }
+}
+
+// ============================================================================
+// NodeView Helpers
+// ============================================================================
+
+/**
+ * Create a block NodeView with reactive rendering
+ */
+/**
+ * Result of rendering dynamic content
+ * - hasData: true if there's source data (even if nothing to display)
+ * - html: the generated HTML content
+ */
+interface RenderResult {
+  hasData: boolean;
+  html: string;
+}
+
+function createBlockNodeView(
+  className: string,
+  dataType: string,
+  renderContent: (data: DynamicExtensionData) => RenderResult,
+  placeholderIcon: string,
+  placeholderLabel: string
+) {
+  return ({ editor }: { editor: Editor }) => {
+    const dom = document.createElement('div');
+    dom.setAttribute('data-type', dataType);
+    dom.className = className;
+    dom.contentEditable = 'false';
+
+    const render = () => {
+      const data = getDataFromEditor(editor);
+      const { hasData, html } = renderContent(data);
+      
+      if (hasData) {
+        // Data exists - show content (even if empty)
+        dom.innerHTML = html 
+          ? `<div class="${className.replace('block', 'content')}">${html}</div>`
+          : `<div class="${className.replace('block', 'content')}"></div>`;
+      } else {
+        // No data - show placeholder
+        dom.innerHTML = `<span class="block-icon">${placeholderIcon}</span><span class="block-label">${placeholderLabel}</span>`;
+      }
+    };
+
+    // Register this NodeView for reactive updates
+    registerNodeView(editor, render);
+
+    // Initial render
+    render();
+
+    return {
+      dom,
+      update: () => {
+        render();
+        return true;
+      },
+      destroy: () => {
+        unregisterNodeView(editor, render);
+      },
+      ignoreMutation: () => true,
+    };
+  };
+}
+
+/**
+ * Create an inline NodeView with reactive rendering
+ */
+function createInlineNodeView(
+  className: string,
+  dataType: string,
+  renderContent: (data: DynamicExtensionData) => string
+) {
+  return ({ editor }: { editor: Editor }) => {
+    const dom = document.createElement('span');
+    dom.setAttribute('data-type', dataType);
+    dom.className = className;
+    dom.contentEditable = 'false';
+
+    const render = () => {
+      const data = getDataFromEditor(editor);
+      dom.textContent = renderContent(data);
+    };
+
+    // Register this NodeView for reactive updates
+    registerNodeView(editor, render);
+
+    render();
+
+    return {
+      dom,
+      update: () => {
+        render();
+        return true;
+      },
+      destroy: () => {
+        unregisterNodeView(editor, render);
+      },
+      ignoreMutation: () => true,
+    };
+  };
 }
 
 // ============================================================================
@@ -151,7 +415,6 @@ function generateConditionsHtml(): string {
 
 /**
  * RecipientsBlock - Atomic block for displaying the list of recipients
- * Reads data from dynamicData.recipients instead of node attributes
  */
 export const RecipientsBlock = Node.create({
   name: 'recipientsBlock',
@@ -165,36 +428,29 @@ export const RecipientsBlock = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    const html = generateRecipientsHtml();
-    const hasData = html.length > 0;
-
-    const attrs = mergeAttributes(HTMLAttributes, {
-      'data-type': 'recipients-block',
-      'class': 'recipients-block',
-      'contenteditable': 'false',
-    });
-
-    if (hasData) {
-      // Return structure with content div - innerHTML will be set via NodeView or DOM update
-      const wrapper = document.createElement('div');
-      Object.entries(attrs).forEach(([key, value]) => {
-        wrapper.setAttribute(key, value as string);
-      });
-      const contentDiv = document.createElement('div');
-      contentDiv.className = 'recipients-content';
-      contentDiv.innerHTML = html;
-      wrapper.appendChild(contentDiv);
-      
-      return ['div', attrs, ['div', { class: 'recipients-content' }]];
-    }
-
-    // Placeholder content
     return [
       'div',
-      attrs,
+      mergeAttributes(HTMLAttributes, {
+        'data-type': 'recipients-block',
+        'class': 'recipients-block',
+        'contenteditable': 'false',
+      }),
       ['span', { class: 'block-icon' }, '👥'],
       ['span', { class: 'block-label' }, 'Liste des destinataires'],
     ];
+  },
+
+  addNodeView() {
+    return createBlockNodeView(
+      'recipients-block',
+      'recipients-block',
+      (data) => {
+        const renderHtml = createRecipientsRenderer(() => data);
+        return renderHtml();
+      },
+      '👥',
+      'Liste des destinataires'
+    );
   },
 
   addCommands() {
@@ -216,7 +472,6 @@ export const RecipientsBlock = Node.create({
 
 /**
  * ConditionsBlock - Atomic block for displaying the opening conditions
- * Reads data from dynamicData.conditions instead of node attributes
  */
 export const ConditionsBlock = Node.create({
   name: 'conditionsBlock',
@@ -230,21 +485,28 @@ export const ConditionsBlock = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    const html = generateConditionsHtml();
-    const hasData = html.length > 0;
+    return [
+      'div',
+      mergeAttributes(HTMLAttributes, {
+        'data-type': 'conditions-block',
+        'class': 'conditions-block',
+        'contenteditable': 'false',
+      }),
+      "Conditions d'ouverture",
+    ];
+  },
 
-    const attrs = mergeAttributes(HTMLAttributes, {
-      'data-type': 'conditions-block',
-      'class': 'conditions-block',
-      'contenteditable': 'false',
-    });
-
-    if (hasData) {
-      return ['div', attrs, ['div', { class: 'conditions-content' }]];
-    }
-
-    // Placeholder content
-    return ['div', attrs, "Conditions d'ouverture"];
+  addNodeView() {
+    return createBlockNodeView(
+      'conditions-block',
+      'conditions-block',
+      (data) => {
+        const renderHtml = createConditionsRenderer(() => data);
+        return renderHtml();
+      },
+      '📋',
+      "Conditions d'ouverture"
+    );
   },
 
   addCommands() {
@@ -270,7 +532,6 @@ export const ConditionsBlock = Node.create({
 
 /**
  * DateTimeInline - Inline element for displaying today's date and time
- * Non-editable, can be inserted anywhere inline with text
  */
 export const DateTimeInline = Node.create({
   name: 'dateTimeInline',
@@ -307,6 +568,27 @@ export const DateTimeInline = Node.create({
     ];
   },
 
+  addNodeView() {
+    return createInlineNodeView(
+      'datetime-inline',
+      'datetime-inline',
+      () => {
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString(undefined, {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+        const formattedTime = now.toLocaleTimeString(undefined, {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+        return `${formattedDate}, ${formattedTime}`;
+      }
+    );
+  },
+
   addCommands() {
     return {
       insertDateTimeInline:
@@ -320,7 +602,6 @@ export const DateTimeInline = Node.create({
 
 /**
  * QuorumInline - Inline element for displaying the required quorum
- * Reads threshold from dynamicData instead of node attributes
  */
 export const QuorumInline = Node.create({
   name: 'quorumInline',
@@ -334,9 +615,6 @@ export const QuorumInline = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    const { threshold } = dynamicData;
-    const displayText = threshold > 0 ? String(threshold) : '[Quorum]';
-
     return [
       'span',
       mergeAttributes(HTMLAttributes, {
@@ -344,8 +622,19 @@ export const QuorumInline = Node.create({
         'class': 'quorum-inline',
         'contenteditable': 'false',
       }),
-      displayText,
+      '[Quorum]',
     ];
+  },
+
+  addNodeView() {
+    return createInlineNodeView(
+      'quorum-inline',
+      'quorum-inline',
+      (data) => {
+        const threshold = data.threshold;
+        return threshold > 0 ? String(threshold) : '[Quorum]';
+      }
+    );
   },
 
   addCommands() {
@@ -377,5 +666,12 @@ declare module '@tiptap/core' {
     quorumInline: {
       insertQuorumInline: () => ReturnType;
     };
+    dynamicData: {
+      setDynamicData: (data: Partial<DynamicExtensionData>) => ReturnType;
+    };
+  }
+  
+  interface Storage {
+    dynamicData: DynamicDataStorage;
   }
 }

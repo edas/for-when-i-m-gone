@@ -141,8 +141,8 @@ introEditor:
         title: Identité de l'auteur du message
         description: Votre nom complet pour que les destinataires sachent de qui provient ce message
       secretHolders:
-        title: Liste des détenteurs du secret
-        description: Noms et coordonnées complètes (téléphone, email, adresse postale, réseaux sociaux) des personnes qui détiennent une partie du secret
+        title: Liste des destinataires
+        description: Noms et coordonnées complètes (téléphone, email, adresse postale, réseaux sociaux) des destinataires
       openingConditions:
         title: Conditions d'ouverture
         description: Les situations dans lesquelles le secret doit être ouvert (décès, incapacité, etc.) et celles où il ne doit PAS l'être (simple voyage, hospitalisation temporaire, etc.)

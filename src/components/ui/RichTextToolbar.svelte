@@ -1,9 +1,7 @@
 <script lang="ts">
   import type { Editor } from '@tiptap/core';
   import { hasRecipientsBlock, hasConditionsBlock } from '../../lib/tiptap/extensions';
-  import Icon from './Icons.svelte';
-
-  type IconName = 'heading' | 'paragraph' | 'bold' | 'italic' | 'underline' | 'list-bullet' | 'list-numbered' | 'users' | 'lock' | 'calendar' | 'quorum';
+  import Icon, { type IconName } from './Icons.svelte';
 
   interface BaseLabels {
     bold: string;
@@ -93,7 +91,7 @@
   }
 
   function insertQuorumInline(): void {
-    editor?.chain().focus().insertQuorumInline({ threshold }).run();
+    editor?.chain().focus().insertQuorumInline().run();
   }
 
   interface ToolbarButton {
@@ -127,10 +125,10 @@
   let insertButtons: ToolbarButton[] | null = $derived(
     !compact && isFullLabels(labels)
       ? [
-          { icon: 'users', label: labels.insertRecipients, action: insertRecipientsBlock, disabled: recipientsBlockExists },
-          { icon: 'lock', label: labels.insertConditions, action: insertConditionsBlock, disabled: conditionsBlockExists },
-          { icon: 'calendar', label: labels.insertDateTime, action: insertDateTimeInline },
-          { icon: 'quorum', label: labels.insertQuorum, action: insertQuorumInline },
+        { icon: 'calendar', label: labels.insertDateTime, action: insertDateTimeInline },
+        { icon: 'quorum', label: labels.insertQuorum, action: insertQuorumInline },    
+        { icon: 'lock', label: labels.insertConditions, action: insertConditionsBlock, disabled: conditionsBlockExists },
+        { icon: 'users', label: labels.insertRecipients, action: insertRecipientsBlock, disabled: recipientsBlockExists },
         ]
       : null
   );
@@ -278,10 +276,10 @@
 
   /* Already inserted buttons show as "done" */
   .insert-btn.already-inserted {
-    color: #4ade80;
-    opacity: 0.6;
-    background: rgba(74, 222, 128, 0.1);
-    border-color: rgba(74, 222, 128, 0.2);
+    color: #93c5fd;
+    background: rgba(96, 165, 250, 0.1);
+    border-color: rgba(96, 165, 250, 0.2);
+    opacity: 1;
   }
 
   @media (max-width: 600px) {

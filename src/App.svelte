@@ -9,28 +9,7 @@
   import StepIndicator from './components/ui/StepIndicator.svelte';
   import { detectLanguage, getTranslations, type Language } from './lib/i18n';
   import { getStoredData, updateStoredData } from './lib/dataStore';
-
-  // Default checkbox states
-  const defaultSecretCheckboxState: SecretCheckboxState = {
-    emails: false,
-    phoneCodes: false,
-    cloudAccounts: false,
-    computerLogins: false,
-    otherPasswords: false,
-    domainManager: false,
-    passwordManager: false,
-    backups: false,
-    crypto: false,
-  };
-
-  const defaultIntroCheckboxState: IntroCheckboxState = {
-    authorIdentity: false,
-    secretHolders: false,
-    openingConditions: false,
-    dated: false,
-    quorum: false,
-    directives: false,
-  };
+  import { defaultSecretCheckboxState, defaultIntroCheckboxState } from './lib/types/editorTypes';
 
   const defaultHowData: Partial<HowData> = {
     conditions: null,
