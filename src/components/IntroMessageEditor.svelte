@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
   import type { Editor, JSONContent } from '@tiptap/core';
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
   import { updateStoredDataDebounced } from '../lib/dataStore';
+  import { type IntroCheckboxState, defaultIntroCheckboxState } from '../lib/types/editorTypes';
   import { RecipientsBlock, ConditionsBlock, DateTimeInline, QuorumInline, hasNodeTypeInJSON } from '../lib/tiptap/extensions';
   import { createTiptapEditor } from '../lib/tiptap/createEditor';
   import { hasJsonContent, updateNodeAttrs } from '../lib/tiptap/utils';
@@ -30,23 +31,8 @@
   import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
   import '../styles/tiptap-editor.css';
 
-  export interface IntroCheckboxState {
-    authorIdentity: boolean;
-    secretHolders: boolean;
-    openingConditions: boolean;
-    dated: boolean;
-    quorum: boolean;
-    directives: boolean;
-  }
-
-  export const defaultIntroCheckboxState: IntroCheckboxState = {
-    authorIdentity: false,
-    secretHolders: false,
-    openingConditions: false,
-    dated: false,
-    quorum: false,
-    directives: false,
-  };
+  export type { IntroCheckboxState };
+  export { defaultIntroCheckboxState };
 
   interface Props {
     lang: Language;
@@ -85,7 +71,7 @@
       directives: saved?.directives ?? false,
     };
   }
-  const initCheckboxes = getInitialCheckboxStates(initialContent, initialCheckboxState);
+  const initCheckboxes = untrack(() => getInitialCheckboxStates(initialContent, initialCheckboxState));
 
   // Checkbox states
   let checkAuthorIdentity: boolean = $state(initCheckboxes.authorIdentity);

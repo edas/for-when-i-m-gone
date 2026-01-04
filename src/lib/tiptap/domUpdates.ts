@@ -14,7 +14,7 @@ import type { Recipient } from '../types/recipient';
 /**
  * Escape HTML special characters
  */
-export function escapeHtml(text: string): string {
+function escapeHtml(text: string): string {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
@@ -193,7 +193,7 @@ export interface GenerateRecipientsHtmlOptions {
 /**
  * Generate HTML for recipients list
  */
-export function generateRecipientsHtml(
+function generateRecipientsHtml(
   recipientsList: Recipient[],
   options: GenerateRecipientsHtmlOptions
 ): string {

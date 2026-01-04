@@ -207,32 +207,3 @@ howEditor:
   buttons:
     continueWithoutEssentials: Continue without essentials
     continue: Continue
-
-thresholdSelector:
-  title: Required number of people
-  subtitle: How many people must gather together to reconstruct the secret?
-  sidePanel:
-    title: Choosing the right number
-    collapse: Collapse
-    expand: Tips
-    intro: >-
-      A number between 3 and 4 is generally a good compromise between security and practicality.
-    warningTooSmall:
-      title: Not too small
-      text: >-
-        A number that is too small makes it easier for one or more malicious individuals 
-        to access the secret. You should imagine the trust you will have in several years, 
-        not today's trust. Sometimes people change or fall out. 
-        Sometimes they are manipulated or deceived by third parties.
-    warningTooLarge:
-      title: Nor too large
-      text: >-
-        A number that is too large makes recovery implementation difficult. 
-        Consider that some people may have passed away, some relationships 
-        will be broken, or simply contacts will have changed and people will no longer 
-        be reachable. Therefore, you probably want a number lower than the total number 
-        of people who will receive a part of the secret.
-  errorOne: >-
-    If only one person is sufficient, simply transmit your secret in plain text, 
-    without using this program.
-  continueButton: Continue

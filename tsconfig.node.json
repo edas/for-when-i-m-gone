@@ -9,11 +9,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "moduleDetection": "force",
+    "composite": true,
     "strict": true,
+    "emitDeclarationOnly": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts"],
-  "composite": true,
+  "include": ["vite.config.ts"]
 }

@@ -18,16 +18,6 @@ export interface DragDropState {
 }
 
 /**
- * Create drag-and-drop state with initial values
- */
-export function createDragDropState(): DragDropState {
-  return {
-    draggedItemId: null,
-    activeDropZone: null,
-  };
-}
-
-/**
  * Handle drag start event
  */
 export function handleDragStart(

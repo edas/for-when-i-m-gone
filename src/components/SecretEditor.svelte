@@ -3,6 +3,7 @@
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
   import { updateStoredDataDebounced } from '../lib/dataStore';
+  import { type SecretCheckboxState, defaultSecretCheckboxState } from '../lib/types/editorTypes';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
@@ -10,29 +11,8 @@
   import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
   import '../styles/form-controls.css';
 
-  export interface SecretCheckboxState {
-    emails: boolean;
-    phoneCodes: boolean;
-    cloudAccounts: boolean;
-    computerLogins: boolean;
-    otherPasswords: boolean;
-    domainManager: boolean;
-    passwordManager: boolean;
-    backups: boolean;
-    crypto: boolean;
-  }
-
-  export const defaultSecretCheckboxState: SecretCheckboxState = {
-    emails: false,
-    phoneCodes: false,
-    cloudAccounts: false,
-    computerLogins: false,
-    otherPasswords: false,
-    domainManager: false,
-    passwordManager: false,
-    backups: false,
-    crypto: false,
-  };
+  export type { SecretCheckboxState };
+  export { defaultSecretCheckboxState };
 
   interface Props {
     lang: Language;

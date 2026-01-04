@@ -208,32 +208,3 @@ howEditor:
   buttons:
     continueWithoutEssentials: Continuer sans les essentiels
     continue: Continuer
-
-thresholdSelector:
-  title: Nombre de personnes requises
-  subtitle: Combien de personnes doivent se réunir ensemble pour reconstituer le secret ?
-  sidePanel:
-    title: Choisir le bon nombre
-    collapse: Replier
-    expand: Conseils
-    intro: >-
-      Un nombre entre 3 et 4 est généralement un bon compromis entre sécurité et praticité.
-    warningTooSmall:
-      title: Pas trop petit
-      text: >-
-        Un nombre trop petit permet plus facilement à une ou plusieurs personnes malveillantes 
-        d'accéder au secret. Il faut imaginer la confiance qu'on aura dans plusieurs années, 
-        pas celle d'aujourd'hui. Parfois les personnes changent ou se déchirent. 
-        Parfois elles sont manipulées ou trompées par des tiers.
-    warningTooLarge:
-      title: Ni trop grand
-      text: >-
-        Un trop grand nombre rend difficile la mise en œuvre de la récupération. 
-        Il faut penser que certaines personnes auront peut-être disparu, ou certaines 
-        relations seront rompues, ou simplement les contacts auront changé et les personnes 
-        ne seront plus joignables. Il est donc probable qu'on veuille un nombre inférieur 
-        au nombre de personnes qui seront destinataires d'une partie du secret.
-  errorOne: >-
-    Si une seule personne suffit, transmettez simplement votre secret en clair, 
-    sans utiliser ce programme.
-  continueButton: Continuer

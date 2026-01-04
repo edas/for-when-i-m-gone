@@ -4,6 +4,7 @@
   import { getTranslations, type Language } from '../lib/i18n';
   import { updateStoredDataDebounced } from '../lib/dataStore';
   import { type ButtonState } from '../lib/buttonState';
+  import { type HowData } from '../lib/types/editorTypes';
   import { parseHtmlToJson } from '../lib/htmlParser';
   import { createTiptapEditor } from '../lib/tiptap/createEditor';
   import { hasJsonContent } from '../lib/tiptap/utils';
@@ -18,12 +19,7 @@
   import '../styles/tiptap-editor.css';
   import '../styles/how-editor.css';
 
-  export interface HowData {
-    threshold: number;
-    conditions: JSONContent | null;
-    hasNoOpenConditions: boolean;
-    isConditionsUnmodified?: boolean;
-  }
+  export type { HowData };
 
   interface Props {
     lang: Language;
@@ -56,10 +52,10 @@
     initialData?.conditions ?? getDefaultConditions()
   ));
   
-  const initialIsUnmodified = initialData?.isConditionsUnmodified ?? !initialData?.conditions;
+  const initialIsUnmodified = untrack(() => initialData?.isConditionsUnmodified ?? !initialData?.conditions);
   let isConditionsUnmodified: boolean = $state(initialIsUnmodified);
   let hasNoOpenConditions: boolean = $state(
-    initialIsUnmodified ? true : (initialData?.hasNoOpenConditions ?? false)
+    untrack(() => initialIsUnmodified ? true : (initialData?.hasNoOpenConditions ?? false))
   );
   let programmaticUpdateInProgress = false;
   let sidePanelOpen: boolean = $state(true);
