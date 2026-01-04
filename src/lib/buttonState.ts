@@ -10,17 +10,30 @@ export function computeButtonState(
   return 'complete';
 }
 
+/**
+ * Compute button state for editors with custom validation logic
+ * @param canContinue - Whether the form can be continued
+ * @param allEssentialsChecked - Whether all essential requirements are met
+ */
+export function computeButtonStateCustom(
+  canContinue: boolean,
+  allEssentialsChecked: boolean
+): ButtonState {
+  if (!canContinue) return 'none';
+  return allEssentialsChecked ? 'complete' : 'partial';
+}
+
 export function getButtonText(
   buttonState: ButtonState,
   texts: {
-    continueWithoutConfirm: string;
+    continueWithoutConfirm?: string;
     continueWithoutEssentials: string;
     continue: string;
   }
 ): string {
   switch (buttonState) {
     case 'none':
-      return texts.continueWithoutConfirm;
+      return texts.continueWithoutConfirm ?? texts.continue;
     case 'partial':
       return texts.continueWithoutEssentials;
     case 'complete':

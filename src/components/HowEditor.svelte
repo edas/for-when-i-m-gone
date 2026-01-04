@@ -2,12 +2,13 @@
   import { onDestroy, untrack } from 'svelte';
   import type { Editor, JSONContent } from '@tiptap/core';
   import { getTranslations, type Language } from '../lib/i18n';
-  import { updateStoredDataDebounced } from '../lib/dataStore';
-  import { type ButtonState } from '../lib/buttonState';
+  import { autoSave } from '../lib/editorComposable';
+  import { computeButtonStateCustom, getButtonText, type ButtonState } from '../lib/buttonState';
   import { type HowData } from '../lib/types/editorTypes';
   import { parseHtmlToJson } from '../lib/htmlParser';
   import { createTiptapEditor } from '../lib/tiptap/createEditor';
   import { hasJsonContent } from '../lib/tiptap/utils';
+  import { generateExampleInEditor } from '../lib/tiptap/editorHelpers';
   import EditorLayout from './ui/EditorLayout.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
@@ -18,8 +19,6 @@
   import Icon from './ui/Icons.svelte';
   import '../styles/tiptap-editor.css';
   import '../styles/how-editor.css';
-
-  export type { HowData };
 
   interface Props {
     lang: Language;
@@ -99,15 +98,12 @@
 
   let canContinue = $derived(isValidThreshold && !isTooHigh);
 
-  let buttonState = $derived.by((): ButtonState => {
-    if (!canContinue) return 'none';
-    return allEssentialsChecked ? 'complete' : 'partial';
-  });
-
+  let buttonState = $derived(computeButtonStateCustom(canContinue, allEssentialsChecked));
   let buttonText = $derived(
-    canContinue
-      ? (allEssentialsChecked ? t.howEditor.buttons.continue : t.howEditor.buttons.continueWithoutEssentials)
-      : t.howEditor.buttons.continue
+    getButtonText(buttonState, {
+      continueWithoutEssentials: t.howEditor.buttons.continueWithoutEssentials,
+      continue: t.howEditor.buttons.continue,
+    })
   );
 
   function getCurrentData(): HowData {
@@ -147,15 +143,9 @@
 
     programmaticUpdateInProgress = true;
 
-    if (hasConditions) {
-      editor.commands.setTextSelection(editor.state.doc.content.size);
-      editor.commands.insertContent([
-        { type: 'paragraph' },
-        { type: 'paragraph' },
-        ...exampleContent.content!,
-      ]);
-    } else {
-      editor.commands.setContent(exampleContent);
+    generateExampleInEditor(editor, exampleContent, hasConditions);
+    
+    if (!hasConditions) {
       isConditionsUnmodified = true;
       hasNoOpenConditions = true;
     }
@@ -196,7 +186,7 @@
 
   // Auto-save
   $effect(() => {
-    updateStoredDataDebounced({ how: getCurrentData() });
+    autoSave(getCurrentData, 'how');
   });
 </script>
 

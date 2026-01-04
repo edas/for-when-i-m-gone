@@ -2,7 +2,7 @@
   import { untrack } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
-  import { updateStoredDataDebounced } from '../lib/dataStore';
+  import { autoSave } from '../lib/editorComposable';
   import { type SecretCheckboxState, defaultSecretCheckboxState } from '../lib/types/editorTypes';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
@@ -10,8 +10,6 @@
   import EssentialSection from './ui/EssentialSection.svelte';
   import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
   import '../styles/form-controls.css';
-
-  export type { SecretCheckboxState };
 
   interface Props {
     lang: Language;
@@ -79,9 +77,7 @@
 
   // Auto-save
   $effect(() => {
-    updateStoredDataDebounced({
-      what: { content: secretText, checkboxState: getCurrentCheckboxState() },
-    });
+    autoSave(() => ({ content: secretText, checkboxState: getCurrentCheckboxState() }), 'what');
   });
 </script>
 

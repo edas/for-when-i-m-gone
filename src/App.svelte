@@ -1,15 +1,21 @@
 <script lang="ts">
   import type { JSONContent } from '@tiptap/core';
   import SecurityWarning from './components/SecurityWarning.svelte';
-  import SecretEditor, { type SecretCheckboxState } from './components/SecretEditor.svelte';
+  import SecretEditor from './components/SecretEditor.svelte';
   import WhoEditor from './components/WhoEditor.svelte';
   import type { Recipient } from './lib/types/recipient';
-  import HowEditor, { type HowData } from './components/HowEditor.svelte';
-  import IntroMessageEditor, { type IntroCheckboxState } from './components/IntroMessageEditor.svelte';
+  import HowEditor from './components/HowEditor.svelte';
+  import IntroMessageEditor from './components/IntroMessageEditor.svelte';
   import StepIndicator from './components/ui/StepIndicator.svelte';
   import { detectLanguage, getTranslations, type Language } from './lib/i18n';
   import { getStoredData, updateStoredData } from './lib/dataStore';
-  import { defaultSecretCheckboxState, defaultIntroCheckboxState } from './lib/types/editorTypes';
+  import { 
+    type SecretCheckboxState, 
+    type HowData, 
+    type IntroCheckboxState,
+    defaultSecretCheckboxState, 
+    defaultIntroCheckboxState 
+  } from './lib/types/editorTypes';
 
   const defaultHowData: Partial<HowData> = {
     conditions: null,

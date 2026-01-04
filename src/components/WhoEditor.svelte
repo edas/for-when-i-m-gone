@@ -1,8 +1,8 @@
 <script lang="ts">
   import { untrack, tick } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
-  import { updateStoredDataDebounced } from '../lib/dataStore';
-  import { type ButtonState } from '../lib/buttonState';
+  import { autoSave } from '../lib/editorComposable';
+  import { computeButtonStateCustom, getButtonText, type ButtonState } from '../lib/buttonState';
   import {
     handleDragStart as dndDragStart,
     handleDragEnd as dndDragEnd,
@@ -73,13 +73,12 @@
     r.contacts.some(c => c.type === 'phone' && c.value.trim())
   ));
 
-  let buttonState = $derived.by((): ButtonState => {
-    if (!hasAtLeast2) return 'none';
-    return allEssentialsChecked ? 'complete' : 'partial';
-  });
-  let buttonText = $derived(hasAtLeast2 
-    ? (allEssentialsChecked ? t.whoEditor.buttons.continue : t.whoEditor.buttons.continueWithoutEssentials)
-    : t.whoEditor.buttons.continue
+  let buttonState = $derived(computeButtonStateCustom(hasAtLeast2, allEssentialsChecked));
+  let buttonText = $derived(
+    getButtonText(buttonState, {
+      continueWithoutEssentials: t.whoEditor.buttons.continueWithoutEssentials,
+      continue: t.whoEditor.buttons.continue,
+    })
   );
 
   const CONTACT_TYPES: ContactType[] = [
@@ -168,7 +167,7 @@
 
   // Auto-save
   $effect(() => {
-    updateStoredDataDebounced({ who: { recipients } });
+    autoSave(() => ({ recipients }), 'who');
   });
 </script>
 

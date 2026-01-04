@@ -5,7 +5,7 @@
 import { Editor, type JSONContent, type AnyExtension } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 
-interface TiptapEditorOptions {
+export interface TiptapEditorOptions {
   element: HTMLElement;
   content: JSONContent | null;
   placeholder: string;

@@ -1,0 +1,17 @@
+---
+description: Générer du code lisible et maintenable
+globs: *.tsx,*.ts,*.js,*.svelte,*.jsx
+alwaysApply: false
+---
+
+# Générer du code lisible et maintenable
+
+Toujours:
+
+- **Limiter les changements** : S'il y a des tâches annexes possibles, demander si elles doivent être faites avant de les implémenter
+- **Favoriser la lisibilité et la maintenance** : Écrire du code clair, bien structuré et facile à comprendre
+- **Corriger les erreurs et alertes** : S'assurer qu'il n'y a pas d'erreurs de compilation ou de lint après les modifications
+- **Gérer les exports** : Vérifier que les nouveaux exports sont utiles et que les anciens exports inutiles sont supprimés
+- **Limiter les duplications** : Mutualiser le code qui peut l'être pour éviter la duplication
+- **Découper les fonctions** : Éviter les longues fonctions en les découpant en sous-fonctions plus petites et focalisées
+- **Découper les fichiers** : Externaliser des fonctions ou des composants pour éviter les fichiers trop longs
