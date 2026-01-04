@@ -2,7 +2,8 @@
   import type { JSONContent } from '@tiptap/core';
   import SecurityWarning from './components/SecurityWarning.svelte';
   import SecretEditor, { type SecretCheckboxState } from './components/SecretEditor.svelte';
-  import WhoEditor, { type Recipient } from './components/WhoEditor.svelte';
+  import WhoEditor from './components/WhoEditor.svelte';
+  import type { Recipient } from './lib/types/recipient';
   import HowEditor, { type HowData } from './components/HowEditor.svelte';
   import IntroMessageEditor, { type IntroCheckboxState } from './components/IntroMessageEditor.svelte';
   import StepIndicator from './components/ui/StepIndicator.svelte';

@@ -2,8 +2,7 @@
  * Custom TipTap extensions for non-editable atomic blocks and inline elements
  */
 
-import { Node, mergeAttributes, type Editor, generateHTML } from '@tiptap/core';
-import StarterKit from '@tiptap/starter-kit';
+import { Node, mergeAttributes, type Editor } from '@tiptap/core';
 import type { JSONContent } from '@tiptap/core';
 
 /**
@@ -56,212 +55,140 @@ export function hasConditionsBlock(editor: Editor | null): boolean {
   return hasNodeTypeInEditor(editor, 'conditionsBlock');
 }
 
-/**
- * RecipientsBlock - Atomic block for displaying the list of recipients
- * Non-editable, can be inserted/deleted but not modified
- * Can only be inserted once per document
- */
-export const RecipientsBlock = Node.create({
-  name: 'recipientsBlock',
-  group: 'block',
-  atom: true,
-  draggable: true,
-  selectable: true,
+// ============================================================================
+// Atomic Block Factory
+// ============================================================================
 
-  addAttributes() {
-    return {
-      recipients: {
-        default: null,
-        parseHTML: (element) => {
-          const value = element.getAttribute('data-recipients');
-          return value || null;
-        },
-        renderHTML: (attributes) => {
-          if (attributes.recipients) {
-            return {
-              'data-recipients': attributes.recipients,
-            };
-          }
-          return {};
-        },
-      },
-    };
-  },
-
-  parseHTML() {
-    return [
-      {
-        tag: 'div[data-type="recipients-block"]',
-      },
-    ];
-  },
-
-  renderHTML({ node, HTMLAttributes }) {
-    const recipientsJson = node.attrs.recipients;
-    const hasRecipients = !!recipientsJson;
-    
-    // Store recipients JSON in data attribute for later rendering
-    const attrs = mergeAttributes(HTMLAttributes, {
-      'data-type': 'recipients-block',
-      'class': 'recipients-block',
-      'contenteditable': 'false',
-    });
-    
-    if (hasRecipients) {
-      attrs['data-recipients'] = recipientsJson;
-      return [
-        'div',
-        attrs,
-        ['div', { class: 'recipients-content' }],
-      ];
-    }
-    
-    // Placeholder content when no recipients are available
-    return [
-      'div',
-      attrs,
-      ['span', { class: 'block-icon' }, '👥'],
-      ['span', { class: 'block-label' }, 'Liste des destinataires'],
-    ];
-  },
-
-  addCommands() {
-    return {
-      insertRecipientsBlock:
-        () =>
-        ({ commands, editor }) => {
-          // Prevent inserting if already exists
-          if (hasNodeTypeInEditor(editor, 'recipientsBlock')) {
-            return false;
-          }
-          // Insert block followed by empty paragraph to ensure next content is on new line
-          return commands.insertContent([
-            { type: this.name },
-            { type: 'paragraph' },
-          ]);
-        },
-    };
-  },
-});
-
-/**
- * Helper function to convert JSONContent to HTML string
- */
-function conditionsJsonToHtml(conditionsJson: string | null): string | null {
-  if (!conditionsJson) return null;
-  
-  try {
-    const conditions: JSONContent = JSON.parse(conditionsJson);
-    // Use TipTap to generate HTML from JSONContent
-    const html = generateHTML(conditions, [
-      StarterKit.configure({
-        blockquote: false,
-        code: false,
-        codeBlock: false,
-        hardBreak: false,
-        horizontalRule: false,
-        strike: false,
-        heading: false,
-      }),
-    ]);
-    return html;
-  } catch (e) {
-    console.error('Failed to parse conditions JSON:', e);
-    return null;
-  }
+interface AtomicBlockConfig {
+  /** Node name (e.g. 'recipientsBlock') */
+  name: string;
+  /** Data attribute key (e.g. 'recipients' -> data-recipients) */
+  attrKey: string;
+  /** CSS class name */
+  className: string;
+  /** Content class for when data is present */
+  contentClass: string;
+  /** Placeholder content when no data [icon, label] or just text */
+  placeholder: [string, string] | string;
+  /** Command name (e.g. 'insertRecipientsBlock') */
+  commandName: string;
 }
 
 /**
- * ConditionsBlock - Atomic block for displaying the opening conditions
- * Non-editable, can be inserted/deleted but not modified
- * Can only be inserted once per document
+ * Factory to create atomic block extensions with similar behavior.
+ * These blocks are non-editable, draggable, and can only be inserted once per document.
  */
-export const ConditionsBlock = Node.create({
-  name: 'conditionsBlock',
-  group: 'block',
-  atom: true,
-  draggable: true,
-  selectable: true,
+function createAtomicBlock(config: AtomicBlockConfig) {
+  const { name, attrKey, className, contentClass, placeholder, commandName } = config;
+  const dataType = name.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
+  const dataAttr = `data-${attrKey}`;
 
-  addAttributes() {
-    return {
-      conditions: {
-        default: null,
-        parseHTML: (element) => {
-          const value = element.getAttribute('data-conditions');
-          return value || null;
+  return Node.create({
+    name,
+    group: 'block',
+    atom: true,
+    draggable: true,
+    selectable: true,
+
+    addAttributes() {
+      return {
+        [attrKey]: {
+          default: null,
+          parseHTML: (element: Element) => element.getAttribute(dataAttr) || null,
+          renderHTML: (attributes: Record<string, unknown>) => {
+            if (attributes[attrKey]) {
+              return { [dataAttr]: attributes[attrKey] };
+            }
+            return {};
+          },
         },
-        renderHTML: (attributes) => {
-          if (attributes.conditions) {
-            return {
-              'data-conditions': attributes.conditions,
-            };
-          }
-          return {};
-        },
-      },
-    };
-  },
+      };
+    },
 
-  parseHTML() {
-    return [
-      {
-        tag: 'div[data-type="conditions-block"]',
-      },
-    ];
-  },
+    parseHTML() {
+      return [{ tag: `div[data-type="${dataType}"]` }];
+    },
 
-  renderHTML({ node, HTMLAttributes }) {
-    const conditionsJson = node.attrs.conditions;
-    const hasConditions = !!conditionsJson;
-    
-    // Store conditions JSON in data attribute for later rendering
-    const attrs = mergeAttributes(HTMLAttributes, {
-      'data-type': 'conditions-block',
-      'class': 'conditions-block',
-      'contenteditable': 'false',
-    });
-    
-    if (hasConditions) {
-      attrs['data-conditions'] = conditionsJson;
-      return [
-        'div',
-        attrs,
-        ['div', { class: 'conditions-content' }],
-      ];
-    }
-    
-    // Placeholder content when no conditions are available (should not appear in normal flow)
-    return [
-      'div',
-      attrs,
-      "Conditions d'ouverture",
-    ];
-  },
+    renderHTML({ node, HTMLAttributes }) {
+      const dataValue = node.attrs[attrKey];
+      const hasData = !!dataValue;
 
-  addCommands() {
-    return {
-      insertConditionsBlock:
-        () =>
-        ({ commands, editor }) => {
-          // Prevent inserting if already exists
-          if (hasNodeTypeInEditor(editor, 'conditionsBlock')) {
-            return false;
-          }
-          // Insert block followed by empty paragraph to ensure next content is on new line
-          return commands.insertContent([
-            { type: this.name },
-            { type: 'paragraph' },
-          ]);
-        },
-    };
-  },
+      const attrs = mergeAttributes(HTMLAttributes, {
+        'data-type': dataType,
+        'class': className,
+        'contenteditable': 'false',
+      });
+
+      if (hasData) {
+        attrs[dataAttr] = dataValue;
+        return ['div', attrs, ['div', { class: contentClass }]];
+      }
+
+      // Placeholder content
+      if (Array.isArray(placeholder)) {
+        return [
+          'div',
+          attrs,
+          ['span', { class: 'block-icon' }, placeholder[0]],
+          ['span', { class: 'block-label' }, placeholder[1]],
+        ];
+      }
+      return ['div', attrs, placeholder];
+    },
+
+    addCommands() {
+      return {
+        [commandName]:
+          () =>
+          ({ commands, editor }: { commands: any; editor: Editor }) => {
+            if (hasNodeTypeInEditor(editor, name)) {
+              return false;
+            }
+            return commands.insertContent([
+              { type: name },
+              { type: 'paragraph' },
+            ]);
+          },
+      };
+    },
+  });
+}
+
+// ============================================================================
+// Block Extensions
+// ============================================================================
+
+/**
+ * RecipientsBlock - Atomic block for displaying the list of recipients
+ */
+export const RecipientsBlock = createAtomicBlock({
+  name: 'recipientsBlock',
+  attrKey: 'recipients',
+  className: 'recipients-block',
+  contentClass: 'recipients-content',
+  placeholder: ['👥', 'Liste des destinataires'],
+  commandName: 'insertRecipientsBlock',
 });
+
+/**
+ * ConditionsBlock - Atomic block for displaying the opening conditions
+ */
+export const ConditionsBlock = createAtomicBlock({
+  name: 'conditionsBlock',
+  attrKey: 'conditions',
+  className: 'conditions-block',
+  contentClass: 'conditions-content',
+  placeholder: "Conditions d'ouverture",
+  commandName: 'insertConditionsBlock',
+});
+
+// ============================================================================
+// Inline Extensions
+// ============================================================================
 
 /**
  * DateTimeInline - Inline element for displaying today's date and time
  * Non-editable, can be inserted anywhere inline with text
- * Can be inserted multiple times in the document
  */
 export const DateTimeInline = Node.create({
   name: 'dateTimeInline',
@@ -271,11 +198,7 @@ export const DateTimeInline = Node.create({
   selectable: true,
 
   parseHTML() {
-    return [
-      {
-        tag: 'span[data-type="datetime-inline"]',
-      },
-    ];
+    return [{ tag: 'span[data-type="datetime-inline"]' }];
   },
 
   renderHTML({ HTMLAttributes }) {
@@ -316,7 +239,6 @@ export const DateTimeInline = Node.create({
 /**
  * QuorumInline - Inline element for displaying the required quorum
  * Non-editable, can be inserted anywhere inline with text
- * Can be inserted multiple times in the document
  */
 export const QuorumInline = Node.create({
   name: 'quorumInline',
@@ -335,9 +257,7 @@ export const QuorumInline = Node.create({
         },
         renderHTML: (attributes) => {
           if (attributes.threshold !== null && attributes.threshold !== undefined) {
-            return {
-              'data-threshold': String(attributes.threshold),
-            };
+            return { 'data-threshold': String(attributes.threshold) };
           }
           return {};
         },
@@ -346,17 +266,13 @@ export const QuorumInline = Node.create({
   },
 
   parseHTML() {
-    return [
-      {
-        tag: 'span[data-type="quorum-inline"]',
-      },
-    ];
+    return [{ tag: 'span[data-type="quorum-inline"]' }];
   },
 
   renderHTML({ node, HTMLAttributes }) {
     const threshold = node.attrs.threshold;
     const displayText = threshold !== null && threshold !== undefined ? String(threshold) : '[Quorum]';
-    
+
     return [
       'span',
       mergeAttributes(HTMLAttributes, {
@@ -380,7 +296,10 @@ export const QuorumInline = Node.create({
   },
 });
 
-// Type augmentation for custom commands
+// ============================================================================
+// Type Augmentation
+// ============================================================================
+
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     recipientsBlock: {

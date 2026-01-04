@@ -5,7 +5,11 @@
 
 import { generateHTML, type Editor, type JSONContent } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
-import type { Recipient, ContactInfo } from '../../components/WhoEditor.svelte';
+import type { Recipient } from '../types/recipient';
+
+// ============================================================================
+// Utilities
+// ============================================================================
 
 /**
  * Escape HTML special characters
@@ -17,69 +21,110 @@ export function escapeHtml(text: string): string {
 }
 
 /**
- * Update conditionsBlock nodes in the editor with actual conditions content
+ * StarterKit configuration for rendering JSON to HTML
  */
-export function updateConditionsBlocks(editor: Editor, conditions: JSONContent | null): void {
+const starterKitConfig = StarterKit.configure({
+  blockquote: false,
+  code: false,
+  codeBlock: false,
+  hardBreak: false,
+  horizontalRule: false,
+  strike: false,
+  heading: false,
+});
+
+// ============================================================================
+// Generic Editor Node Updates
+// ============================================================================
+
+/**
+ * Generic function to update all nodes of a given type in the editor
+ */
+function updateEditorNodes(
+  editor: Editor,
+  nodeType: string,
+  getNewAttrs: (currentAttrs: Record<string, unknown>) => Record<string, unknown>
+): void {
   if (!editor) return;
-  
-  const conditionsJson = conditions ? JSON.stringify(conditions) : null;
-  
-  // Collect all positions of conditionsBlock nodes first
+
   const positions: number[] = [];
   editor.state.doc.descendants((node, pos) => {
-    if (node.type.name === 'conditionsBlock') {
+    if (node.type.name === nodeType) {
       positions.push(pos);
     }
   });
-  
-  // Update all conditionsBlock nodes in a single transaction
+
   if (positions.length > 0) {
     const tr = editor.state.tr;
     positions.forEach((pos) => {
       const node = editor.state.doc.nodeAt(pos);
-      if (node && node.type.name === 'conditionsBlock') {
-        tr.setNodeMarkup(pos, undefined, {
-          ...node.attrs,
-          conditions: conditionsJson,
-        });
+      if (node && node.type.name === nodeType) {
+        tr.setNodeMarkup(pos, undefined, getNewAttrs(node.attrs));
       }
     });
     editor.view.dispatch(tr);
   }
 }
 
+// ============================================================================
+// Editor Node Update Functions
+// ============================================================================
+
+/**
+ * Update conditionsBlock nodes in the editor with actual conditions content
+ */
+export function updateConditionsBlocks(editor: Editor, conditions: JSONContent | null): void {
+  const conditionsJson = conditions ? JSON.stringify(conditions) : null;
+  updateEditorNodes(editor, 'conditionsBlock', (attrs) => ({
+    ...attrs,
+    conditions: conditionsJson,
+  }));
+}
+
+/**
+ * Update recipientsBlock nodes in the editor with actual recipients data
+ */
+export function updateRecipientsBlocks(editor: Editor, recipientsList: Recipient[] | undefined): void {
+  const recipientsJson = recipientsList?.length ? JSON.stringify(recipientsList) : null;
+  updateEditorNodes(editor, 'recipientsBlock', (attrs) => ({
+    ...attrs,
+    recipients: recipientsJson,
+  }));
+}
+
+/**
+ * Update quorumInline nodes in the editor with current threshold
+ */
+export function updateQuorumInlines(editor: Editor, thresholdValue: number): void {
+  updateEditorNodes(editor, 'quorumInline', (attrs) => ({
+    ...attrs,
+    threshold: thresholdValue,
+  }));
+}
+
+// ============================================================================
+// DOM Update Functions
+// ============================================================================
+
 /**
  * Update DOM for conditions blocks (renders the conditions content)
  */
 export function updateConditionsDOM(editorElement: HTMLElement | null): void {
   if (!editorElement) return;
-  
+
   requestAnimationFrame(() => {
-    const blocks = editorElement?.querySelectorAll('[data-type="conditions-block"]');
-    blocks?.forEach((block) => {
+    editorElement.querySelectorAll('[data-type="conditions-block"]').forEach((block) => {
       const conditionsJson = block.getAttribute('data-conditions');
       const contentDiv = block.querySelector('.conditions-content');
-      
+
       if (conditionsJson && contentDiv) {
         try {
           const conditionsData: JSONContent = JSON.parse(conditionsJson);
-          const html = generateHTML(conditionsData, [
-            StarterKit.configure({
-              blockquote: false,
-              code: false,
-              codeBlock: false,
-              hardBreak: false,
-              horizontalRule: false,
-              strike: false,
-              heading: false,
-            }),
-          ]);
-          contentDiv.innerHTML = html;
+          contentDiv.innerHTML = generateHTML(conditionsData, [starterKitConfig]);
         } catch (e) {
           console.error('Failed to render conditions:', e);
         }
       } else if (!conditionsJson) {
-        // Remove content div if no conditions
         contentDiv?.remove();
       }
     });
@@ -87,93 +132,34 @@ export function updateConditionsDOM(editorElement: HTMLElement | null): void {
 }
 
 /**
- * Update quorumInline nodes in the editor with current threshold
- */
-export function updateQuorumInlines(editor: Editor, thresholdValue: number): void {
-  if (!editor) return;
-  
-  // Collect all positions of quorumInline nodes first
-  const positions: number[] = [];
-  editor.state.doc.descendants((node, pos) => {
-    if (node.type.name === 'quorumInline') {
-      positions.push(pos);
-    }
-  });
-  
-  // Update all quorumInline nodes in a single transaction
-  if (positions.length > 0) {
-    const tr = editor.state.tr;
-    positions.forEach((pos) => {
-      const node = editor.state.doc.nodeAt(pos);
-      if (node && node.type.name === 'quorumInline') {
-        tr.setNodeMarkup(pos, undefined, {
-          ...node.attrs,
-          threshold: thresholdValue,
-        });
-      }
-    });
-    editor.view.dispatch(tr);
-  }
-}
-
-/**
  * Update DOM for dateTimeInline nodes with current date/time
  */
 export function updateDateTimeDOM(editorElement: HTMLElement | null): void {
   if (!editorElement) return;
-  
+
   requestAnimationFrame(() => {
-    const dateNodes = editorElement?.querySelectorAll('[data-type="datetime-inline"]');
-    dateNodes?.forEach((node) => {
-      const now = new Date();
-      const formattedDate = now.toLocaleDateString(undefined, {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-      const formattedTime = now.toLocaleTimeString(undefined, {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      node.textContent = `${formattedDate}, ${formattedTime}`;
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString(undefined, {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    const formattedTime = now.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const dateTimeText = `${formattedDate}, ${formattedTime}`;
+
+    editorElement.querySelectorAll('[data-type="datetime-inline"]').forEach((node) => {
+      node.textContent = dateTimeText;
     });
   });
 }
 
-/**
- * Update recipientsBlock nodes in the editor with actual recipients data
- */
-export function updateRecipientsBlocks(editor: Editor, recipientsList: Recipient[] | undefined): void {
-  if (!editor) return;
-  
-  const recipientsJson = recipientsList && recipientsList.length > 0 
-    ? JSON.stringify(recipientsList) 
-    : null;
-  
-  // Collect all positions of recipientsBlock nodes first
-  const positions: number[] = [];
-  editor.state.doc.descendants((node, pos) => {
-    if (node.type.name === 'recipientsBlock') {
-      positions.push(pos);
-    }
-  });
-  
-  // Update all recipientsBlock nodes in a single transaction
-  if (positions.length > 0) {
-    const tr = editor.state.tr;
-    positions.forEach((pos) => {
-      const node = editor.state.doc.nodeAt(pos);
-      if (node && node.type.name === 'recipientsBlock') {
-        tr.setNodeMarkup(pos, undefined, {
-          ...node.attrs,
-          recipients: recipientsJson,
-        });
-      }
-    });
-    editor.view.dispatch(tr);
-  }
-}
+// ============================================================================
+// Recipients HTML Generation
+// ============================================================================
 
 /**
  * Contact type labels interface for generateRecipientsHtml
@@ -211,61 +197,39 @@ export function generateRecipientsHtml(
   recipientsList: Recipient[],
   options: GenerateRecipientsHtmlOptions
 ): string {
-  const items: string[] = [];
   const { contactTypeLabels, lang } = options;
   // French typography: non-breaking space before colon; English: no space
   const colonSeparator = lang === 'fr' ? '\u00A0: ' : ': ';
-  
+
   // Filter out recipients that are marked as private
-  const publicRecipients = recipientsList.filter(r => !r.isPrivate);
-  
-  for (const recipient of publicRecipients) {
-    // Build contacts list
-    const contactParts: string[] = [];
-    for (const contact of recipient.contacts) {
-      if (!contact.value.trim()) continue;
-      
-      let contactStr = '';
-      
-      // Add type prefix (except for "other")
-      if (contact.type !== 'other') {
-        const typeLabel = contactTypeLabels[contact.type as keyof ContactTypeLabels] || contact.type;
-        contactStr = `${typeLabel}${colonSeparator}${escapeHtml(contact.value)}`;
-      } else {
-        contactStr = escapeHtml(contact.value);
-      }
-      
-      // Add comment in parentheses if present
-      if (contact.comment.trim()) {
-        contactStr += ` (${escapeHtml(contact.comment)})`;
-      }
-      
-      contactParts.push(contactStr);
-    }
-    
-    // Skip if no name and no contacts
-    if (!recipient.name.trim() && contactParts.length === 0) continue;
-    
-    // Build the list item
-    let itemHtml = '';
-    
-    // Add name in bold if present
-    if (recipient.name.trim()) {
-      itemHtml += `<strong>${escapeHtml(recipient.name)}</strong>`;
-      if (contactParts.length > 0) {
-        itemHtml += ' — ';
-      }
-    }
-    
-    // Add contacts
-    itemHtml += contactParts.join(' — ');
-    
-    items.push(`<li>${itemHtml}</li>`);
-  }
-  
-  if (items.length === 0) return '';
-  
-  return `<ul>${items.join('')}</ul>`;
+  const publicRecipients = recipientsList.filter((r) => !r.isPrivate);
+
+  const items = publicRecipients
+    .map((recipient) => {
+      const contactParts = recipient.contacts
+        .filter((c) => c.value.trim())
+        .map((contact) => {
+          const valueStr =
+            contact.type !== 'other'
+              ? `${contactTypeLabels[contact.type as keyof ContactTypeLabels] || contact.type}${colonSeparator}${escapeHtml(contact.value)}`
+              : escapeHtml(contact.value);
+          return contact.comment.trim()
+            ? `${valueStr} (${escapeHtml(contact.comment)})`
+            : valueStr;
+        });
+
+      if (!recipient.name.trim() && contactParts.length === 0) return null;
+
+      const namePart = recipient.name.trim()
+        ? `<strong>${escapeHtml(recipient.name)}</strong>`
+        : '';
+      const separator = namePart && contactParts.length > 0 ? ' — ' : '';
+
+      return `<li>${namePart}${separator}${contactParts.join(' — ')}</li>`;
+    })
+    .filter(Boolean);
+
+  return items.length > 0 ? `<ul>${items.join('')}</ul>` : '';
 }
 
 /**
@@ -276,36 +240,32 @@ export function updateRecipientsDOM(
   options: GenerateRecipientsHtmlOptions
 ): void {
   if (!editorElement) return;
-  
+
   requestAnimationFrame(() => {
-    const blocks = editorElement?.querySelectorAll('[data-type="recipients-block"]');
-    blocks?.forEach((block) => {
+    editorElement.querySelectorAll('[data-type="recipients-block"]').forEach((block) => {
       const recipientsJson = block.getAttribute('data-recipients');
       let contentDiv = block.querySelector('.recipients-content');
-      
+
       if (recipientsJson) {
         try {
           const recipientsList: Recipient[] = JSON.parse(recipientsJson);
           const html = generateRecipientsHtml(recipientsList, options);
-          
-          // Create content div if it doesn't exist
+
           if (!contentDiv) {
             // Remove placeholder elements if present
-            const icon = block.querySelector('.block-icon');
-            const label = block.querySelector('.block-label');
-            icon?.remove();
-            label?.remove();
-            
+            block.querySelector('.block-icon')?.remove();
+            block.querySelector('.block-label')?.remove();
+
             contentDiv = document.createElement('div');
             contentDiv.className = 'recipients-content';
             block.appendChild(contentDiv);
           }
-          
+
           contentDiv.innerHTML = html;
         } catch (e) {
           console.error('Failed to render recipients:', e);
         }
-      } else if (!recipientsJson && contentDiv) {
+      } else if (contentDiv) {
         // If no recipients data, restore placeholder
         contentDiv.remove();
         if (!block.querySelector('.block-icon')) {

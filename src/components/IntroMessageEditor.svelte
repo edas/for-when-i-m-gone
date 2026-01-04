@@ -21,7 +21,7 @@
     updateDateTimeDOM,
     type GenerateRecipientsHtmlOptions,
   } from '../lib/tiptap/domUpdates';
-  import type { Recipient } from './WhoEditor.svelte';
+  import type { Recipient } from '../lib/types/recipient';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';

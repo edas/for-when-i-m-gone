@@ -17,44 +17,17 @@
   import TipSection from './ui/TipSection.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
+  import RecipientCard from './ui/RecipientCard.svelte';
   import Icon from './ui/Icons.svelte';
   import '../styles/form-controls.css';
-
-  export type ContactType = 
-    | 'phone' | 'email' | 'address' | 'x' | 'bluesky' | 'mastodon' 
-    | 'facebook' | 'telegram' | 'whatsapp' | 'signal'
-    | 'instagram' | 'snapchat' | 'linkedin' | 'web' | 'other';
-
-  export interface ContactInfo {
-    id: string;
-    type: ContactType;
-    value: string;
-    comment: string;
-  }
-
-  export interface Recipient {
-    id: string;
-    name: string;
-    contacts: ContactInfo[];
-    isPrivate?: boolean;
-  }
-
-  export function createEmptyContact(): ContactInfo {
-    return { id: crypto.randomUUID(), type: 'phone', value: '', comment: '' };
-  }
-
-  export function createEmptyRecipient(): Recipient {
-    return {
-      id: crypto.randomUUID(),
-      name: '',
-      contacts: [
-        { ...createEmptyContact(), type: 'phone' },
-        { ...createEmptyContact(), type: 'email' },
-        { ...createEmptyContact(), type: 'address' },
-      ],
-      isPrivate: false,
-    };
-  }
+  import '../styles/who-editor.css';
+  import {
+    type ContactType,
+    type ContactInfo,
+    type Recipient,
+    createEmptyContact,
+    createEmptyRecipient,
+  } from '../lib/types/recipient';
 
   interface Props {
     lang: Language;
@@ -109,23 +82,14 @@
     : t.whoEditor.buttons.continue
   );
 
-  const contactTypeOptions = $derived([
-    { value: 'phone', label: t.whoEditor.contactTypes.phone },
-    { value: 'email', label: t.whoEditor.contactTypes.email },
-    { value: 'address', label: t.whoEditor.contactTypes.address },
-    { value: 'x', label: t.whoEditor.contactTypes.x },
-    { value: 'bluesky', label: t.whoEditor.contactTypes.bluesky },
-    { value: 'mastodon', label: t.whoEditor.contactTypes.mastodon },
-    { value: 'facebook', label: t.whoEditor.contactTypes.facebook },
-    { value: 'telegram', label: t.whoEditor.contactTypes.telegram },
-    { value: 'whatsapp', label: t.whoEditor.contactTypes.whatsapp },
-    { value: 'signal', label: t.whoEditor.contactTypes.signal },
-    { value: 'instagram', label: t.whoEditor.contactTypes.instagram },
-    { value: 'snapchat', label: t.whoEditor.contactTypes.snapchat },
-    { value: 'linkedin', label: t.whoEditor.contactTypes.linkedin },
-    { value: 'web', label: t.whoEditor.contactTypes.web },
-    { value: 'other', label: t.whoEditor.contactTypes.other },
-  ]);
+  const CONTACT_TYPES: ContactType[] = [
+    'phone', 'email', 'address', 'x', 'bluesky', 'mastodon',
+    'facebook', 'telegram', 'whatsapp', 'signal',
+    'instagram', 'snapchat', 'linkedin', 'web', 'other',
+  ];
+  const contactTypeOptions = $derived(
+    CONTACT_TYPES.map((type) => ({ value: type, label: t.whoEditor.contactTypes[type] }))
+  );
 
   // Recipient management
   async function addRecipient(): Promise<void> {
@@ -230,115 +194,21 @@
         <div class="drop-zone-indicator"></div>
       </div>
       
-      <div 
-        class="recipient-card" 
-        class:expanded={expandedRecipientId === recipient.id}
-        class:dragging={dragState.draggedItemId === recipient.id}
-        role="listitem"
-        draggable="true"
-        ondragstart={(e) => handleDragStart(e, recipient.id)}
-        ondragend={handleDragEnd}
-      >
-        <div 
-          class="recipient-header" 
-          role="button"
-          tabindex="0"
-          onclick={() => toggleExpanded(recipient.id)}
-          onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleExpanded(recipient.id); } }}
-        >
-          <div 
-            class="drag-handle"
-            role="presentation"
-            onclick={(e) => e.stopPropagation()}
-            onkeydown={(e) => e.stopPropagation()}
-          >
-            <Icon name="grip-vertical" size={18} />
-          </div>
-          <div class="recipient-summary">
-            <span class="recipient-name">{recipient.name || t.whoEditor.newRecipient}</span>
-          </div>
-          <div class="recipient-actions">
-            <button 
-              class="remove-button large" 
-              onclick={(e) => { e.stopPropagation(); removeRecipient(recipient.id); }}
-              title={t.whoEditor.removeRecipient}
-            >
-              <Icon name="minus" size={16} />
-            </button>
-            <span class="expand-icon" class:rotated={expandedRecipientId === recipient.id}>
-              <Icon name="chevron-right" size={20} />
-            </span>
-          </div>
-        </div>
-        
-        {#if expandedRecipientId === recipient.id}
-          <div class="recipient-details">
-            <div class="form-field">
-              <label for="name-{recipient.id}">{t.whoEditor.fields.name}</label>
-              <input
-                id="name-{recipient.id}"
-                type="text"
-                class="form-input"
-                value={recipient.name}
-                oninput={(e) => updateRecipient(recipient.id, 'name', e.currentTarget.value)}
-                placeholder={t.whoEditor.placeholders.name}
-              />
-            </div>
-            
-            <div class="form-field">
-              <CheckboxItem
-                checked={recipient.isPrivate ?? false}
-                label={t.whoEditor.fields.notListedPublicly}
-                onchange={(checked) => updateRecipient(recipient.id, 'isPrivate', checked)}
-              />
-            </div>
-            
-            <div class="contacts-section">
-              <span class="contacts-label">{t.whoEditor.fields.contacts}</span>
-              
-              {#each recipient.contacts as contact (contact.id)}
-                <div class="contact-row">
-                  <select
-                    class="form-select contact-type"
-                    value={contact.type}
-                    onchange={(e) => updateContact(recipient.id, contact.id, 'type', e.currentTarget.value)}
-                  >
-                    {#each contactTypeOptions as option}
-                      <option value={option.value}>{option.label}</option>
-                    {/each}
-                  </select>
-                  <input
-                    class="form-input small contact-value"
-                    type="text"
-                    value={contact.value}
-                    oninput={(e) => updateContact(recipient.id, contact.id, 'value', e.currentTarget.value)}
-                    placeholder={t.whoEditor.placeholders.contactValue}
-                  />
-                  <input
-                    class="form-input small contact-comment"
-                    type="text"
-                    value={contact.comment}
-                    oninput={(e) => updateContact(recipient.id, contact.id, 'comment', e.currentTarget.value)}
-                    placeholder={t.whoEditor.placeholders.contactComment}
-                  />
-                  <button 
-                    class="remove-button"
-                    onclick={() => removeContact(recipient.id, contact.id)}
-                    title={t.whoEditor.removeContact}
-                  >
-                    <Icon name="minus" size={14} />
-                  </button>
-                </div>
-              {/each}
-              
-              <button class="add-button" onclick={() => addContact(recipient.id)}>
-                <Icon name="plus" size={16} />
-                {t.whoEditor.addContact}
-              </button>
-            </div>
-          </div>
-        {/if}
-      </div>
+      <RecipientCard
+        {recipient}
+        expanded={expandedRecipientId === recipient.id}
+        dragging={dragState.draggedItemId === recipient.id}
+        {contactTypeOptions}
+        translations={t.whoEditor}
+        onToggle={() => toggleExpanded(recipient.id)}
+        onRemove={() => removeRecipient(recipient.id)}
+        onUpdateField={(field, value) => updateRecipient(recipient.id, field, value)}
+        onAddContact={() => addContact(recipient.id)}
+        onRemoveContact={(contactId) => removeContact(recipient.id, contactId)}
+        onUpdateContact={(contactId, field, value) => updateContact(recipient.id, contactId, field, value)}
+        onDragStart={(e) => handleDragStart(e, recipient.id)}
+        onDragEnd={handleDragEnd}
+      />
     {/each}
     
     <div 
@@ -410,235 +280,3 @@
     <TipSection text={t.whoEditor.sidePanel.tip2} />
   {/snippet}
 </EditorLayout>
-
-<style>
-  .recipients-list {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    overflow-y: auto;
-    padding: 0.5rem 0;
-  }
-
-  .recipient-card {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
-    cursor: grab;
-  }
-
-  .recipient-card:hover {
-    border-color: rgba(255, 255, 255, 0.25);
-  }
-
-  .recipient-card.expanded {
-    border-color: rgba(96, 165, 250, 0.5);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
-  }
-
-  .recipient-card.dragging {
-    opacity: 0.4;
-    cursor: grabbing;
-    transform: scale(0.98);
-  }
-
-  .drop-zone {
-    height: 1rem;
-    margin: -0.5rem 0;
-    position: relative;
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  .drop-zone:not(.hidden) {
-    pointer-events: auto;
-  }
-
-  .drop-zone-indicator {
-    height: 3px;
-    border-radius: 2px;
-    background: transparent;
-    transition: background 0.15s ease;
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    transform: translateY(-50%);
-  }
-
-  .drop-zone.active .drop-zone-indicator {
-    background: #60a5fa;
-    box-shadow: 0 0 10px rgba(96, 165, 250, 0.6);
-  }
-
-  .recipient-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.25rem;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .drag-handle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    margin-right: 0.75rem;
-    color: #64748b;
-    cursor: grab;
-    flex-shrink: 0;
-    transition: color 0.2s ease;
-  }
-
-  .drag-handle:hover {
-    color: #94a3b8;
-  }
-
-  .recipient-card.dragging .drag-handle {
-    cursor: grabbing;
-  }
-
-  .recipient-summary {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .recipient-name {
-    color: #e2e8f0;
-    font-weight: 500;
-    font-size: 1rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .recipient-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .expand-icon {
-    color: #a0aec0;
-    transition: transform 0.2s ease;
-    display: flex;
-  }
-
-  .expand-icon.rotated {
-    transform: rotate(90deg);
-  }
-
-  .recipient-details {
-    padding: 0 1.25rem 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 1rem;
-  }
-
-  .contacts-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .contacts-label {
-    color: #a0aec0;
-    font-size: 0.85rem;
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-  }
-
-  .contact-row {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-  }
-
-  .contact-type {
-    width: 140px;
-    flex-shrink: 0;
-  }
-
-  .contact-value {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .contact-comment {
-    width: 120px;
-    flex-shrink: 0;
-    font-size: 0.85rem;
-  }
-
-  /* Side panel styles */
-  .recipient-count {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
-    background: rgba(96, 165, 250, 0.1);
-    border-radius: 12px;
-    margin: 1rem 0;
-  }
-
-  .count-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #60a5fa;
-  }
-
-  .count-details {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .count-label {
-    color: #a0aec0;
-    font-size: 0.95rem;
-  }
-
-  .count-warnings {
-    color: #f59e0b;
-    font-size: 0.8rem;
-  }
-
-  @media (max-width: 600px) {
-    .recipient-summary {
-      flex-wrap: wrap;
-    }
-
-    .contact-row {
-      flex-wrap: wrap;
-      position: relative;
-      padding-right: 36px;
-    }
-
-    .contact-type {
-      width: 100%;
-    }
-
-    .contact-value {
-      min-width: calc(100% - 36px);
-    }
-
-    .contact-comment {
-      width: calc(100% - 36px);
-    }
-
-    .contact-row .remove-button {
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
-  }
-</style>

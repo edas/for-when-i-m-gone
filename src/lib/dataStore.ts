@@ -6,7 +6,7 @@
 import type { JSONContent } from '@tiptap/core';
 import type { SecretCheckboxState } from '../components/SecretEditor.svelte';
 import type { IntroCheckboxState } from '../components/IntroMessageEditor.svelte';
-import type { Recipient } from '../components/WhoEditor.svelte';
+import type { Recipient } from './types/recipient';
 import type { HowData } from '../components/HowEditor.svelte';
 
 export interface SecurityData {
