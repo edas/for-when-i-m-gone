@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onDestroy, untrack } from 'svelte';
-  import { Editor, type JSONContent } from '@tiptap/core';
-  import StarterKit from '@tiptap/starter-kit';
+  import type { Editor, JSONContent } from '@tiptap/core';
   import { getTranslations, type Language } from '../lib/i18n';
   import { updateStoredDataDebounced } from '../lib/dataStore';
   import { type ButtonState } from '../lib/buttonState';
   import { parseHtmlToJson } from '../lib/htmlParser';
+  import { createTiptapEditor } from '../lib/tiptap/createEditor';
+  import { hasJsonContent } from '../lib/tiptap/utils';
   import EditorLayout from './ui/EditorLayout.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
@@ -14,12 +15,13 @@
   import RichTextToolbar from './ui/RichTextToolbar.svelte';
   import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
   import Icon from './ui/Icons.svelte';
+  import '../styles/tiptap-editor.css';
 
   export interface HowData {
     threshold: number;
     conditions: JSONContent | null;
     hasNoOpenConditions: boolean;
-    isConditionsUnmodified?: boolean; // Track if conditions are still default/unmodified
+    isConditionsUnmodified?: boolean;
   }
 
   interface Props {
@@ -34,19 +36,16 @@
 
   let t = $derived(getTranslations(lang));
 
-  // Calculate default threshold based on recipient count
   function getDefaultThreshold(count: number): number {
     if (count <= 3) return 2;
     if (count <= 6) return 3;
     return 4;
   }
 
-  // Get default example content
   function getDefaultConditions(): JSONContent {
     return parseHtmlToJson(t.howEditor.sidePanel.exampleContent);
   }
 
-  // Use string to capture all user input including invalid values
   let inputValue: string = $state(untrack(() => 
     initialData?.threshold !== undefined 
       ? String(initialData.threshold) 
@@ -56,28 +55,18 @@
     initialData?.conditions ?? getDefaultConditions()
   ));
   
-  // Calculate initial "unmodified" state once - true if no saved conditions (using default content)
   const initialIsUnmodified = initialData?.isConditionsUnmodified ?? !initialData?.conditions;
-  
-  // Track if conditions are still in their default/unmodified state
   let isConditionsUnmodified: boolean = $state(initialIsUnmodified);
-  
-  // If content is unmodified (default), checkbox MUST be checked
-  // Otherwise, use saved value (for user-modified content)
   let hasNoOpenConditions: boolean = $state(
     initialIsUnmodified ? true : (initialData?.hasNoOpenConditions ?? false)
   );
-  
-  // Flag to ignore programmatic updates to the editor
   let programmaticUpdateInProgress = false;
-  
   let sidePanelOpen: boolean = $state(true);
 
-  // TipTap editor state
   let editorElement: HTMLDivElement | null = $state(null);
   let editor: Editor | null = $state(null);
 
-  // Parse and validate the threshold input
+  // Parse threshold input
   let parsedValue = $derived(() => {
     const trimmed = inputValue.trim();
     if (trimmed === '') return null;
@@ -89,57 +78,33 @@
   let threshold = $derived(parsedValue());
   let isValidNumber = $derived(threshold !== null);
   let isOne = $derived(threshold === 1);
-  
-  // Essential conditions
   let isValidThreshold = $derived(threshold !== null && threshold >= 2);
   let isTooHigh = $derived(threshold !== null && threshold > recipientCount);
   let isLowerThanRecipientCount = $derived(threshold !== null && threshold < recipientCount);
 
-  // Check if editor has meaningful content
-  let hasConditions = $derived.by(() => {
-    if (!conditionsJson) return false;
-    const content = conditionsJson.content;
-    if (!content || content.length === 0) return false;
-    // Check if it's just an empty paragraph
-    if (content.length === 1 && content[0].type === 'paragraph' && !content[0].content) {
-      return false;
-    }
-    return true;
-  });
+  let hasConditions = $derived(hasJsonContent(conditionsJson));
 
-  // When recipientCount <= 2, ignore isLowerThanRecipientCount (impossible to satisfy with minimum threshold of 2)
   let allEssentialsChecked = $derived(
     isValidThreshold && 
     (recipientCount <= 2 || isLowerThanRecipientCount) && 
     hasConditions
   );
 
-  // Non-essential conditions (for display in side panel)
   let isAtLeast3 = $derived(threshold !== null && threshold >= 3);
   let isAtMost5 = $derived(threshold !== null && threshold <= 5);
 
-  // Visual feedback for input styling
-  // Red: invalid number, or threshold < 2, or threshold > recipient count
   let isError = $derived(
-    !isValidNumber ||
-    (threshold !== null && (threshold < 2 || threshold > recipientCount))
+    !isValidNumber || (threshold !== null && (threshold < 2 || threshold > recipientCount))
   );
-  // Green: threshold between 3-5 AND strictly less than recipient count
   let isGreen = $derived(
-    threshold !== null &&
-    threshold >= 3 &&
-    threshold <= 5 &&
-    threshold < recipientCount
+    threshold !== null && threshold >= 3 && threshold <= 5 && threshold < recipientCount
   );
 
-  // Button is disabled if threshold < 2 or threshold > recipient count
   let canContinue = $derived(isValidThreshold && !isTooHigh);
 
-  // Button state
   let buttonState = $derived.by((): ButtonState => {
     if (!canContinue) return 'none';
-    if (allEssentialsChecked) return 'complete';
-    return 'partial';
+    return allEssentialsChecked ? 'complete' : 'partial';
   });
 
   let buttonText = $derived(
@@ -158,9 +123,7 @@
   }
 
   function handleContinue(): void {
-    if (canContinue) {
-      onContinue(getCurrentData());
-    }
+    if (canContinue) onContinue(getCurrentData());
   }
 
   function handleBack(): void {
@@ -169,34 +132,25 @@
 
   function increment(): void {
     const current = threshold ?? 1;
-    if (current < recipientCount) {
-      inputValue = String(current + 1);
-    }
+    if (current < recipientCount) inputValue = String(current + 1);
   }
 
   function decrement(): void {
     const current = threshold ?? 3;
-    if (current > 2) {
-      inputValue = String(current - 1);
-    }
+    if (current > 2) inputValue = String(current - 1);
   }
 
   function handleInputChange(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    inputValue = target.value;
+    inputValue = (event.target as HTMLInputElement).value;
   }
 
   function generateExample(): void {
     if (!editor) return;
-
     const exampleContent = getDefaultConditions();
 
-    // Mark as programmatic update to avoid triggering the "first modification" logic
     programmaticUpdateInProgress = true;
 
-    // If there's existing content, append the example; otherwise replace
     if (hasConditions) {
-      // Insert at end: add separator paragraphs then example content
       editor.commands.setTextSelection(editor.state.doc.content.size);
       editor.commands.insertContent([
         { type: 'paragraph' },
@@ -204,81 +158,48 @@
         ...exampleContent.content!,
       ]);
     } else {
-      // Replacing with default content - reset the "unmodified" state
       editor.commands.setContent(exampleContent);
       isConditionsUnmodified = true;
       hasNoOpenConditions = true;
     }
     
     conditionsJson = editor.getJSON();
-    
-    // Reset the flag after all synchronous updates have been processed
-    requestAnimationFrame(() => {
-      programmaticUpdateInProgress = false;
-    });
+    requestAnimationFrame(() => { programmaticUpdateInProgress = false; });
   }
 
-  // Auto-uncheck hasNoOpenConditions when conditions become empty
+  // Auto-uncheck when conditions become empty
   $effect(() => {
-    if (!hasConditions && hasNoOpenConditions) {
-      hasNoOpenConditions = false;
-    }
+    if (!hasConditions && hasNoOpenConditions) hasNoOpenConditions = false;
   });
 
-  // Initialize TipTap editor when element is mounted
+  // Initialize TipTap editor
   $effect(() => {
     if (editorElement && !editor) {
       const initialContent = conditionsJson ?? getDefaultConditions();
       
-      const newEditor = new Editor({
+      editor = createTiptapEditor({
         element: editorElement,
-        extensions: [
-          StarterKit.configure({
-            // Disable features we don't need
-            blockquote: false,
-            code: false,
-            codeBlock: false,
-            hardBreak: false,
-            horizontalRule: false,
-            strike: false,
-            heading: false, // No headings for conditions
-          }),
-        ],
         content: initialContent,
-        editorProps: {
-          attributes: {
-            class: 'conditions-editor-content',
-            'data-placeholder': t.howEditor.conditions.placeholder,
-          },
-        },
-        onUpdate: ({ editor: e }) => {
-          conditionsJson = e.getJSON();
-          
-          // Skip programmatic updates (from generateExample)
+        placeholder: t.howEditor.conditions.placeholder,
+        contentClass: 'tiptap-content',
+        enableHeadings: false,
+        onUpdate: (json) => {
+          conditionsJson = json;
           if (programmaticUpdateInProgress) return;
-          
-          // On first user modification of default content, uncheck the checkbox
           if (isConditionsUnmodified) {
             isConditionsUnmodified = false;
             hasNoOpenConditions = false;
           }
         },
       });
-      
-      editor = newEditor;
     }
   });
 
-  // Cleanup editor on destroy
-  onDestroy(() => {
-    editor?.destroy();
-  });
+  onDestroy(() => editor?.destroy());
 
-  // Auto-save to JSON on any change (debounced)
+  // Auto-save
   $effect(() => {
-    updateStoredDataDebounced({
-      how: getCurrentData(),
-    });
+    updateStoredDataDebounced({ how: getCurrentData() });
   });
 </script>
 
@@ -298,7 +219,7 @@
       <div class="input-section">
         <div class="number-input-wrapper">
           <button 
-            class="number-button decrement" 
+            class="number-button" 
             onclick={decrement}
             disabled={threshold === null || threshold <= 2}
             aria-label="Decrease"
@@ -306,7 +227,6 @@
             <Icon name="minus" size={24} />
           </button>
           <input
-            id="threshold-input"
             type="text"
             inputmode="numeric"
             pattern="[0-9]*"
@@ -317,7 +237,7 @@
             oninput={handleInputChange}
           />
           <button 
-            class="number-button increment" 
+            class="number-button" 
             onclick={increment}
             disabled={threshold !== null && threshold >= recipientCount}
             aria-label="Increase"
@@ -347,10 +267,7 @@
       
       <div class="editor-wrapper">
         <RichTextToolbar {editor} labels={t.howEditor.toolbar} compact />
-        <div
-          class="conditions-editor"
-          bind:this={editorElement}
-        ></div>
+        <div class="tiptap-editor compact" bind:this={editorElement}></div>
       </div>
     </section>
   </div>
@@ -429,7 +346,6 @@
     overflow-y: auto;
   }
 
-  /* Section styles */
   .threshold-section,
   .conditions-section {
     display: flex;
@@ -451,7 +367,6 @@
     font-size: 0.95rem;
   }
 
-  /* Threshold input styles */
   .input-section {
     display: flex;
     flex-direction: column;
@@ -551,7 +466,6 @@
     line-height: 1.5;
   }
 
-  /* Conditions styles */
   .conditions-section {
     flex: 1;
     gap: 0.75rem;
@@ -579,55 +493,6 @@
     min-height: 180px;
   }
 
-  .conditions-editor {
-    flex: 1;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 0 0 10px 10px;
-    overflow-y: auto;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .conditions-editor:focus-within {
-    border-color: rgba(96, 165, 250, 0.5);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
-  }
-
-  /* TipTap editor content styles */
-  .conditions-editor :global(.conditions-editor-content) {
-    padding: 1rem;
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: #e2e8f0;
-    outline: none;
-    min-height: 100%;
-  }
-
-  /* Placeholder */
-  .conditions-editor :global(.conditions-editor-content.is-editor-empty:first-child::before) {
-    content: attr(data-placeholder);
-    color: rgba(255, 255, 255, 0.4);
-    pointer-events: none;
-    float: left;
-    height: 0;
-    white-space: pre-wrap;
-  }
-
-  .conditions-editor :global(p) {
-    margin-bottom: 0.6rem;
-  }
-
-  .conditions-editor :global(ul), .conditions-editor :global(ol) {
-    margin: 0.6rem 0;
-    padding-left: 1.5rem;
-  }
-
-  .conditions-editor :global(li) {
-    margin-bottom: 0.25rem;
-  }
-
-  /* Side panel styles */
   .optional-section {
     margin-top: 1rem;
   }

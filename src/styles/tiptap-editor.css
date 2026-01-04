@@ -1,0 +1,238 @@
+/**
+ * Shared TipTap editor styles
+ * Used by IntroMessageEditor and HowEditor
+ */
+
+/* Base editor container */
+.tiptap-editor {
+  flex: 1;
+  min-height: 200px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0 0 12px 12px;
+  overflow-y: auto;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tiptap-editor:focus-within {
+  border-color: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+/* Compact variant (for conditions editor) */
+.tiptap-editor.compact {
+  border-radius: 0 0 10px 10px;
+}
+
+/* Editor content area */
+.tiptap-editor .tiptap-content {
+  padding: 1.5rem;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #e2e8f0;
+  outline: none;
+  min-height: 100%;
+}
+
+.tiptap-editor.compact .tiptap-content {
+  padding: 1rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* Placeholder */
+.tiptap-editor .tiptap-content.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+.tiptap-editor.compact .tiptap-content.is-editor-empty:first-child::before {
+  white-space: pre-wrap;
+}
+
+/* Headings */
+.tiptap-editor h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 1rem 0 0.75rem 0;
+}
+
+.tiptap-editor h2:first-child {
+  margin-top: 0;
+}
+
+/* Paragraphs */
+.tiptap-editor p {
+  margin-bottom: 0.75rem;
+}
+
+.tiptap-editor.compact p {
+  margin-bottom: 0.6rem;
+}
+
+/* Lists */
+.tiptap-editor ul,
+.tiptap-editor ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.tiptap-editor.compact ul,
+.tiptap-editor.compact ol {
+  margin: 0.6rem 0;
+}
+
+.tiptap-editor li {
+  margin-bottom: 0.35rem;
+}
+
+.tiptap-editor.compact li {
+  margin-bottom: 0.25rem;
+}
+
+/* Conditions block - subtle styling */
+.tiptap-editor .conditions-block {
+  display: block;
+  margin: 0.5rem 0;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: rgba(167, 199, 231, 0.85);
+  cursor: default;
+  user-select: none;
+}
+
+.tiptap-editor .conditions-block.ProseMirror-selectednode {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+
+/* Conditions content styles */
+.tiptap-editor .conditions-block .conditions-content {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: rgba(167, 199, 231, 0.85);
+  display: block;
+}
+
+.tiptap-editor .conditions-block .conditions-content p {
+  margin-bottom: 0.75rem;
+}
+
+.tiptap-editor .conditions-block .conditions-content ul,
+.tiptap-editor .conditions-block .conditions-content ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.tiptap-editor .conditions-block .conditions-content li {
+  margin-bottom: 0.35rem;
+}
+
+/* Recipients block - similar styling to conditions */
+.tiptap-editor .recipients-block {
+  display: block;
+  margin: 0.5rem 0;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: rgba(167, 199, 231, 0.85);
+  cursor: default;
+  user-select: none;
+}
+
+.tiptap-editor .recipients-block.ProseMirror-selectednode {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+
+/* Recipients content styles */
+.tiptap-editor .recipients-block .recipients-content {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: rgba(167, 199, 231, 0.85);
+  display: block;
+}
+
+.tiptap-editor .recipients-block .recipients-content p {
+  margin-bottom: 0.5rem;
+}
+
+.tiptap-editor .recipients-block .recipients-content strong {
+  color: rgba(187, 215, 243, 0.95);
+  font-weight: 600;
+}
+
+/* Placeholder style for blocks without data */
+.tiptap-editor .recipients-block .block-icon,
+.tiptap-editor .recipients-block .block-label {
+  display: inline;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.tiptap-editor .recipients-block .block-icon {
+  margin-right: 0.5rem;
+}
+
+.tiptap-editor .block-icon {
+  font-size: 1.1rem;
+}
+
+.tiptap-editor .block-label {
+  font-weight: 500;
+}
+
+/* Inline datetime styles */
+.tiptap-editor .datetime-inline {
+  display: inline;
+  color: rgba(167, 199, 231, 0.85);
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: inherit;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
+.tiptap-editor .datetime-inline.ProseMirror-selectednode {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 1px;
+}
+
+/* Inline quorum styles */
+.tiptap-editor .quorum-inline {
+  display: inline;
+  color: rgba(167, 199, 231, 0.85);
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: inherit;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
+.tiptap-editor .quorum-inline.ProseMirror-selectednode {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 1px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .tiptap-editor {
+    min-height: 150px;
+  }
+}

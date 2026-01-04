@@ -1,0 +1,171 @@
+/**
+ * Shared form control styles
+ * Used across multiple editor components
+ */
+
+/* Text inputs */
+.form-input {
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+/* Smaller variant */
+.form-input.small {
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+/* Select dropdowns */
+.form-select {
+  padding: 0.6rem 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+.form-select option {
+  background: #1a1a2e;
+  color: #e2e8f0;
+}
+
+/* Textarea */
+.form-textarea {
+  flex: 1;
+  min-height: 400px;
+  padding: 1.5rem;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: #e2e8f0;
+  resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+/* Form field wrapper */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  color: #a0aec0;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Add button (dashed border style) */
+.add-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  width: fit-content;
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px dashed rgba(96, 165, 250, 0.4);
+  border-radius: 6px;
+  color: #60a5fa;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-button:hover {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: rgba(96, 165, 250, 0.6);
+}
+
+/* Large add button */
+.add-button.large {
+  justify-content: center;
+  padding: 1rem;
+  width: 100%;
+  border-width: 2px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Remove button (red style) */
+.remove-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.remove-button:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.remove-button.large {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+/* Section divider */
+.section-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 1.5rem 0;
+}
+
+/* Optional section */
+.optional-section {
+  margin-top: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .form-textarea {
+    min-height: 250px;
+  }
+}

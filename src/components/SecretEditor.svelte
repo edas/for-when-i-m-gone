@@ -8,6 +8,7 @@
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
   import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
+  import '../styles/form-controls.css';
 
   export interface SecretCheckboxState {
     emails: boolean;
@@ -46,7 +47,7 @@
   let secretText: string = $state(untrack(() => initialValue ?? ''));
   let sidePanelOpen: boolean = $state(true);
 
-  // Checkbox states - first 3 are essential
+  // Checkbox states
   let checkEmails: boolean = $state(untrack(() => initialCheckboxState?.emails ?? false));
   let checkPhoneCodes: boolean = $state(untrack(() => initialCheckboxState?.phoneCodes ?? false));
   let checkCloudAccounts: boolean = $state(untrack(() => initialCheckboxState?.cloudAccounts ?? false));
@@ -85,9 +86,7 @@
   }
 
   function handleContinue(): void {
-    if (hasContent) {
-      onContinue(secretText, getCurrentCheckboxState());
-    }
+    if (hasContent) onContinue(secretText, getCurrentCheckboxState());
   }
 
   function handleBack(): void {
@@ -96,21 +95,13 @@
 
   function generateExample(): void {
     const example = t.secretEditor.sidePanel.exampleContent;
-    if (secretText.trim()) {
-      secretText = secretText + '\n\n\n' + example;
-    } else {
-      secretText = example;
-    }
+    secretText = secretText.trim() ? secretText + '\n\n\n' + example : example;
   }
 
-  // Auto-save to JSON on any change (debounced)
+  // Auto-save
   $effect(() => {
-    const state = getCurrentCheckboxState();
     updateStoredDataDebounced({
-      what: {
-        content: secretText,
-        checkboxState: state,
-      },
+      what: { content: secretText, checkboxState: getCurrentCheckboxState() },
     });
   });
 </script>
@@ -124,7 +115,7 @@
 >
   <textarea
     autocomplete="off"
-    class="editor-textarea"
+    class="form-textarea"
     bind:value={secretText}
     placeholder={t.secretEditor.placeholder}
   ></textarea>
@@ -198,36 +189,3 @@
     />
   {/snippet}
 </EditorLayout>
-
-<style>
-  .editor-textarea {
-    flex: 1;
-    min-height: 400px;
-    padding: 1.5rem;
-    font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
-    color: #e2e8f0;
-    resize: vertical;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .editor-textarea::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-  }
-
-  .editor-textarea:focus {
-    outline: none;
-    border-color: rgba(96, 165, 250, 0.5);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
-  }
-
-  @media (max-width: 600px) {
-    .editor-textarea {
-      min-height: 250px;
-    }
-  }
-</style>
