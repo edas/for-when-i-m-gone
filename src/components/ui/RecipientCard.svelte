@@ -23,7 +23,6 @@
     placeholders: {
       name: string;
       contactValue: string;
-      contactComment: string;
     };
   }
 
@@ -38,7 +37,7 @@
     onUpdateField: (field: 'name' | 'isPrivate', value: string | boolean) => void;
     onAddContact: () => void;
     onRemoveContact: (contactId: string) => void;
-    onUpdateContact: (contactId: string, field: keyof ContactInfo, value: string) => void;
+    onUpdateContact: (contactId: string, field: 'type' | 'value', value: string) => void;
     onDragStart: (e: DragEvent) => void;
     onDragEnd: () => void;
     autoFocus?: boolean;
@@ -189,11 +188,10 @@
           <ContactRow
             {contact}
             {contactTypeOptions}
-            placeholders={{ value: t.placeholders.contactValue, comment: t.placeholders.contactComment }}
+            placeholders={{ value: t.placeholders.contactValue }}
             removeTitle={t.removeContact}
             onTypeChange={(type) => onUpdateContact(contact.id, 'type', type)}
             onValueChange={(value) => onUpdateContact(contact.id, 'value', value)}
-            onCommentChange={(comment) => onUpdateContact(contact.id, 'comment', comment)}
             onRemove={() => onRemoveContact(contact.id)}
           />
         {/each}

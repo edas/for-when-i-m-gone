@@ -158,13 +158,9 @@ function createRecipientsRenderer(getData: () => DynamicExtensionData): () => Re
           .filter((c) => c.value.trim())
           .map((contact) => {
             const label = contactTypeLabels[contact.type as keyof typeof contactTypeLabels] || contact.type;
-            const valueStr =
-              contact.type !== 'other'
-                ? `${label}${colonSeparator}${escapeHtml(contact.value)}`
-                : escapeHtml(contact.value);
-            return contact.comment.trim()
-              ? `${valueStr} (${escapeHtml(contact.comment)})`
-              : valueStr;
+            return contact.type !== 'other'
+              ? `${label}${colonSeparator}${escapeHtml(contact.value)}`
+              : escapeHtml(contact.value);
           });
 
         if (!recipient.name.trim() && contactParts.length === 0) return null;

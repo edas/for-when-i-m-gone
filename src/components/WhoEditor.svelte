@@ -45,6 +45,11 @@
   let sidePanelOpen: boolean = $state(untrack(() => getInitialSidePanelState('who', true)));
   let expandedRecipientId: string | null = $state(
     untrack(() => {
+      // Chercher le premier destinataire non nommé
+      const unnamedRecipient = recipients.find(r => !r.name.trim());
+      if (unnamedRecipient) {
+        return unnamedRecipient.id;
+      }
       // Si il y a plus d'une personne, toutes sont repliées
       if (recipients.length > 1) {
         return null;
