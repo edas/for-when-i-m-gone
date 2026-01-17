@@ -23,6 +23,8 @@ whoEditor:
     name: Who is this?
     contacts: Contact information
     notListedPublicly: Do not list publicly
+    privateInfo: This person will not be visible in the recipients list
+    numberedInfo: This person has already been part of the sends and can no longer be removed. They can only be hidden from the recipients list.
   placeholders:
     name: Cousin Paul Smith
     contactValue: Value...

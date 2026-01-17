@@ -124,6 +124,12 @@
   font-weight: 500;
 }
 
+.add-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Remove button (red style) */
 .remove-button {
   display: flex;

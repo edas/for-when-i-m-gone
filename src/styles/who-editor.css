@@ -72,9 +72,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.25rem;
+  padding: 1rem 0.5rem;
   cursor: pointer;
   user-select: none;
+}
+
+.recipient-header.toggle-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.recipient-header.toggle-disabled:hover {
+  opacity: 0.6;
+}
+
+.recipient-card.expanded .recipient-header {
+  align-items: flex-start;
+}
+
+.recipient-card:not(.expanded) .recipient-header {
+  padding: 0.25rem 0.5rem;
 }
 
 .drag-handle {
@@ -83,7 +100,7 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  margin-right: 0.75rem;
+  margin-right: 0.25rem;
   color: #64748b;
   cursor: grab;
   flex-shrink: 0;
@@ -105,6 +122,10 @@
   min-width: 0;
 }
 
+.recipient-card.expanded .recipient-summary {
+  align-items: flex-start;
+}
+
 .recipient-name {
   color: #e2e8f0;
   font-weight: 500;
@@ -114,10 +135,84 @@
   white-space: nowrap;
 }
 
+.recipient-name.private {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.recipient-number {
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 0.9em;
+  margin-left: 0.25em;
+}
+
+.recipient-name-input {
+  width: 100%;
+  max-width: calc(100% - 2rem);
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recipient-name-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.recipient-name-input:focus {
+  outline: none;
+  border-color: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+.name-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.private-info-message {
+  color: #a0aec0;
+  font-size: 0.85rem;
+  font-style: italic;
+  padding-left: 0.25rem;
+}
+
 .recipient-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.recipient-card.expanded .recipient-actions {
+  align-items: flex-start;
+  padding-top: 0.25rem;
+}
+
+.private-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  border-radius: 8px;
+  color: #60a5fa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.private-toggle-button:hover {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: rgba(96, 165, 250, 0.5);
 }
 
 .expand-icon {

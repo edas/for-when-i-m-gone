@@ -23,6 +23,8 @@ whoEditor:
     name: Qui est-ce ?
     contacts: Coordonnées
     notListedPublicly: Ne pas lister publiquement
+    privateInfo: Cette personne ne sera pas visible dans la liste des destinataires
+    numberedInfo: Cette personne a déjà fait partie des envois et ne peut plus être retirée. Elle peut seulement être masquée de la liste des destinataires.
   placeholders:
     name: Cousin Paul Durant
     contactValue: Valeur...

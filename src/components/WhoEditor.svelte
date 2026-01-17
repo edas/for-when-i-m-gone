@@ -82,6 +82,12 @@
   let allHavePhone = $derived(recipients.length > 0 && recipients.every(r => 
     r.contacts.some(c => c.type === 'phone' && c.value.trim())
   ));
+  
+  // Vérifie si la personne actuellement en édition a un nom valide
+  let expandedRecipientHasName = $derived(
+    expandedRecipientId !== null && 
+    recipients.find(r => r.id === expandedRecipientId)?.name.trim() !== ''
+  );
 
   let buttonState = $derived(computeButtonStateCustom(hasAtLeast2, allEssentialsChecked));
   let buttonText = $derived(
@@ -116,6 +122,11 @@
   }
 
   function removeRecipient(id: string): void {
+    const recipient = recipients.find(r => r.id === id);
+    // Ne pas permettre la suppression d'une personne qui a un numéro attribué
+    if (recipient && typeof recipient.number === 'number' && recipient.number > 0) {
+      return;
+    }
     const index = recipients.findIndex(r => r.id === id);
     recipients = recipients.filter(r => r.id !== id);
     if (expandedRecipientId === id) {
@@ -124,6 +135,14 @@
   }
 
   function toggleExpanded(id: string): void {
+    // Si on essaie de sélectionner une autre personne alors que la personne en édition n'a pas de nom, on bloque
+    if (expandedRecipientId !== null && expandedRecipientId !== id && !expandedRecipientHasName) {
+      return;
+    }
+    // Si on essaie de replier la personne actuellement en édition et qu'elle n'a pas de nom, on bloque
+    if (expandedRecipientId === id && !expandedRecipientHasName) {
+      return;
+    }
     expandedRecipientId = expandedRecipientId === id ? null : id;
   }
 
@@ -219,6 +238,7 @@
           {contactTypeOptions}
           translations={t.whoEditor}
           autoFocus={autoFocusRecipientId === recipient.id}
+          toggleDisabled={expandedRecipientId !== null && !expandedRecipientHasName}
           onToggle={() => toggleExpanded(recipient.id)}
           onRemove={() => removeRecipient(recipient.id)}
           onUpdateField={(field, value) => updateRecipient(recipient.id, field, value)}
@@ -242,7 +262,11 @@
         <div class="drop-zone-indicator"></div>
       </div>
       
-      <button class="add-button large" onclick={addRecipient}>
+      <button 
+        class="add-button large" 
+        onclick={addRecipient}
+        disabled={expandedRecipientId !== null && !expandedRecipientHasName}
+      >
         <Icon name="plus" size={20} />
         {t.whoEditor.addRecipient}
       </button>
@@ -253,7 +277,7 @@
         backLabel={t.common.back}
         continueLabel={buttonText}
         {buttonState}
-        disabled={!hasAtLeast2}
+        disabled={!hasAtLeast2 || (expandedRecipientId !== null && !expandedRecipientHasName)}
         onBack={handleBack}
         onContinue={handleContinue}
       />
