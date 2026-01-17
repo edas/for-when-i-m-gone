@@ -27,7 +27,6 @@
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
   import RichTextToolbar from './ui/RichTextToolbar.svelte';
-  import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
   import '../styles/tiptap-editor.css';
 
   interface Props {
@@ -43,11 +42,8 @@
 
   let { lang, initialValue, initialCheckboxState, threshold, conditions, recipients, onContinue, onBack }: Props = $props();
 
-  // Get initial content
-  const initialContent = (() => {
-    const translations = getTranslations(lang);
-    return initialValue ?? translations.introEditor.sidePanel.exampleContentJson;
-  })();
+  // Get initial content - empty by default
+  const initialContent = initialValue ?? null;
 
   let sidePanelOpen: boolean = $state(true);
   let editorElement: HTMLDivElement | null = $state(null);
@@ -225,6 +221,9 @@
     disabled={!hasContent}
     onBack={handleBack}
     onContinue={handleContinue}
+    showAlternative={!hasContent}
+    alternativeLabel={t.introEditor.sidePanel.generateExample}
+    onAlternative={generateExample}
   />
 
   {#snippet sidePanelContent()}
@@ -275,13 +274,6 @@
         description={t.introEditor.sidePanel.checkboxes.directives.description}
       />
     </div>
-
-    <div class="section-divider"></div>
-
-    <GenerateExampleButton
-      label={t.introEditor.sidePanel.generateExample}
-      onclick={generateExample}
-    />
   {/snippet}
 </EditorLayout>
 

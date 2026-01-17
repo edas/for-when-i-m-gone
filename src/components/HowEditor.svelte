@@ -15,7 +15,6 @@
   import CheckboxItem from './ui/CheckboxItem.svelte';
 import TipSection from './ui/TipSection.svelte';
 import RichTextToolbar from './ui/RichTextToolbar.svelte';
-import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
 import Icon from './ui/Icons.svelte';
   import '../styles/tiptap-editor.css';
   import '../styles/how-editor.css';
@@ -48,7 +47,7 @@ import Icon from './ui/Icons.svelte';
       : String(getDefaultThreshold(recipientCount))
   ));
   let conditionsJson: JSONContent | null = $state(untrack(() => 
-    initialData?.conditions ?? getDefaultConditions()
+    initialData?.conditions ?? null
   ));
   
   const initialIsUnmodified = untrack(() => initialData?.isConditionsUnmodified ?? !initialData?.conditions);
@@ -162,11 +161,9 @@ import Icon from './ui/Icons.svelte';
   // Initialize TipTap editor
   $effect(() => {
     if (editorElement && !editor) {
-      const initialContent = conditionsJson ?? getDefaultConditions();
-      
       editor = createTiptapEditor({
         element: editorElement,
-        content: initialContent,
+        content: conditionsJson,
         placeholder: t.howEditor.conditions.placeholder,
         contentClass: 'tiptap-content',
         enableHeadings: false,
@@ -278,6 +275,9 @@ import Icon from './ui/Icons.svelte';
     disabled={!canContinue}
     onBack={handleBack}
     onContinue={handleContinue}
+    alternativeLabel={t.howEditor.sidePanel.generateExample}
+    showAlternative={!hasConditions}
+    onAlternative={generateExample}
   />
 
   {#snippet sidePanelContent()}
@@ -325,12 +325,5 @@ import Icon from './ui/Icons.svelte';
     </div>
 
     <TipSection text={t.howEditor.sidePanel.tip} />
-
-    <div class="section-divider"></div>
-
-    <GenerateExampleButton
-      label={t.howEditor.sidePanel.generateExample}
-      onclick={generateExample}
-    />
   {/snippet}
 </EditorLayout>

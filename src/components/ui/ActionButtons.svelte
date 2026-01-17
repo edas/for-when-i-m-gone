@@ -9,6 +9,10 @@
     disabled?: boolean;
     onBack: () => void;
     onContinue: () => void;
+    // Alternative button (replaces continue button when shown)
+    alternativeLabel?: string;
+    showAlternative?: boolean;
+    onAlternative?: () => void;
   }
 
   let { 
@@ -17,7 +21,10 @@
     buttonState = 'complete', 
     disabled = false, 
     onBack, 
-    onContinue 
+    onContinue,
+    alternativeLabel,
+    showAlternative = false,
+    onAlternative,
   }: Props = $props();
 </script>
 
@@ -26,23 +33,30 @@
     <Icon name="arrow-left" size={18} />
     {backLabel}
   </button>
-  <button
-    class="continue-button"
-    class:state-none={buttonState === 'none'}
-    class:state-partial={buttonState === 'partial'}
-    class:state-complete={buttonState === 'complete'}
-    {disabled}
-    onclick={onContinue}
-  >
-    {#if buttonState === 'none'}
-      <Icon name="info" />
-    {:else if buttonState === 'partial'}
-      <Icon name="layers" />
-    {:else}
-      <Icon name="check" />
-    {/if}
-    {continueLabel}
-  </button>
+  {#if showAlternative && alternativeLabel && onAlternative}
+    <button class="alternative-button" onclick={onAlternative}>
+      <Icon name="plus" size={18} />
+      {alternativeLabel}
+    </button>
+  {:else}
+    <button
+      class="continue-button"
+      class:state-none={buttonState === 'none'}
+      class:state-partial={buttonState === 'partial'}
+      class:state-complete={buttonState === 'complete'}
+      {disabled}
+      onclick={onContinue}
+    >
+      {#if buttonState === 'none'}
+        <Icon name="info" />
+      {:else if buttonState === 'partial'}
+        <Icon name="layers" />
+      {:else}
+        <Icon name="check" />
+      {/if}
+      {continueLabel}
+    </button>
+  {/if}
 </div>
 
 <style>
@@ -126,6 +140,33 @@
     transform: none !important;
   }
 
+  .alternative-button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(99, 102, 241, 0.3) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    color: #ddd6fe;
+  }
+
+  .alternative-button:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(99, 102, 241, 0.4) 100%);
+    border-color: rgba(139, 92, 246, 0.7);
+    color: #ede9fe;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+  }
+
+  .alternative-button:active {
+    transform: translateY(0);
+  }
+
   /* Responsive */
   @media (max-width: 600px) {
     .button-container {
@@ -133,7 +174,8 @@
     }
 
     .back-button,
-    .continue-button {
+    .continue-button,
+    .alternative-button {
       width: 100%;
       justify-content: center;
     }
