@@ -10,18 +10,44 @@
     wide?: boolean;
     onToggle: () => void;
     children: Snippet;
+    editorId?: string;
   }
 
-  let { open, collapseLabel, expandLabel, wide = false, onToggle, children }: Props = $props();
+  let { open, collapseLabel, expandLabel, wide = false, onToggle, children, editorId = 'default' }: Props = $props();
+  
+  const STORAGE_KEY = `sidePanel_hasVisitedSmallScreen_${editorId}`;
+  
+  // Charger l'état depuis sessionStorage
+  function getInitialHasVisitedSmallScreen(): boolean {
+    if (typeof sessionStorage !== 'undefined') {
+      return sessionStorage.getItem(STORAGE_KEY) === 'true';
+    }
+    return false;
+  }
   
   let isLargeScreen = $state(true);
+  let hasVisitedSmallScreen = $state(getInitialHasVisitedSmallScreen());
+  let wasLargeScreenOnMount = $state(true);
   
   function checkScreenSize() {
+    const previousIsLargeScreen = isLargeScreen;
     isLargeScreen = window.innerWidth > 900;
+    
+    // Détecter la transition d'un grand écran vers un petit écran
+    // et ouvrir automatiquement la première fois
+    if (previousIsLargeScreen && !isLargeScreen && !hasVisitedSmallScreen && !open) {
+      hasVisitedSmallScreen = true;
+      // Sauvegarder dans sessionStorage
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(STORAGE_KEY, 'true');
+      }
+      onToggle();
+    }
   }
   
   onMount(() => {
-    checkScreenSize();
+    wasLargeScreenOnMount = window.innerWidth > 900;
+    isLargeScreen = wasLargeScreenOnMount;
     window.addEventListener('resize', checkScreenSize);
     return () => {
       window.removeEventListener('resize', checkScreenSize);

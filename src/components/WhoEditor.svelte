@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { untrack, tick } from 'svelte';
+  import { untrack, tick, onMount } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
   import { updateStoredData } from '../lib/dataStore';
   import { computeButtonStateCustom, getButtonText, type ButtonState } from '../lib/buttonState';
@@ -28,6 +28,7 @@
     createEmptyContact,
     createEmptyRecipient,
   } from '../lib/types/recipient';
+  import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
 
   interface Props {
     lang: Language;
@@ -41,7 +42,7 @@
   let recipients: Recipient[] = $state(
     untrack(() => initialRecipients?.length ? [...initialRecipients] : [createEmptyRecipient()])
   );
-  let sidePanelOpen: boolean = $state(true);
+  let sidePanelOpen: boolean = $state(untrack(() => getInitialSidePanelState('who', true)));
   let expandedRecipientId: string | null = $state(
     untrack(() => {
       // Si il y a plus d'une personne, toutes sont repliées
@@ -206,6 +207,30 @@
       who: { recipients }
     }));
   });
+
+  // Sauvegarder l'état de la barre latérale
+  $effect(() => {
+    saveSidePanelState('who', sidePanelOpen);
+  });
+
+  // Focus automatique sur le champ nom lors de la première visite
+  onMount(async () => {
+    // Attendre que le DOM soit complètement rendu
+    await tick();
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    // Vérifier si on a une personne étendue sans nom (première visite)
+    if (expandedRecipientId !== null && recipients.length > 0) {
+      const expandedRecipient = recipients.find(r => r.id === expandedRecipientId);
+      if (expandedRecipient && !expandedRecipient.name.trim()) {
+        autoFocusRecipientId = expandedRecipient.id;
+        // Réinitialiser après le focus
+        setTimeout(() => {
+          autoFocusRecipientId = null;
+        }, 400);
+      }
+    }
+  });
 </script>
 
 <EditorLayout
@@ -215,6 +240,7 @@
   expandLabel={t.whoEditor.sidePanel.expand}
   wideSidePanel
   onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
+  editorId="who"
 >
   <div class="content-wrapper">
     <div class="recipients-list" role="list">

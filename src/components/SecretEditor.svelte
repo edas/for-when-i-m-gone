@@ -4,6 +4,7 @@
   import { computeButtonState, getButtonText } from '../lib/buttonState';
   import { updateStoredData } from '../lib/dataStore';
   import { type SecretCheckboxState, defaultSecretCheckboxState } from '../lib/types/editorTypes';
+  import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
   import EditorLayout from './ui/EditorLayout.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
@@ -23,7 +24,7 @@
   let { lang, initialValue, initialCheckboxState, onContinue, onBack }: Props = $props();
 
   let secretText: string = $state(untrack(() => initialValue ?? ''));
-  let sidePanelOpen: boolean = $state(true);
+  let sidePanelOpen: boolean = $state(untrack(() => getInitialSidePanelState('secret', true)));
 
   // Checkbox states
   let checkEmails: boolean = $state(untrack(() => initialCheckboxState?.emails ?? false));
@@ -84,6 +85,11 @@
       what: { content: secretText, checkboxState: getCurrentCheckboxState() }
     }));
   });
+
+  // Sauvegarder l'état de la barre latérale
+  $effect(() => {
+    saveSidePanelState('secret', sidePanelOpen);
+  });
 </script>
 
 <EditorLayout
@@ -92,6 +98,7 @@
   collapseLabel={t.secretEditor.sidePanel.collapse}
   expandLabel={t.secretEditor.sidePanel.expand}
   onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
+  editorId="secret"
 >
   <textarea
     autocomplete="off"

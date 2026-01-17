@@ -13,6 +13,7 @@
     children: Snippet;
     sidePanelContent: Snippet;
     toolbar?: Snippet;
+    editorId?: string;
   }
 
   let { 
@@ -25,7 +26,8 @@
     onToggleSidePanel, 
     children,
     sidePanelContent,
-    toolbar
+    toolbar,
+    editorId
   }: Props = $props();
 </script>
 
@@ -53,6 +55,7 @@
     {expandLabel}
     wide={wideSidePanel}
     onToggle={onToggleSidePanel}
+    {editorId}
   >
     {@render sidePanelContent()}
   </SidePanel>

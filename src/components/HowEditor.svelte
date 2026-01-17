@@ -3,6 +3,7 @@
   import type { Editor, JSONContent } from '@tiptap/core';
   import { getTranslations, type Language } from '../lib/i18n';
   import { updateStoredData } from '../lib/dataStore';
+  import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
   import { computeButtonStateCustom, getButtonText, type ButtonState } from '../lib/buttonState';
   import { type HowData } from '../lib/types/editorTypes';
   import { parseHtmlToJson } from '../lib/htmlParser';
@@ -57,7 +58,7 @@ import Icon from './ui/Icons.svelte';
     untrack(() => initialIsUnmodified ? true : (initialData?.hasNoOpenConditions ?? false))
   );
   let programmaticUpdateInProgress = false;
-  let sidePanelOpen: boolean = $state(true);
+  let sidePanelOpen: boolean = $state(untrack(() => getInitialSidePanelState('how', true)));
 
   let editorElement: HTMLDivElement | null = $state(null);
   let editor: Editor | null = $state(null);
@@ -192,6 +193,11 @@ import Icon from './ui/Icons.svelte';
       how: getCurrentData()
     }));
   });
+
+  // Sauvegarder l'état de la barre latérale
+  $effect(() => {
+    saveSidePanelState('how', sidePanelOpen);
+  });
 </script>
 
 <EditorLayout
@@ -200,6 +206,7 @@ import Icon from './ui/Icons.svelte';
   collapseLabel={t.howEditor.sidePanel.collapse}
   expandLabel={t.howEditor.sidePanel.expand}
   onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
+  editorId="how"
 >
   <div class="how-content">
     <!-- Threshold Section -->

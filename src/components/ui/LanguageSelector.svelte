@@ -27,6 +27,19 @@
     position: absolute;
     top: 1.5rem;
     right: 1.5rem;
+    z-index: 10000;
+  }
+
+  @media (max-width: 480px) {
+    .language-selector {
+      top: 1rem;
+      right: 1rem;
+    }
+
+    .language-selector select {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.8rem;
+    }
   }
 
   .language-selector select {

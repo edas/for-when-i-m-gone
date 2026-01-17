@@ -3,6 +3,7 @@
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
   import { updateStoredData, getStoredData } from '../lib/dataStore';
+  import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
   import { 
     generateAES256Key, 
     exportKeyToUint8Array,
@@ -37,7 +38,7 @@
   });
 
   let t = $derived(getTranslations(lang));
-  let sidePanelOpen: boolean = $state(true);
+  let sidePanelOpen: boolean = $state(untrack(() => getInitialSidePanelState('generate', true)));
   let errorMessage: string | null = $state(null);
   let isReady: boolean = $state(false);
   let isProcessing: boolean = $state(false);
@@ -226,6 +227,11 @@
   function handleBack(): void {
     onBack();
   }
+
+  // Sauvegarder l'état de la barre latérale
+  $effect(() => {
+    saveSidePanelState('generate', sidePanelOpen);
+  });
 </script>
 
 <EditorLayout
@@ -234,6 +240,7 @@
   collapseLabel={t.generateEditor.sidePanel.collapse}
   expandLabel={t.generateEditor.sidePanel.expand}
   onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
+  editorId="generate"
 >
   <div class="generate-content">
     {#if errorMessage}

@@ -104,6 +104,16 @@
     margin: 0 auto 1.5rem;
     color: #f59e0b;
     animation: pulse 2s ease-in-out infinite;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .warning-icon :global(svg) {
+    width: 100%;
+    height: 100%;
   }
 
   @keyframes pulse {
@@ -240,5 +250,39 @@
     cursor: not-allowed;
     box-shadow: none;
     opacity: 0.6;
+  }
+
+  /* Responsive styles for mobile */
+  @media (max-width: 480px) {
+    .warning-container {
+      padding: 2rem 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .warning-icon {
+      width: 50px;
+      height: 50px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .checkbox-container {
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .continue-button {
+      padding: 0.875rem 2rem;
+      font-size: 1rem;
+    }
   }
 </style>

@@ -5,6 +5,7 @@
   import { computeButtonState, getButtonText } from '../lib/buttonState';
   import { updateStoredData } from '../lib/dataStore';
   import { type IntroCheckboxState, defaultIntroCheckboxState } from '../lib/types/editorTypes';
+  import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
   import { 
     RecipientsBlock, 
     ConditionsBlock, 
@@ -45,7 +46,7 @@
   // Get initial content - empty by default
   const initialContent = initialValue ?? null;
 
-  let sidePanelOpen: boolean = $state(true);
+  let sidePanelOpen: boolean = $state(untrack(() => getInitialSidePanelState('intro', true)));
   let editorElement: HTMLDivElement | null = $state(null);
   let editor: Editor | null = $state(null);
   let messageJson: JSONContent | null = $state(initialContent);
@@ -197,6 +198,11 @@
       intro: { message: messageJson, checkboxState: getCurrentCheckboxState() }
     }));
   });
+
+  // Sauvegarder l'état de la barre latérale
+  $effect(() => {
+    saveSidePanelState('intro', sidePanelOpen);
+  });
 </script>
 
 <EditorLayout
@@ -207,6 +213,7 @@
   expandLabel={t.introEditor.sidePanel.expand}
   wideSidePanel
   onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
+  editorId="intro"
 >
   {#snippet toolbar()}
     <RichTextToolbar {editor} {editorVersion} labels={t.introEditor.toolbar} {threshold} />
