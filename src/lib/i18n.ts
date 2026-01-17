@@ -225,6 +225,7 @@ export interface Translations {
         hasNoOpenConditions: string;
       };
       tip: string;
+      quorumWarning: string;
       generateExample: string;
       exampleContent: string;
     };
