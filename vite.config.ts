@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { viteSingleFile } from 'vite-plugin-singlefile'
 import yaml from '@modyfi/vite-plugin-yaml'
@@ -10,5 +10,9 @@ export default defineConfig({
     target: 'esnext',
     assetsInlineLimit: 100000000,
     cssCodeSplit: false,
-  }
+  },
+  test: {
+    globals: true,
+    environment: 'node',
+  },
 })

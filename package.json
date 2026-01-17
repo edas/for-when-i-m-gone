@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
+    "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
+    "test": "vitest"
   },
   "devDependencies": {
     "@modyfi/vite-plugin-yaml": "^1.1.1",
@@ -17,12 +18,14 @@
     "svelte-check": "^4.3.5",
     "typescript": "~5.9.3",
     "vite": "^7.3.0",
-    "vite-plugin-singlefile": "^2.3.0"
+    "vite-plugin-singlefile": "^2.3.0",
+    "vitest": "^4.0.17"
   },
   "dependencies": {
     "@tiptap/core": "^3.14.0",
     "@tiptap/extension-underline": "^3.14.0",
     "@tiptap/pm": "^3.14.0",
-    "@tiptap/starter-kit": "^3.14.0"
+    "@tiptap/starter-kit": "^3.14.0",
+    "ssss-js": "github:edas/ssss-js"
   }
 }
