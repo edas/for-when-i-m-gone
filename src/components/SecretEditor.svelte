@@ -195,22 +195,22 @@
   .back-button {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    color: #a0aec0;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    color: rgba(160, 174, 192, 0.6);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    text-decoration: none;
   }
 
   .back-button:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: #e2e8f0;
+    background: none;
+    color: rgba(160, 174, 192, 0.9);
   }
 
   .button-container :global(.generate-example-button) {
@@ -223,13 +223,17 @@
   /* Responsive */
   @media (max-width: 600px) {
     .button-container {
-      flex-direction: column;
+      flex-direction: column-reverse;
     }
 
-    .back-button,
     .button-container :global(.generate-example-button) {
       width: 100%;
       justify-content: center;
+    }
+
+    .back-button {
+      align-self: flex-start;
+      margin-top: 0.5rem;
     }
   }
 </style>

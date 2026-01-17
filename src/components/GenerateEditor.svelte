@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/ae4b1377-63e3-4eb9-a9ff-0f51f71a7a34',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GenerateEditor.svelte:2',message:'Checking imports before untrack usage',data:{hasOnMount:true,hasUntrack:true,typeofUntrack:'function'},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
+  import { onMount, untrack } from 'svelte';
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/ae4b1377-63e3-4eb9-a9ff-0f51f71a7a34',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GenerateEditor.svelte:3',message:'After onMount and untrack import, checking untrack availability',data:{typeofUntrack:typeof untrack,untrackDefined:typeof untrack !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
   import { updateStoredData, getStoredData } from '../lib/dataStore';
@@ -38,6 +44,9 @@
   });
 
   let t = $derived(getTranslations(lang));
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/ae4b1377-63e3-4eb9-a9ff-0f51f71a7a34',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GenerateEditor.svelte:50',message:'Before untrack usage - checking if untrack is defined',data:{typeofUntrack:typeof untrack,untrackDefined:typeof untrack !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
   let sidePanelOpen: boolean = $state(untrack(() => getInitialSidePanelState('generate', true)));
   let errorMessage: string | null = $state(null);
   let isReady: boolean = $state(false);
@@ -296,6 +305,7 @@
     disabled={!canContinue}
     onBack={handleBack}
     onContinue={handleContinue}
+    showContinue={false}
   />
 
   {#snippet sidePanelContent()}
