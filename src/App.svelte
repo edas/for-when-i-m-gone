@@ -133,6 +133,16 @@
     if (!generateSubmitted) return 4;
     return 4; // Stay on last step when completed
   });
+
+  // Synchronize aesKey with store when on HowEditor screen
+  $effect(() => {
+    if (!howSubmitted && secretSubmitted && whoSubmitted) {
+      const storedData = getStoredData();
+      if (storedData.generate?.aesKey instanceof Uint8Array) {
+        aesKey = storedData.generate.aesKey;
+      }
+    }
+  });
 </script>
 
 {#if !securityConfirmed}
@@ -167,6 +177,7 @@
           lang={currentLang}
           recipientCount={recipients.length}
           initialData={howData}
+          {aesKey}
           onContinue={handleHowContinue}
           onBack={handleHowBack}
         />

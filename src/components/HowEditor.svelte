@@ -23,11 +23,12 @@ import Icon from './ui/Icons.svelte';
     lang: Language;
     recipientCount: number;
     initialData?: Partial<HowData>;
+    aesKey?: Uint8Array;
     onContinue: (data: HowData) => void;
     onBack: (data: HowData) => void;
   }
 
-  let { lang, recipientCount, initialData, onContinue, onBack }: Props = $props();
+  let { lang, recipientCount, initialData, aesKey, onContinue, onBack }: Props = $props();
 
   let t = $derived(getTranslations(lang));
 
@@ -96,6 +97,9 @@ import Icon from './ui/Icons.svelte';
   );
 
   let canContinue = $derived(isValidThreshold && !isTooHigh);
+
+  // Check if AES key is already generated
+  let isAesKeyGenerated = $derived(aesKey instanceof Uint8Array);
 
   let buttonState = $derived(computeButtonStateCustom(canContinue, allEssentialsChecked));
   let buttonText = $derived(
@@ -209,7 +213,7 @@ import Icon from './ui/Icons.svelte';
             <button 
               class="number-button" 
               onclick={decrement}
-              disabled={threshold === null || threshold <= 2}
+              disabled={isAesKeyGenerated || threshold === null || threshold <= 2}
               aria-label="Decrease"
             >
               <Icon name="minus" size={24} />
@@ -223,11 +227,12 @@ import Icon from './ui/Icons.svelte';
               class:optimal={isGreen}
               value={inputValue}
               oninput={handleInputChange}
+              readonly={isAesKeyGenerated}
             />
             <button 
               class="number-button" 
               onclick={increment}
-              disabled={threshold !== null && threshold >= recipientCount}
+              disabled={isAesKeyGenerated || (threshold !== null && threshold >= recipientCount)}
               aria-label="Increase"
             >
               <Icon name="plus" size={24} />
