@@ -328,26 +328,66 @@ function createBlockNodeView(
   dataType: string,
   renderContent: (data: DynamicExtensionData) => RenderResult,
   placeholderIcon: string,
-  placeholderLabel: string
+  placeholderLabel: string,
+  showDeleteButton: boolean = false
 ) {
-  return ({ editor }: { editor: Editor }) => {
+  return ({ editor, getPos }: { editor: Editor; getPos: () => number | undefined }) => {
     const dom = document.createElement('div');
     dom.setAttribute('data-type', dataType);
     dom.className = className;
     dom.contentEditable = 'false';
+    dom.style.position = 'relative';
+
+    // Create delete button if needed
+    let deleteButton: HTMLButtonElement | null = null;
+    if (showDeleteButton) {
+      deleteButton = document.createElement('button');
+      deleteButton.className = 'block-delete-button';
+      deleteButton.innerHTML = '×';
+      deleteButton.setAttribute('aria-label', 'Retirer ce composant');
+      deleteButton.setAttribute('type', 'button');
+      
+      deleteButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const pos = getPos();
+        if (pos !== undefined) {
+          // Select the node at this position and delete it
+          const tr = editor.state.tr;
+          const node = tr.doc.nodeAt(pos);
+          if (node) {
+            tr.delete(pos, pos + node.nodeSize);
+            editor.view.dispatch(tr);
+          }
+        }
+      });
+      
+      dom.appendChild(deleteButton);
+    }
 
     const render = () => {
       const data = getDataFromEditor(editor);
       const { hasData, html } = renderContent(data);
       
+      // Get the content container (or create it)
+      let contentContainer = dom.querySelector(`.${className.replace('block', 'content')}`) as HTMLElement;
+      if (!contentContainer) {
+        contentContainer = document.createElement('div');
+        contentContainer.className = className.replace('block', 'content');
+        // Insert before delete button if it exists
+        if (deleteButton && dom.contains(deleteButton)) {
+          dom.insertBefore(contentContainer, deleteButton);
+        } else {
+          dom.appendChild(contentContainer);
+        }
+      }
+      
       if (hasData) {
         // Data exists - show content (even if empty)
-        dom.innerHTML = html 
-          ? `<div class="${className.replace('block', 'content')}">${html}</div>`
-          : `<div class="${className.replace('block', 'content')}"></div>`;
+        contentContainer.innerHTML = html || '';
       } else {
         // No data - show placeholder
-        dom.innerHTML = `<span class="block-icon">${placeholderIcon}</span><span class="block-label">${placeholderLabel}</span>`;
+        contentContainer.innerHTML = `<span class="block-icon">${placeholderIcon}</span><span class="block-label">${placeholderLabel}</span>`;
       }
     };
 
@@ -449,7 +489,8 @@ export const RecipientsBlock = Node.create({
         return renderHtml();
       },
       '👥',
-      'Liste des destinataires'
+      'Liste des destinataires',
+      true // Show delete button
     );
   },
 
@@ -505,7 +546,8 @@ export const ConditionsBlock = Node.create({
         return renderHtml();
       },
       '📋',
-      "Conditions d'ouverture"
+      "Conditions d'ouverture",
+      true // Show delete button
     );
   },
 
