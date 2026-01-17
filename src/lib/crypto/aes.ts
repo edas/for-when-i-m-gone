@@ -119,18 +119,82 @@ export function bufferToText(buffer: ArrayBuffer): string {
  * @throws If key export fails
  */
 export async function exportKeyToBase64(key: CryptoKey): Promise<string> {
+  const keyBytes = await exportKeyToUint8Array(key);
+  return uint8ArrayToBase64(keyBytes);
+}
+
+/**
+ * Exports a CryptoKey to a Uint8Array
+ * @param key - The CryptoKey to export
+ * @returns A promise that resolves with the key as a Uint8Array
+ * @throws If key export fails
+ */
+export async function exportKeyToUint8Array(key: CryptoKey): Promise<Uint8Array> {
   try {
     const exported = await crypto.subtle.exportKey('raw', key);
-    const bytes = new Uint8Array(exported);
-    // Convert to base64
-    let binary = '';
-    for (let i = 0; i < bytes.length; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
+    return new Uint8Array(exported);
   } catch (error) {
-    throw new Error(`Error exporting key to base64: ${error}`);
+    throw new Error(`Error exporting key to Uint8Array: ${error}`);
   }
+}
+
+/**
+ * Imports a Uint8Array as a CryptoKey
+ * @param keyBytes - The Uint8Array representing the key
+ * @returns A promise that resolves with the imported CryptoKey
+ * @throws If key import fails
+ */
+export async function importKeyFromUint8Array(keyBytes: Uint8Array): Promise<CryptoKey> {
+  try {
+    return await crypto.subtle.importKey(
+      'raw',
+      keyBytes.buffer,
+      {
+        name: 'AES-GCM',
+        length: 256,
+      },
+      true, // extractable
+      ['encrypt', 'decrypt'] // keyUsages
+    );
+  } catch (error) {
+    throw new Error(`Error importing key from Uint8Array: ${error}`);
+  }
+}
+
+/**
+ * Converts a Uint8Array to a base64 string
+ * @param bytes - The Uint8Array to convert
+ * @returns The base64 string
+ */
+export function uint8ArrayToBase64(bytes: Uint8Array): string {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+/**
+ * Converts a base64 string to a Uint8Array
+ * @param base64 - The base64 string to convert
+ * @returns The Uint8Array
+ */
+export function base64ToUint8Array(base64: string): Uint8Array {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+/**
+ * Converts an ArrayBuffer to a base64 string
+ * @param buffer - The ArrayBuffer to convert
+ * @returns The base64 string
+ */
+export function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  return uint8ArrayToBase64(new Uint8Array(buffer));
 }
 
 /**
@@ -140,25 +204,6 @@ export async function exportKeyToBase64(key: CryptoKey): Promise<string> {
  * @throws If key import fails
  */
 export async function importKeyFromBase64(base64Key: string): Promise<CryptoKey> {
-  try {
-    // Convert base64 to ArrayBuffer
-    const binary = atob(base64Key);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    
-    return await crypto.subtle.importKey(
-      'raw',
-      bytes.buffer,
-      {
-        name: 'AES-GCM',
-        length: 256,
-      },
-      true, // extractable
-      ['encrypt', 'decrypt'] // keyUsages
-    );
-  } catch (error) {
-    throw new Error(`Error importing key from base64: ${error}`);
-  }
+  const keyBytes = base64ToUint8Array(base64Key);
+  return importKeyFromUint8Array(keyBytes);
 }

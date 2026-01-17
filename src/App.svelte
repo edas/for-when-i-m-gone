@@ -48,6 +48,8 @@
     ...storedData.intro?.checkboxState,
   });
   let introSubmitted: boolean = $state(false);
+  let aesKey: Uint8Array | undefined = $state(storedData.generate?.aesKey);
+  let shares: string[] | undefined = $state(storedData.generate?.shares);
   let generateSubmitted: boolean = $state(false);
 
   function handleSecurityContinue(checked: boolean): void {
@@ -185,6 +187,8 @@
           secret={secretContent}
           recipients={recipients}
           threshold={howData.threshold!}
+          {aesKey}
+          {shares}
           onContinue={handleGenerateContinue}
           onBack={handleGenerateBack}
         />

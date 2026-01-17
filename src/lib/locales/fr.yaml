@@ -214,6 +214,8 @@ howEditor:
 generateEditor:
   title: Générer les documents
   placeholder: Le contenu de cet écran sera défini prochainement.
+  processing: Génération en cours...
+  ready: Tout est prêt
   sidePanel:
     title: Génération
     intro: >-
@@ -221,6 +223,14 @@ generateEditor:
       pour transmettre votre secret de manière sécurisée.
     collapse: Replier
     expand: Aide
+  shares:
+    title: Jetons partagés aux destinataires
+    intro: >-
+      Chaque destinataire a reçu un jeton unique. Ces jetons doivent être 
+      combinés pour reconstituer la clé de déchiffrement. Transmettez chaque 
+      jeton à son destinataire correspondant de manière sécurisée.
+    copyButton: Copier
+    unnamedRecipient: Personne non-nommée
   buttons:
     continueWithoutConfirm: Continuer sans confirmation
     continueWithoutEssentials: Continuer sans les essentiels

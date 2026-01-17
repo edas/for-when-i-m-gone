@@ -237,11 +237,19 @@ export interface Translations {
   generateEditor: {
     title: string;
     placeholder: string;
+    processing: string;
+    ready: string;
     sidePanel: {
       title: string;
       intro: string;
       collapse: string;
       expand: string;
+    };
+    shares: {
+      title: string;
+      intro: string;
+      copyButton: string;
+      unnamedRecipient: string;
     };
     buttons: {
       continueWithoutConfirm: string;

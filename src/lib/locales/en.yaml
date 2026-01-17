@@ -213,6 +213,8 @@ howEditor:
 generateEditor:
   title: Generate documents
   placeholder: The content of this screen will be defined soon.
+  processing: Generating...
+  ready: Everything is ready
   sidePanel:
     title: Generation
     intro: >-
@@ -220,6 +222,14 @@ generateEditor:
       to securely transmit your secret.
     collapse: Collapse
     expand: Help
+  shares:
+    title: Shared tokens for recipients
+    intro: >-
+      Each recipient has received a unique token. These tokens must be 
+      combined to reconstruct the decryption key. Transmit each token 
+      to its corresponding recipient securely.
+    copyButton: Copy
+    unnamedRecipient: Unnamed person
   buttons:
     continueWithoutConfirm: Continue without confirmation
     continueWithoutEssentials: Continue without essentials

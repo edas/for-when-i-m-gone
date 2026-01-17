@@ -25,10 +25,13 @@ interface IntroData {
   checkboxState?: IntroCheckboxState;
 }
 
+/**
+ * Internal representation with buffers (used in memory)
+ */
 interface GenerateData {
-  aesKey?: string; // Base64 encoded AES key
-  encryptedSecret?: string; // Base64 encoded encrypted secret
-  iv?: string; // Base64 encoded IV
+  aesKey?: Uint8Array; // AES key as Uint8Array
+  encryptedSecret?: ArrayBuffer; // Encrypted secret as ArrayBuffer
+  iv?: Uint8Array; // IV as Uint8Array
   shares?: string[]; // Array of shares from ssss-js split
 }
 
@@ -39,14 +42,17 @@ export interface StoredData {
   who?: WhoData;
   how?: HowData;
   intro?: IntroData;
-  generate?: GenerateData;
+  generate?: GenerateData; // Can be internal (buffers) or serialized (base64)
   language?: string;
 }
+
+
 
 const SCRIPT_ID = 'fwimg-data';
 
 /**
  * Read initial data from the JSON script element in the document head
+ * Converts serialized data (base64) to internal format (buffers)
  * @throws Error if the script element is not found or if parsing fails
  */
 function readInitialDataFromDOM(): StoredData {
@@ -61,7 +67,8 @@ function readInitialDataFromDOM(): StoredData {
   }
   
   try {
-    return JSON.parse(scriptElement.textContent) as StoredData;
+    const parsed = JSON.parse(scriptElement.textContent) as StoredData;
+    return parsed;
   } catch (error) {
     throw new Error(`Failed to parse JSON from script element #${SCRIPT_ID}: ${error instanceof Error ? error.message : String(error)}`);
   }

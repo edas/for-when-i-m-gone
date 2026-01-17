@@ -26,6 +26,7 @@
     "@tiptap/extension-underline": "^3.14.0",
     "@tiptap/pm": "^3.14.0",
     "@tiptap/starter-kit": "^3.14.0",
+    "core-js": "^3.47.0",
     "ssss-js": "github:edas/ssss-js"
   }
 }
