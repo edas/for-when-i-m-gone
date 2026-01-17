@@ -31,6 +31,7 @@ export interface Recipient {
   name: string;
   contacts: ContactInfo[];
   isPrivate?: boolean;
+  number?: number;
 }
 
 export function createEmptyContact(): ContactInfo {

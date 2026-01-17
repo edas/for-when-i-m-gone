@@ -26,7 +26,15 @@
     onBack: () => void;
   }
 
-  let { lang, secret, recipients, threshold, aesKey, shares, onContinue, onBack }: Props = $props();
+  let { lang, secret, recipients: recipientsProp, threshold, aesKey, shares, onContinue, onBack }: Props = $props();
+
+  // Local state for recipients (can be updated with numbers)
+  // Initialize from props and sync when props change
+  let recipients = $state<typeof recipientsProp>([]);
+  
+  $effect(() => {
+    recipients = [...recipientsProp];
+  });
 
   let t = $derived(getTranslations(lang));
   let sidePanelOpen: boolean = $state(true);
@@ -48,6 +56,39 @@
 
   let buttonState = $derived(computeButtonState(canContinue, anyChecked, allEssentialsChecked));
   let buttonText = $derived(getButtonText(buttonState, t.generateEditor.buttons));
+
+  /**
+   * Assigns sequential numbers to recipients that don't have one
+   * Numbers start from 1 if no recipient has a number, otherwise from the highest existing number + 1
+   */
+  async function assignRecipientNumbers(): Promise<void> {
+    type Recipient = import('../lib/types/recipient').Recipient;
+    
+    // Find the highest existing number
+    const existingNumbers = recipients
+      .map(r => r.number)
+      .filter((n): n is number => typeof n === 'number' && n > 0);
+    
+    const maxNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) : 0;
+    let nextNumber = maxNumber + 1;
+    
+    // Assign numbers to recipients that don't have one
+    const updatedRecipients: Recipient[] = recipients.map(recipient => {
+      if (typeof recipient.number === 'number' && recipient.number > 0) {
+        return recipient; // Keep existing number
+      }
+      return { ...recipient, number: nextNumber++ };
+    });
+    
+    // Update recipients in the store
+    await updateStoredData((data) => ({
+      ...data,
+      who: { ...data.who, recipients: updatedRecipients },
+    }));
+    
+    // Update local recipients array (this will trigger reactivity)
+    recipients = updatedRecipients;
+  }
 
   /**
    * Validates that all required input data is present
@@ -120,7 +161,7 @@
   }
 
   /**
-   * Main generation logic: creates AES key, encrypts secret, and splits the key
+   * Main generation logic: assigns recipient numbers, creates AES key, encrypts secret, and splits the key
    */
   async function generate(): Promise<void> {
     if (isProcessing) return;
@@ -130,6 +171,9 @@
     
     try {
       validateInputs();
+      
+      // Assign numbers to recipients that don't have one
+      await assignRecipientNumbers();
       
       const { key, keyBytes } = await getOrCreateAesKey();
       await encryptAndStoreSecret(key);
@@ -192,7 +236,12 @@
               {#each recipients as recipient, index (recipient.id)}
                 <div class="share-item">
                   <div class="share-header">
-                    <span class="share-recipient-name">{recipient.name || t.generateEditor.shares.unnamedRecipient}</span>
+                    <span class="share-recipient-name">
+                      {recipient.name || t.generateEditor.shares.unnamedRecipient}
+                      {#if recipient.number !== undefined}
+                        <span class="share-recipient-number"> (#{recipient.number})</span>
+                      {/if}
+                    </span>
                     <button
                       class="copy-button"
                       onclick={() => copyShareToClipboard(currentShares[index], recipient.name)}
@@ -316,6 +365,12 @@
     font-weight: 600;
     color: #2d3748;
     font-size: 1rem;
+  }
+
+  .share-recipient-number {
+    font-weight: 500;
+    color: #718096;
+    font-size: 0.9rem;
   }
 
   .copy-button {
