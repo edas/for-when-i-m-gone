@@ -1,7 +1,7 @@
 <script lang="ts">
   import { untrack, tick } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
-  import { autoSave } from '../lib/editorComposable';
+  import { updateStoredData } from '../lib/dataStore';
   import { computeButtonStateCustom, getButtonText, type ButtonState } from '../lib/buttonState';
   import {
     handleDragStart as dndDragStart,
@@ -167,7 +167,10 @@
 
   // Auto-save
   $effect(() => {
-    autoSave(() => ({ recipients }), 'who');
+    updateStoredData((currentData) => ({
+      ...currentData,
+      who: { recipients }
+    }));
   });
 </script>
 

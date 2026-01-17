@@ -2,7 +2,7 @@
   import { onDestroy, untrack } from 'svelte';
   import type { Editor, JSONContent } from '@tiptap/core';
   import { getTranslations, type Language } from '../lib/i18n';
-  import { autoSave } from '../lib/editorComposable';
+  import { updateStoredData } from '../lib/dataStore';
   import { computeButtonStateCustom, getButtonText, type ButtonState } from '../lib/buttonState';
   import { type HowData } from '../lib/types/editorTypes';
   import { parseHtmlToJson } from '../lib/htmlParser';
@@ -187,7 +187,10 @@ import Icon from './ui/Icons.svelte';
 
   // Auto-save
   $effect(() => {
-    autoSave(getCurrentData, 'how');
+    updateStoredData((currentData) => ({
+      ...currentData,
+      how: getCurrentData()
+    }));
   });
 </script>
 

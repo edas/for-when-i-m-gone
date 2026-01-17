@@ -3,7 +3,7 @@
   import type { Editor, JSONContent } from '@tiptap/core';
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
-  import { autoSave } from '../lib/editorComposable';
+  import { updateStoredData } from '../lib/dataStore';
   import { type IntroCheckboxState, defaultIntroCheckboxState } from '../lib/types/editorTypes';
   import { 
     RecipientsBlock, 
@@ -196,7 +196,10 @@
 
   // Auto-save
   $effect(() => {
-    autoSave(() => ({ message: messageJson, checkboxState: getCurrentCheckboxState() }), 'intro');
+    updateStoredData((currentData) => ({
+      ...currentData,
+      intro: { message: messageJson, checkboxState: getCurrentCheckboxState() }
+    }));
   });
 </script>
 
