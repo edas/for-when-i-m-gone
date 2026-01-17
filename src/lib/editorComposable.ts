@@ -3,7 +3,7 @@
  */
 
 import { getTranslations, type Language } from './i18n';
-import { updateStoredDataDebounced, type StoredData } from './dataStore';
+import { updateStoredData, type StoredData } from './dataStore';
 
 /**
  * Get translations for an editor
@@ -21,5 +21,8 @@ export function autoSave<T>(
   storageKey: keyof StoredData
 ): void {
   const data = getData();
-  updateStoredDataDebounced({ [storageKey]: data } as Partial<StoredData>);
+  updateStoredData((currentData) => ({
+    ...currentData,
+    [storageKey]: data
+  }));
 }

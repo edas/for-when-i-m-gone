@@ -1,7 +1,7 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { getTranslations, type Language } from '../lib/i18n';
-  import { recordSecurityConfirmation } from '../lib/dataStore';
+  import { recordSecurityConfirmation } from '../lib/security';
   import LanguageSelector from './ui/LanguageSelector.svelte';
   import Icon from './ui/Icons.svelte';
 

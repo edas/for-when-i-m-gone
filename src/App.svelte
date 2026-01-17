@@ -99,7 +99,7 @@
 
   function handleLanguageChange(lang: Language): void {
     currentLang = lang;
-    updateStoredData({ language: lang });
+    updateStoredData((currentData) => ({ ...currentData, language: lang }));
   }
 
   let t = $derived(getTranslations(currentLang));

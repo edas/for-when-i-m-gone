@@ -1,6 +1,6 @@
 /**
- * Module for managing JSON data storage in HTML head
- * The data is stored in a <script type="application/json" id="fwimg-data"> element
+ * Module for managing JSON data storage in memory
+ * The data is read from the DOM at initialization, then stored in a JavaScript object
  */
 
 import type { JSONContent } from '@tiptap/core';
@@ -36,101 +36,59 @@ export interface StoredData {
 }
 
 const SCRIPT_ID = 'fwimg-data';
-const DEBOUNCE_DELAY = 300; // ms
 
 /**
- * Creates a debounced version of a function
+ * Read initial data from the JSON script element in the document head
+ * @throws Error if the script element is not found or if parsing fails
  */
-function debounce<T extends (...args: Parameters<T>) => void>(
-  fn: T,
-  delay: number
-): (...args: Parameters<T>) => void {
-  let timeoutId: ReturnType<typeof setTimeout> | null = null;
-  
-  return (...args: Parameters<T>) => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    timeoutId = setTimeout(() => {
-      fn(...args);
-      timeoutId = null;
-    }, delay);
-  };
-}
-
-/**
- * Get the JSON script element from the document head
- * @throws Error if the element is not found
- */
-function getScriptElement(): HTMLScriptElement {
+function readInitialDataFromDOM(): StoredData {
   const scriptElement = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
   
   if (!scriptElement) {
     throw new Error(`Data script element #${SCRIPT_ID} not found in document`);
   }
   
-  return scriptElement;
+  if (!scriptElement.textContent) {
+    throw new Error(`Data script element #${SCRIPT_ID} has no content`);
+  }
+  
+  try {
+    return JSON.parse(scriptElement.textContent) as StoredData;
+  } catch (error) {
+    throw new Error(`Failed to parse JSON from script element #${SCRIPT_ID}: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 /**
- * Read the current stored data from the JSON block
+ * In-memory data store, initialized from DOM at module load
+ */
+let storedData: StoredData = readInitialDataFromDOM();
+
+/**
+ * Read the current stored data from memory
  */
 export function getStoredData(): StoredData {
-  const scriptElement = getScriptElement();
-  const data = JSON.parse(scriptElement.textContent!);
-  return data;
+  return storedData;
 }
 
 /**
  * Mutex for serializing updateStoredData calls
- * Resolves to the last written data, avoiding DOM reads between updates
+ * Resolves to the last written data
  */
-let updateMutex = Promise.resolve(getStoredData());
+let updateMutex = Promise.resolve(storedData);
 
 /**
- * Update the stored data in the JSON block
+ * Update the stored data in memory
  * Uses mutex to ensure only one update runs at a time
- * Reuses last written value from mutex to avoid DOM reads
+ * @param updater Function that receives current data and returns the complete new data
  */
-export function updateStoredData(updates: Partial<StoredData>): Promise<StoredData> {
+export function updateStoredData(updater: (currentData: StoredData) => StoredData): Promise<StoredData> {
   const result = updateMutex.then((currentData): StoredData => {
-    const scriptElement = getScriptElement();
-    const newData = { ...currentData, ...updates };
-    scriptElement.textContent = JSON.stringify(newData, null, 2);
-    
+    const newData = updater(currentData);
+    storedData = newData;
     return newData;
   });
   
   updateMutex = result;
   return result;
 }
-
-/**
- * Get the current datetime in ISO format with timezone
- */
-function getCurrentISODateTime(): string {
-  return new Date().toISOString();
-}
-
-/**
- * Record the security confirmation timestamp
- */
-export async function recordSecurityConfirmation(): Promise<string> {
-  const timestamp = getCurrentISODateTime();
-  const currentData = await updateMutex;
-  await updateStoredData({ 
-    security: { 
-      ...currentData.security,
-      confirmedAt: timestamp 
-    } 
-  });
-  return timestamp;
-}
-
-/**
- * Debounced version of updateStoredData for real-time saving
- */
-export const updateStoredDataDebounced = debounce(
-  (updates: Partial<StoredData>) => updateStoredData(updates),
-  DEBOUNCE_DELAY
-);
