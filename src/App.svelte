@@ -106,6 +106,11 @@
   }
 
   function handleGenerateBack(): void {
+    const storedData = getStoredData();
+    // Synchronize recipients with store to get updated numbers
+    if (storedData.who?.recipients) {
+      recipients = storedData.who.recipients;
+    }
     generateSubmitted = false;
     introSubmitted = false;
   }

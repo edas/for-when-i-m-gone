@@ -189,6 +189,21 @@
   }
 
   /**
+   * Gets the share (token) for a recipient based on their number
+   * The token at index (number - 1) is assigned to the recipient with that number
+   */
+  function getShareForRecipient(recipient: import('../lib/types/recipient').Recipient): string | undefined {
+    if (recipient.number === undefined || recipient.number < 1) {
+      return undefined;
+    }
+    const shareIndex = recipient.number - 1; // Convert number (1-based) to index (0-based)
+    if (shareIndex >= 0 && shareIndex < currentShares.length) {
+      return currentShares[shareIndex];
+    }
+    return undefined;
+  }
+
+  /**
    * Copies a share to clipboard
    */
   async function copyShareToClipboard(share: string, recipientName: string): Promise<void> {
@@ -234,26 +249,29 @@
             <p class="shares-intro">{t.generateEditor.shares.intro}</p>
             <div class="shares-list">
               {#each recipients as recipient, index (recipient.id)}
-                <div class="share-item">
-                  <div class="share-header">
-                    <span class="share-recipient-name">
-                      {recipient.name || t.generateEditor.shares.unnamedRecipient}
-                      {#if recipient.number !== undefined}
-                        <span class="share-recipient-number"> (#{recipient.number})</span>
-                      {/if}
-                    </span>
-                    <button
-                      class="copy-button"
-                      onclick={() => copyShareToClipboard(currentShares[index], recipient.name)}
-                      title={t.generateEditor.shares.copyButton}
-                    >
-                      {t.generateEditor.shares.copyButton}
-                    </button>
+                {@const share = getShareForRecipient(recipient)}
+                {#if share !== undefined}
+                  <div class="share-item">
+                    <div class="share-header">
+                      <span class="share-recipient-name">
+                        {recipient.name || t.generateEditor.shares.unnamedRecipient}
+                        {#if recipient.number !== undefined}
+                          <span class="share-recipient-number"> (#{recipient.number})</span>
+                        {/if}
+                      </span>
+                      <button
+                        class="copy-button"
+                        onclick={() => copyShareToClipboard(share, recipient.name)}
+                        title={t.generateEditor.shares.copyButton}
+                      >
+                        {t.generateEditor.shares.copyButton}
+                      </button>
+                    </div>
+                    <div class="share-value" title={share}>
+                      {share}
+                    </div>
                   </div>
-                  <div class="share-value" title={currentShares[index]}>
-                    {currentShares[index]}
-                  </div>
-                </div>
+                {/if}
               {/each}
             </div>
           </div>
