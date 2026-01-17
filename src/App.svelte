@@ -6,6 +6,7 @@
   import type { Recipient } from './lib/types/recipient';
   import HowEditor from './components/HowEditor.svelte';
   import IntroMessageEditor from './components/IntroMessageEditor.svelte';
+  import GenerateEditor from './components/GenerateEditor.svelte';
   import StepIndicator from './components/ui/StepIndicator.svelte';
   import { detectLanguage, getTranslations, type Language } from './lib/i18n';
   import { getStoredData, updateStoredData } from './lib/dataStore';
@@ -47,6 +48,7 @@
     ...storedData.intro?.checkboxState,
   });
   let introSubmitted: boolean = $state(false);
+  let generateSubmitted: boolean = $state(false);
 
   function handleSecurityContinue(checked: boolean): void {
     securityChecked = checked;
@@ -97,6 +99,15 @@
     howSubmitted = false;
   }
 
+  function handleGenerateContinue(): void {
+    generateSubmitted = true;
+  }
+
+  function handleGenerateBack(): void {
+    generateSubmitted = false;
+    introSubmitted = false;
+  }
+
   function handleLanguageChange(lang: Language): void {
     currentLang = lang;
     updateStoredData((currentData) => ({ ...currentData, language: lang }));
@@ -117,7 +128,8 @@
     if (!whoSubmitted) return 1;
     if (!howSubmitted) return 2;
     if (!introSubmitted) return 3;
-    return 4;
+    if (!generateSubmitted) return 4;
+    return 4; // Stay on last step when completed
   });
 </script>
 
@@ -166,6 +178,12 @@
           {recipients}
           onContinue={handleIntroContinue}
           onBack={handleIntroBack}
+        />
+      {:else if !generateSubmitted}
+        <GenerateEditor
+          lang={currentLang}
+          onContinue={handleGenerateContinue}
+          onBack={handleGenerateBack}
         />
       {:else}
         <main>

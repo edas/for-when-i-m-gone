@@ -14,7 +14,6 @@
   import EssentialSection from './ui/EssentialSection.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
 import TipSection from './ui/TipSection.svelte';
-import WarningSection from './ui/WarningSection.svelte';
 import RichTextToolbar from './ui/RichTextToolbar.svelte';
 import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
 import Icon from './ui/Icons.svelte';
@@ -207,38 +206,47 @@ import Icon from './ui/Icons.svelte';
       <h2 class="section-title">{t.howEditor.threshold.title}</h2>
       <p class="section-subtitle">{t.howEditor.threshold.subtitle}</p>
       
-      <div class="input-section">
-        <div class="number-input-wrapper">
-          <button 
-            class="number-button" 
-            onclick={decrement}
-            disabled={threshold === null || threshold <= 2}
-            aria-label="Decrease"
-          >
-            <Icon name="minus" size={24} />
-          </button>
-          <input
-            type="text"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            class="number-input"
-            class:error={isError}
-            class:optimal={isGreen}
-            value={inputValue}
-            oninput={handleInputChange}
-          />
-          <button 
-            class="number-button" 
-            onclick={increment}
-            disabled={threshold !== null && threshold >= recipientCount}
-            aria-label="Increase"
-          >
-            <Icon name="plus" size={24} />
-          </button>
+      <div class="threshold-content">
+        <div class="input-section">
+          <div class="number-input-wrapper">
+            <button 
+              class="number-button" 
+              onclick={decrement}
+              disabled={threshold === null || threshold <= 2}
+              aria-label="Decrease"
+            >
+              <Icon name="minus" size={24} />
+            </button>
+            <input
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              class="number-input"
+              class:error={isError}
+              class:optimal={isGreen}
+              value={inputValue}
+              oninput={handleInputChange}
+            />
+            <button 
+              class="number-button" 
+              onclick={increment}
+              disabled={threshold !== null && threshold >= recipientCount}
+              aria-label="Increase"
+            >
+              <Icon name="plus" size={24} />
+            </button>
+          </div>
+          <span class="recipient-info">
+            {t.howEditor.threshold.outOf.replace('{count}', String(recipientCount))}
+          </span>
         </div>
-        <span class="recipient-info">
-          {t.howEditor.threshold.outOf.replace('{count}', String(recipientCount))}
-        </span>
+
+        <div class="quorum-warning-inline">
+          <div class="warning-icon">
+            <Icon name="alert-triangle" size={20} />
+          </div>
+          <p class="warning-text">{t.howEditor.sidePanel.quorumWarning}</p>
+        </div>
       </div>
 
       {#if isOne}
@@ -317,8 +325,6 @@ import Icon from './ui/Icons.svelte';
     </div>
 
     <TipSection text={t.howEditor.sidePanel.tip} />
-
-    <WarningSection text={t.howEditor.sidePanel.quorumWarning} />
 
     <div class="section-divider"></div>
 

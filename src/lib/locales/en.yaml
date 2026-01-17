@@ -209,3 +209,18 @@ howEditor:
   buttons:
     continueWithoutEssentials: Continue without essentials
     continue: Continue
+
+generateEditor:
+  title: Generate documents
+  placeholder: The content of this screen will be defined soon.
+  sidePanel:
+    title: Generation
+    intro: >-
+      This step will allow you to generate the necessary documents 
+      to securely transmit your secret.
+    collapse: Collapse
+    expand: Help
+  buttons:
+    continueWithoutConfirm: Continue without confirmation
+    continueWithoutEssentials: Continue without essentials
+    continue: Continue
