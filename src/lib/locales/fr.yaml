@@ -203,6 +203,8 @@ howEditor:
     tip: >-
       Les conditions d'ouverture seront communiquées dans le document. 
       Soyez précis et le plus exhaustif possible pour éviter les interprétations différentes.
+    quorumWarning: >-
+      Le quorum est le seul paramètre que vous ne pourrez pas changer sans casser la comptabilité avec des documents déjà envoyés. Réfléchissez-y bien.
     generateExample: Générer un exemple
     # exampleContent est chargé depuis examples/conditions-example.fr.html
   buttons:

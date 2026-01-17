@@ -202,6 +202,8 @@ howEditor:
     tip: >-
       These conditions will be visible to recipients in the introduction message. 
       Be precise to avoid different interpretations.
+    quorumWarning: >-
+      The quorum is the only parameter you won't be able to change without breaking compatibility with documents already sent. Think carefully about it.
     generateExample: Generate an example
     # exampleContent is loaded from examples/conditions-example.en.html
   buttons:

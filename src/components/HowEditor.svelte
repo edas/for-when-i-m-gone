@@ -13,10 +13,11 @@
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
   import CheckboxItem from './ui/CheckboxItem.svelte';
-  import TipSection from './ui/TipSection.svelte';
-  import RichTextToolbar from './ui/RichTextToolbar.svelte';
-  import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
-  import Icon from './ui/Icons.svelte';
+import TipSection from './ui/TipSection.svelte';
+import WarningSection from './ui/WarningSection.svelte';
+import RichTextToolbar from './ui/RichTextToolbar.svelte';
+import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
+import Icon from './ui/Icons.svelte';
   import '../styles/tiptap-editor.css';
   import '../styles/how-editor.css';
 
@@ -313,6 +314,8 @@
     </div>
 
     <TipSection text={t.howEditor.sidePanel.tip} />
+
+    <WarningSection text={t.howEditor.sidePanel.quorumWarning} />
 
     <div class="section-divider"></div>
 
