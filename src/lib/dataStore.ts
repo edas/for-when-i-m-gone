@@ -25,6 +25,13 @@ interface IntroData {
   checkboxState?: IntroCheckboxState;
 }
 
+interface GenerateData {
+  aesKey?: string; // Base64 encoded AES key
+  encryptedSecret?: string; // Base64 encoded encrypted secret
+  iv?: string; // Base64 encoded IV
+  shares?: string[]; // Array of shares from ssss-js split
+}
+
 export interface StoredData {
   encrypt?: number;
   security?: SecurityData;
@@ -32,6 +39,7 @@ export interface StoredData {
   who?: WhoData;
   how?: HowData;
   intro?: IntroData;
+  generate?: GenerateData;
   language?: string;
 }
 

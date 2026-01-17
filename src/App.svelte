@@ -182,6 +182,9 @@
       {:else if !generateSubmitted}
         <GenerateEditor
           lang={currentLang}
+          secret={secretContent}
+          recipients={recipients}
+          threshold={howData.threshold!}
           onContinue={handleGenerateContinue}
           onBack={handleGenerateBack}
         />

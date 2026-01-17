@@ -111,3 +111,54 @@ export function bufferToText(buffer: ArrayBuffer): string {
   const decoder = new TextDecoder();
   return decoder.decode(buffer);
 }
+
+/**
+ * Exports a CryptoKey to a base64 string for storage
+ * @param key - The CryptoKey to export
+ * @returns A promise that resolves with the key as a base64 string
+ * @throws If key export fails
+ */
+export async function exportKeyToBase64(key: CryptoKey): Promise<string> {
+  try {
+    const exported = await crypto.subtle.exportKey('raw', key);
+    const bytes = new Uint8Array(exported);
+    // Convert to base64
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  } catch (error) {
+    throw new Error(`Error exporting key to base64: ${error}`);
+  }
+}
+
+/**
+ * Imports a base64 string as a CryptoKey
+ * @param base64Key - The base64 string representing the key
+ * @returns A promise that resolves with the imported CryptoKey
+ * @throws If key import fails
+ */
+export async function importKeyFromBase64(base64Key: string): Promise<CryptoKey> {
+  try {
+    // Convert base64 to ArrayBuffer
+    const binary = atob(base64Key);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    
+    return await crypto.subtle.importKey(
+      'raw',
+      bytes.buffer,
+      {
+        name: 'AES-GCM',
+        length: 256,
+      },
+      true, // extractable
+      ['encrypt', 'decrypt'] // keyUsages
+    );
+  } catch (error) {
+    throw new Error(`Error importing key from base64: ${error}`);
+  }
+}

@@ -42,7 +42,17 @@
     untrack(() => initialRecipients?.length ? [...initialRecipients] : [createEmptyRecipient()])
   );
   let sidePanelOpen: boolean = $state(true);
-  let expandedRecipientId: string | null = $state(untrack(() => recipients[0]?.id ?? null));
+  let expandedRecipientId: string | null = $state(
+    untrack(() => {
+      // Si il y a plus d'une personne, toutes sont repliées
+      if (recipients.length > 1) {
+        return null;
+      }
+      // Sinon, la première (et seule) personne est étendue
+      return recipients[0]?.id ?? null;
+    })
+  );
+  let autoFocusRecipientId: string | null = $state(null);
   let actionButtonsElement: HTMLDivElement | null = $state(null);
   let dragState: DragDropState = $state({ draggedItemId: null, activeDropZone: null });
 
@@ -95,9 +105,14 @@
     const newRecipient = createEmptyRecipient();
     recipients = [...recipients, newRecipient];
     expandedRecipientId = newRecipient.id;
+    autoFocusRecipientId = newRecipient.id;
     await tick();
     await new Promise(resolve => setTimeout(resolve, 150));
     actionButtonsElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Réinitialiser après le focus pour éviter de refocuser à chaque expansion
+    setTimeout(() => {
+      autoFocusRecipientId = null;
+    }, 200);
   }
 
   function removeRecipient(id: string): void {
@@ -182,64 +197,67 @@
   wideSidePanel
   onToggleSidePanel={() => sidePanelOpen = !sidePanelOpen}
 >
-  <div class="recipients-list" role="list">
-    {#each recipients as recipient, index (recipient.id)}
+  <div class="content-wrapper">
+    <div class="recipients-list" role="list">
+      {#each recipients as recipient, index (recipient.id)}
+        <div 
+          class="drop-zone"
+          class:active={dragState.activeDropZone === index}
+          class:hidden={isDropZoneHidden(index)}
+          role="presentation"
+          ondragover={(e) => handleDropZoneDragOver(e, index)}
+          ondragleave={handleDropZoneDragLeave}
+          ondrop={(e) => handleDropZoneDrop(e, index)}
+        >
+          <div class="drop-zone-indicator"></div>
+        </div>
+        
+        <RecipientCard
+          {recipient}
+          expanded={expandedRecipientId === recipient.id}
+          dragging={dragState.draggedItemId === recipient.id}
+          {contactTypeOptions}
+          translations={t.whoEditor}
+          autoFocus={autoFocusRecipientId === recipient.id}
+          onToggle={() => toggleExpanded(recipient.id)}
+          onRemove={() => removeRecipient(recipient.id)}
+          onUpdateField={(field, value) => updateRecipient(recipient.id, field, value)}
+          onAddContact={() => addContact(recipient.id)}
+          onRemoveContact={(contactId) => removeContact(recipient.id, contactId)}
+          onUpdateContact={(contactId, field, value) => updateContact(recipient.id, contactId, field, value)}
+          onDragStart={(e) => handleDragStart(e, recipient.id)}
+          onDragEnd={handleDragEnd}
+        />
+      {/each}
+      
       <div 
         class="drop-zone"
-        class:active={dragState.activeDropZone === index}
-        class:hidden={isDropZoneHidden(index)}
+        class:active={dragState.activeDropZone === recipients.length}
+        class:hidden={isDropZoneHidden(recipients.length)}
         role="presentation"
-        ondragover={(e) => handleDropZoneDragOver(e, index)}
+        ondragover={(e) => handleDropZoneDragOver(e, recipients.length)}
         ondragleave={handleDropZoneDragLeave}
-        ondrop={(e) => handleDropZoneDrop(e, index)}
+        ondrop={(e) => handleDropZoneDrop(e, recipients.length)}
       >
         <div class="drop-zone-indicator"></div>
       </div>
       
-      <RecipientCard
-        {recipient}
-        expanded={expandedRecipientId === recipient.id}
-        dragging={dragState.draggedItemId === recipient.id}
-        {contactTypeOptions}
-        translations={t.whoEditor}
-        onToggle={() => toggleExpanded(recipient.id)}
-        onRemove={() => removeRecipient(recipient.id)}
-        onUpdateField={(field, value) => updateRecipient(recipient.id, field, value)}
-        onAddContact={() => addContact(recipient.id)}
-        onRemoveContact={(contactId) => removeContact(recipient.id, contactId)}
-        onUpdateContact={(contactId, field, value) => updateContact(recipient.id, contactId, field, value)}
-        onDragStart={(e) => handleDragStart(e, recipient.id)}
-        onDragEnd={handleDragEnd}
-      />
-    {/each}
-    
-    <div 
-      class="drop-zone"
-      class:active={dragState.activeDropZone === recipients.length}
-      class:hidden={isDropZoneHidden(recipients.length)}
-      role="presentation"
-      ondragover={(e) => handleDropZoneDragOver(e, recipients.length)}
-      ondragleave={handleDropZoneDragLeave}
-      ondrop={(e) => handleDropZoneDrop(e, recipients.length)}
-    >
-      <div class="drop-zone-indicator"></div>
+      <button class="add-button large" onclick={addRecipient}>
+        <Icon name="plus" size={20} />
+        {t.whoEditor.addRecipient}
+      </button>
     </div>
-    
-    <button class="add-button large" onclick={addRecipient}>
-      <Icon name="plus" size={20} />
-      {t.whoEditor.addRecipient}
-    </button>
-  </div>
 
-  <div bind:this={actionButtonsElement}>
-    <ActionButtons
-      backLabel={t.common.back}
-      continueLabel={buttonText}
-      {buttonState}
-      disabled={!hasAtLeast2}
-      onBack={handleBack}
-      onContinue={handleContinue}
-    />
+    <div bind:this={actionButtonsElement}>
+      <ActionButtons
+        backLabel={t.common.back}
+        continueLabel={buttonText}
+        {buttonState}
+        disabled={!hasAtLeast2}
+        onBack={handleBack}
+        onContinue={handleContinue}
+      />
+    </div>
   </div>
 
   {#snippet sidePanelContent()}

@@ -9,6 +9,7 @@
   import ActionButtons from './ui/ActionButtons.svelte';
   import EssentialSection from './ui/EssentialSection.svelte';
   import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
+  import Icon from './ui/Icons.svelte';
   import '../styles/form-controls.css';
 
   interface Props {
@@ -38,6 +39,7 @@
   let t = $derived(getTranslations(lang));
 
   let hasContent = $derived(secretText.trim().length > 0);
+  let isEmpty = $derived(secretText.trim().length === 0);
   let essentialsChecked = $derived(checkEmails && checkPhoneCodes && checkCloudAccounts);
   let anyChecked = $derived(
     checkEmails || checkPhoneCodes || checkCloudAccounts ||
@@ -98,14 +100,27 @@
     placeholder={t.secretEditor.placeholder}
   ></textarea>
 
-  <ActionButtons
-    backLabel={t.common.back}
-    continueLabel={buttonText}
-    {buttonState}
-    disabled={!hasContent}
-    onBack={handleBack}
-    onContinue={handleContinue}
-  />
+  {#if isEmpty}
+    <div class="button-container">
+      <button class="back-button" onclick={handleBack}>
+        <Icon name="arrow-left" size={18} />
+        {t.common.back}
+      </button>
+      <GenerateExampleButton
+        label={t.secretEditor.sidePanel.generateExample}
+        onclick={generateExample}
+      />
+    </div>
+  {:else}
+    <ActionButtons
+      backLabel={t.common.back}
+      continueLabel={buttonText}
+      {buttonState}
+      disabled={!hasContent}
+      onBack={handleBack}
+      onContinue={handleContinue}
+    />
+  {/if}
 
   {#snippet sidePanelContent()}
     <h2>{t.secretEditor.sidePanel.title}</h2>
@@ -158,12 +173,56 @@
         label={t.secretEditor.sidePanel.checkboxes.crypto}
       />
     </div>
-
-    <div class="section-divider"></div>
-
-    <GenerateExampleButton
-      label={t.secretEditor.sidePanel.generateExample}
-      onclick={generateExample}
-    />
   {/snippet}
 </EditorLayout>
+
+<style>
+  .button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .back-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: #a0aec0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .back-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #e2e8f0;
+  }
+
+  .button-container :global(.generate-example-button) {
+    width: auto;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .button-container {
+      flex-direction: column;
+    }
+
+    .back-button,
+    .button-container :global(.generate-example-button) {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

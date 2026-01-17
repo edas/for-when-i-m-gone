@@ -40,6 +40,7 @@
     onUpdateContact: (contactId: string, field: keyof ContactInfo, value: string) => void;
     onDragStart: (e: DragEvent) => void;
     onDragEnd: () => void;
+    autoFocus?: boolean;
   }
 
   let {
@@ -56,7 +57,19 @@
     onUpdateContact,
     onDragStart,
     onDragEnd,
+    autoFocus = false,
   }: Props = $props();
+
+  let nameInput: HTMLInputElement | null = $state(null);
+
+  $effect(() => {
+    if (autoFocus && expanded && nameInput) {
+      // Petit délai pour s'assurer que le DOM est rendu
+      setTimeout(() => {
+        nameInput?.focus();
+      }, 100);
+    }
+  });
 
   function handleKeydown(e: KeyboardEvent): void {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -117,6 +130,7 @@
       <div class="form-field">
         <label for="name-{recipient.id}">{t.fields.name}</label>
         <input
+          bind:this={nameInput}
           id="name-{recipient.id}"
           type="text"
           class="form-input"

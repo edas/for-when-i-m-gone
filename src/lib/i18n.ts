@@ -234,6 +234,21 @@ export interface Translations {
       continue: string;
     };
   };
+  generateEditor: {
+    title: string;
+    placeholder: string;
+    sidePanel: {
+      title: string;
+      intro: string;
+      collapse: string;
+      expand: string;
+    };
+    buttons: {
+      continueWithoutConfirm: string;
+      continueWithoutEssentials: string;
+      continue: string;
+    };
+  };
 }
 
 // Build translations by merging YAML content with example files
