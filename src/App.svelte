@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { JSONContent } from '@tiptap/core';
+  import { tick } from 'svelte';
   import SecurityWarning from './components/SecurityWarning.svelte';
   import SecretEditor from './components/SecretEditor.svelte';
   import WhoEditor from './components/WhoEditor.svelte';
@@ -52,60 +53,82 @@
   let shares: string[] | undefined = $state(storedData.generate?.shares);
   let generateSubmitted: boolean = $state(false);
 
-  function handleSecurityContinue(checked: boolean): void {
-    securityChecked = checked;
-    securityConfirmed = true;
+  async function scrollToTop(): Promise<void> {
+    await tick();
+    // Double requestAnimationFrame to ensure DOM is completely rendered
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      });
+    });
   }
 
-  function handleSecretContinue(secret: string, checkboxState: SecretCheckboxState): void {
+  async function handleSecurityContinue(checked: boolean): Promise<void> {
+    securityChecked = checked;
+    securityConfirmed = true;
+    await scrollToTop();
+  }
+
+  async function handleSecretContinue(secret: string, checkboxState: SecretCheckboxState): Promise<void> {
     secretContent = secret;
     secretCheckboxState = checkboxState;
     secretSubmitted = true;
+    await scrollToTop();
   }
 
-  function handleSecretBack(secret: string, checkboxState: SecretCheckboxState): void {
+  async function handleSecretBack(secret: string, checkboxState: SecretCheckboxState): Promise<void> {
     secretContent = secret;
     secretCheckboxState = checkboxState;
     securityConfirmed = false;
+    await scrollToTop();
   }
 
-  function handleWhoContinue(newRecipients: Recipient[]): void {
+  async function handleWhoContinue(newRecipients: Recipient[]): Promise<void> {
     recipients = newRecipients;
     whoSubmitted = true;
+    await scrollToTop();
   }
 
-  function handleWhoBack(newRecipients: Recipient[]): void {
+  async function handleWhoBack(newRecipients: Recipient[]): Promise<void> {
     recipients = newRecipients;
     secretSubmitted = false;
+    await scrollToTop();
   }
 
-  function handleHowContinue(data: HowData): void {
+  async function handleHowContinue(data: HowData): Promise<void> {
     howData = data;
     howSubmitted = true;
+    await scrollToTop();
   }
 
-  function handleHowBack(data: HowData): void {
+  async function handleHowBack(data: HowData): Promise<void> {
     howData = data;
     whoSubmitted = false;
+    await scrollToTop();
   }
 
-  function handleIntroContinue(message: JSONContent | null, checkboxState: IntroCheckboxState): void {
+  async function handleIntroContinue(message: JSONContent | null, checkboxState: IntroCheckboxState): Promise<void> {
     introMessage = message;
     introCheckboxState = checkboxState;
     introSubmitted = true;
+    await scrollToTop();
   }
 
-  function handleIntroBack(message: JSONContent | null, checkboxState: IntroCheckboxState): void {
+  async function handleIntroBack(message: JSONContent | null, checkboxState: IntroCheckboxState): Promise<void> {
     introMessage = message;
     introCheckboxState = checkboxState;
     howSubmitted = false;
+    await scrollToTop();
   }
 
-  function handleGenerateContinue(): void {
+  async function handleGenerateContinue(): Promise<void> {
     generateSubmitted = true;
+    await scrollToTop();
   }
 
-  function handleGenerateBack(): void {
+  async function handleGenerateBack(): Promise<void> {
     const storedData = getStoredData();
     // Synchronize recipients with store to get updated numbers
     if (storedData.who?.recipients) {
@@ -113,6 +136,7 @@
     }
     generateSubmitted = false;
     introSubmitted = false;
+    await scrollToTop();
   }
 
   function handleLanguageChange(lang: Language): void {

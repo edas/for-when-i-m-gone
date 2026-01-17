@@ -55,6 +55,7 @@
   );
   let autoFocusRecipientId: string | null = $state(null);
   let actionButtonsElement: HTMLDivElement | null = $state(null);
+  let recipientCardElements: Record<string, HTMLDivElement> = {};
   let dragState: DragDropState = $state({ draggedItemId: null, activeDropZone: null });
 
   function setDragState(state: Partial<DragDropState>): void {
@@ -115,7 +116,11 @@
     autoFocusRecipientId = newRecipient.id;
     await tick();
     await new Promise(resolve => setTimeout(resolve, 150));
-    actionButtonsElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Faire défiler jusqu'à la nouvelle carte de destinataire
+    const newCardElement = recipientCardElements[newRecipient.id];
+    if (newCardElement) {
+      newCardElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
     // Réinitialiser après le focus pour éviter de refocuser à chaque expansion
     setTimeout(() => {
       autoFocusRecipientId = null;
@@ -130,6 +135,7 @@
     }
     const index = recipients.findIndex(r => r.id === id);
     recipients = recipients.filter(r => r.id !== id);
+    delete recipientCardElements[id];
     if (expandedRecipientId === id) {
       expandedRecipientId = recipients[Math.min(index, recipients.length - 1)]?.id ?? null;
     }
@@ -200,6 +206,15 @@
     return dndIsHidden(zoneIndex, recipients, dragState.draggedItemId);
   }
 
+  function cardElementAction(node: HTMLDivElement, recipientId: string): { destroy: () => void } {
+    recipientCardElements[recipientId] = node;
+    return {
+      destroy() {
+        delete recipientCardElements[recipientId];
+      }
+    };
+  }
+
   // Auto-save
   $effect(() => {
     updateStoredData((currentData) => ({
@@ -257,23 +272,25 @@
           <div class="drop-zone-indicator"></div>
         </div>
         
-        <RecipientCard
-          {recipient}
-          expanded={expandedRecipientId === recipient.id}
-          dragging={dragState.draggedItemId === recipient.id}
-          {contactTypeOptions}
-          translations={t.whoEditor}
-          autoFocus={autoFocusRecipientId === recipient.id}
-          toggleDisabled={expandedRecipientId !== null && !expandedRecipientHasName}
-          onToggle={() => toggleExpanded(recipient.id)}
-          onRemove={() => removeRecipient(recipient.id)}
-          onUpdateField={(field, value) => updateRecipient(recipient.id, field, value)}
-          onAddContact={() => addContact(recipient.id)}
-          onRemoveContact={(contactId) => removeContact(recipient.id, contactId)}
-          onUpdateContact={(contactId, field, value) => updateContact(recipient.id, contactId, field, value)}
-          onDragStart={(e) => handleDragStart(e, recipient.id)}
-          onDragEnd={handleDragEnd}
-        />
+        <div use:cardElementAction={recipient.id}>
+          <RecipientCard
+            {recipient}
+            expanded={expandedRecipientId === recipient.id}
+            dragging={dragState.draggedItemId === recipient.id}
+            {contactTypeOptions}
+            translations={t.whoEditor}
+            autoFocus={autoFocusRecipientId === recipient.id}
+            toggleDisabled={expandedRecipientId !== null && !expandedRecipientHasName}
+            onToggle={() => toggleExpanded(recipient.id)}
+            onRemove={() => removeRecipient(recipient.id)}
+            onUpdateField={(field, value) => updateRecipient(recipient.id, field, value)}
+            onAddContact={() => addContact(recipient.id)}
+            onRemoveContact={(contactId) => removeContact(recipient.id, contactId)}
+            onUpdateContact={(contactId, field, value) => updateContact(recipient.id, contactId, field, value)}
+            onDragStart={(e) => handleDragStart(e, recipient.id)}
+            onDragEnd={handleDragEnd}
+          />
+        </div>
       {/each}
       
       <div 
