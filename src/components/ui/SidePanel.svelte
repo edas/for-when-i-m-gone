@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import Icon from './Icons.svelte';
+  import { onMount } from 'svelte';
 
   interface Props {
     open: boolean;
@@ -12,10 +13,37 @@
   }
 
   let { open, collapseLabel, expandLabel, wide = false, onToggle, children }: Props = $props();
+  
+  let isLargeScreen = $state(true);
+  
+  function checkScreenSize() {
+    isLargeScreen = window.innerWidth > 900;
+  }
+  
+  onMount(() => {
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+    };
+  });
+  
+  function handleToggle() {
+    // Ne pas permettre le repliement sur les grands écrans
+    if (isLargeScreen && open) {
+      return;
+    }
+    onToggle();
+  }
 </script>
 
-<aside class="side-panel" class:closed={!open} class:wide>
-  <button class="toggle-button" onclick={onToggle}>
+<aside class="side-panel" class:closed={!open} class:wide class:large-screen={isLargeScreen}>
+  <button 
+    class="toggle-button" 
+    onclick={handleToggle}
+    disabled={isLargeScreen && open}
+    aria-disabled={isLargeScreen && open}
+  >
     {#if open}
       <Icon name="chevron-right" />
       <span class="toggle-text">{collapseLabel}</span>
@@ -68,9 +96,18 @@
     justify-content: flex-start;
   }
 
-  .toggle-button:hover {
+  .toggle-button:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.12);
     color: #e2e8f0;
+  }
+
+  .toggle-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .side-panel.large-screen .toggle-button {
+    display: none;
   }
 
   .toggle-text {
