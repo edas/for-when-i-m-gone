@@ -1,11 +1,11 @@
-.decrypt-container {
+.decryptContainer {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
-.status-box {
+.statusBox {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -15,45 +15,45 @@
   text-align: center;
 }
 
-.status-box.processing {
+.statusBox.processing {
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
-.status-box.success {
+.statusBox.success {
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
-.status-box.error {
+.statusBox.error {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.status-box.waiting {
+.statusBox.waiting {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.status-box p {
+.statusBox p {
   color: #a0aec0;
   margin: 0;
 }
 
-.success-title {
+.successTitle {
   color: #10b981 !important;
   font-weight: 600;
   font-size: 1.1rem;
 }
 
-.error-title {
+.errorTitle {
   color: #f87171 !important;
   font-weight: 600;
   font-size: 1.1rem;
   margin-bottom: 0.5rem !important;
 }
 
-.error-message {
+.errorMessage {
   color: #fca5a5 !important;
   font-size: 0.9rem;
 }
@@ -74,7 +74,7 @@
   }
 }
 
-.secret-display {
+.secretDisplay {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -82,7 +82,7 @@
   overflow-x: auto;
 }
 
-.secret-display pre {
+.secretDisplay pre {
   margin: 0;
   color: #e2e8f0;
   font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
@@ -92,14 +92,14 @@
   word-break: break-word;
 }
 
-.decrypt-container h3 {
+.decryptContainer h3 {
   font-family: 'Georgia', 'Times New Roman', serif;
   font-size: 1.25rem;
   color: #ffffff;
   margin-bottom: 1rem;
 }
 
-.intro-text {
+.introText {
   color: #a0aec0;
   font-size: 0.9rem;
   line-height: 1.6;

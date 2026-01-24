@@ -11,7 +11,7 @@ import { HelpSection } from '../ui/HelpSection';
 import { GenerateExampleButton } from '../ui/GenerateExampleButton';
 import { Icon } from '../ui/Icons';
 import '../../styles/form-controls.css';
-import './SecretEditor.css';
+import styles from './SecretEditor.module.css';
 
 interface SecretEditorProps {
   initialValue?: string;
@@ -164,8 +164,8 @@ export function SecretEditor({ initialValue, initialCheckboxState, onContinue, o
       </HelpSection>
 
       {isEmpty ? (
-        <div className="button-container">
-          <button className="back-button" onClick={handleBack}>
+        <div className={styles.buttonContainer}>
+          <button className={styles.backButton} onClick={handleBack}>
             <Icon name="arrow-left" size={18} />
             {t('common.back')}
           </button>

@@ -1,4 +1,4 @@
-.recipient-card {
+.recipientCard {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -6,16 +6,16 @@
   transition: all 0.2s ease;
 }
 
-.recipient-card.expanded {
+.recipientCard.expanded {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.recipient-card.dragging {
+.recipientCard.dragging {
   opacity: 0.5;
 }
 
-.recipient-header {
+.recipientHeader {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -23,64 +23,64 @@
   cursor: pointer;
 }
 
-.recipient-header.toggle-disabled {
+.recipientHeader.toggleDisabled {
   cursor: default;
 }
 
-.drag-handle {
+.dragHandle {
   color: rgba(255, 255, 255, 0.3);
   cursor: grab;
   padding: 0.25rem;
 }
 
-.drag-handle:active {
+.dragHandle:active {
   cursor: grabbing;
 }
 
-.recipient-summary {
+.recipientSummary {
   flex: 1;
   min-width: 0;
 }
 
-.recipient-name {
+.recipientName {
   color: #e2e8f0;
   font-size: 1rem;
 }
 
-.recipient-name.private {
+.recipientName.private {
   font-style: italic;
   color: #a0aec0;
 }
 
-.recipient-number {
+.recipientNumber {
   color: #60a5fa;
   font-size: 0.9rem;
 }
 
-.name-input-wrapper {
+.nameInputWrapper {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.recipient-name-input {
+.recipientNameInput {
   font-size: 1rem;
   padding: 0.5rem 0.75rem;
 }
 
-.private-info-message {
+.privateInfoMessage {
   font-size: 0.75rem;
   color: #a78bfa;
   font-style: italic;
 }
 
-.recipient-actions {
+.recipientActions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.private-toggle-button {
+.privateToggleButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,12 +94,12 @@
   transition: all 0.2s ease;
 }
 
-.private-toggle-button:hover {
+.privateToggleButton:hover {
   background: rgba(167, 139, 250, 0.25);
   border-color: rgba(167, 139, 250, 0.5);
 }
 
-.remove-button {
+.removeButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -113,51 +113,51 @@
   transition: all 0.2s ease;
 }
 
-.remove-button:hover {
+.removeButton:hover {
   background: rgba(239, 68, 68, 0.25);
   border-color: rgba(239, 68, 68, 0.5);
 }
 
-.remove-button.large {
+.removeButton.large {
   width: 32px;
   height: 32px;
 }
 
-.expand-icon {
+.expandIcon {
   color: rgba(255, 255, 255, 0.4);
   transition: transform 0.2s ease;
 }
 
-.expand-icon.rotated {
+.expandIcon.rotated {
   transform: rotate(90deg);
 }
 
-.recipient-details {
+.recipientDetails {
   padding: 0 1rem 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.contacts-section {
+.contactsSection {
   padding-top: 1rem;
 }
 
-.contact-row {
+.contactRow {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   align-items: center;
 }
 
-.contact-type {
+.contactType {
   width: 140px;
   flex-shrink: 0;
 }
 
-.contact-value {
+.contactValue {
   flex: 1;
 }
 
-.add-button {
+.addButton {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -172,7 +172,7 @@
   transition: all 0.2s ease;
 }
 
-.add-button:hover {
+.addButton:hover {
   background: rgba(59, 130, 246, 0.25);
   border-color: rgba(59, 130, 246, 0.5);
 }

@@ -15,7 +15,7 @@ import { EditorLayout } from '../ui/EditorLayout';
 import { ActionButtons } from '../ui/ActionButtons';
 import { HelpSection } from '../ui/HelpSection';
 import type { Recipient } from '../../lib/types/recipient';
-import './GenerateEditor.css';
+import styles from './GenerateEditor.module.css';
 
 interface GenerateEditorProps {
   secret: string;
@@ -226,40 +226,40 @@ export function GenerateEditor({
 
   return (
     <EditorLayout title={t('generateEditor.title')}>
-      <div className="generate-content">
+      <div className={styles.generateContent}>
         {errorMessage ? (
-          <p className="error-text">{errorMessage}</p>
+          <p className={styles.errorText}>{errorMessage}</p>
         ) : isProcessing ? (
-          <p className="processing-text">{t('generateEditor.processing')}</p>
+          <p className={styles.processingText}>{t('generateEditor.processing')}</p>
         ) : isReady ? (
-          <div className="ready-section">
-            <p className="ready-text">{t('generateEditor.ready')}</p>
+          <div className={styles.readySection}>
+            <p className={styles.readyText}>{t('generateEditor.ready')}</p>
             {currentShares.length > 0 && currentShares.length === recipients.length && (
-              <div className="shares-section">
-                <h3 className="shares-title">{t('generateEditor.shares.title')}</h3>
-                <p className="shares-intro">{t('generateEditor.shares.intro')}</p>
-                <div className="shares-list">
+              <div className={styles.sharesSection}>
+                <h3 className={styles.sharesTitle}>{t('generateEditor.shares.title')}</h3>
+                <p className={styles.sharesIntro}>{t('generateEditor.shares.intro')}</p>
+                <div className={styles.sharesList}>
                   {recipients.map((recipient) => {
                     const share = getShareForRecipient(recipient);
                     if (share === undefined) return null;
                     return (
-                      <div key={recipient.id} className="share-item">
-                        <div className="share-header">
-                          <span className="share-recipient-name">
+                      <div key={recipient.id} className={styles.shareItem}>
+                        <div className={styles.shareHeader}>
+                          <span className={styles.shareRecipientName}>
                             {recipient.name || t('generateEditor.shares.unnamedRecipient')}
                             {recipient.number !== undefined && (
-                              <span className="share-recipient-number"> (#{recipient.number})</span>
+                              <span className={styles.shareRecipientNumber}> (#{recipient.number})</span>
                             )}
                           </span>
                           <button
-                            className="copy-button"
+                            className={styles.copyButton}
                             onClick={() => copyShareToClipboard(share)}
                             title={t('generateEditor.shares.copyButton')}
                           >
                             {t('generateEditor.shares.copyButton')}
                           </button>
                         </div>
-                        <div className="share-value" title={share}>
+                        <div className={styles.shareValue} title={share}>
                           {share}
                         </div>
                       </div>
@@ -270,7 +270,7 @@ export function GenerateEditor({
             )}
           </div>
         ) : (
-          <p className="placeholder-text">{t('generateEditor.placeholder')}</p>
+          <p className={styles.placeholderText}>{t('generateEditor.placeholder')}</p>
         )}
       </div>
 

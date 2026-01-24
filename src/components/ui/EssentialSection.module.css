@@ -1,4 +1,4 @@
-.essential-section {
+.essentialSection {
   background: rgba(167, 139, 250, 0.15);
   border: 1px solid rgba(167, 139, 250, 0.3);
   border-radius: 12px;
@@ -10,7 +10,7 @@
   gap: 0.25rem;
 }
 
-.essential-badge {
+.essentialBadge {
   position: absolute;
   top: -10px;
   right: 12px;
@@ -24,7 +24,7 @@
   color: white;
 }
 
-.essential-note {
+.essentialNote {
   font-size: 0.8rem;
   color: #a78bfa;
   line-height: 1.5;

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import './EditorLayout.css';
+import styles from './EditorLayout.module.css';
 
 interface EditorLayoutProps {
   title?: string;
@@ -15,11 +15,11 @@ export function EditorLayout({
   toolbar,
 }: EditorLayoutProps) {
   return (
-    <div className="editor-container">
-      <main className="main-content">
-        <div className="editor-wrapper">
-          {title && <h1 className="editor-title">{title}</h1>}
-          {subtitle && <p className="editor-subtitle">{subtitle}</p>}
+    <div className={styles.editorContainer}>
+      <main className={styles.mainContent}>
+        <div className={styles.editorWrapper}>
+          {title && <h1 className={styles.editorTitle}>{title}</h1>}
+          {subtitle && <p className={styles.editorSubtitle}>{subtitle}</p>}
           
           {toolbar}
 

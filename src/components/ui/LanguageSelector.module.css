@@ -1,4 +1,4 @@
-.language-selector {
+.languageSelector {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
@@ -6,18 +6,18 @@
 }
 
 @media (max-width: 480px) {
-  .language-selector {
+  .languageSelector {
     top: 1rem;
     right: 1rem;
   }
 
-  .language-selector select {
+  .languageSelector select {
     font-size: 0.85rem;
     padding: 0.4rem 0.8rem;
   }
 }
 
-.language-selector select {
+.languageSelector select {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #e0e0e0;
@@ -28,12 +28,12 @@
   transition: all 0.2s ease;
 }
 
-.language-selector select:hover {
+.languageSelector select:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-.language-selector select option {
+.languageSelector select option {
   background: #1a1a2e;
   color: #e0e0e0;
 }

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { EditorLayout } from '../ui/EditorLayout';
 import { ActionButtons } from '../ui/ActionButtons';
 import { HelpSection } from '../ui/HelpSection';
-import './DecryptEditor.css';
+import styles from './DecryptEditor.module.css';
 
 interface DecryptEditorProps {
   onBack: () => void;
@@ -26,28 +26,28 @@ export function DecryptEditor({ onBack }: DecryptEditorProps) {
       title={t('decryptEditor.title')}
       subtitle={t('decryptEditor.subtitle')}
     >
-      <div className="decrypt-container">
+      <div className={styles.decryptContainer}>
         {isProcessing ? (
-          <div className="status-box processing">
-            <div className="spinner"></div>
+          <div className={`${styles.statusBox} ${styles.processing}`}>
+            <div className={styles.spinner}></div>
             <p>{t('decryptEditor.processing')}</p>
           </div>
         ) : errorMessage ? (
-          <div className="status-box error">
-            <p className="error-title">{t('decryptEditor.error')}</p>
-            <p className="error-message">{errorMessage}</p>
+          <div className={`${styles.statusBox} ${styles.error}`}>
+            <p className={styles.errorTitle}>{t('decryptEditor.error')}</p>
+            <p className={styles.errorMessage}>{errorMessage}</p>
           </div>
         ) : decryptedSecret ? (
           <>
-            <div className="status-box success">
-              <p className="success-title">{t('decryptEditor.success')}</p>
+            <div className={`${styles.statusBox} ${styles.success}`}>
+              <p className={styles.successTitle}>{t('decryptEditor.success')}</p>
             </div>
-            <div className="secret-display">
+            <div className={styles.secretDisplay}>
               <pre>{decryptedSecret}</pre>
             </div>
           </>
         ) : (
-          <div className="status-box waiting">
+          <div className={`${styles.statusBox} ${styles.waiting}`}>
             <p>{t('decryptEditor.subtitle')}</p>
           </div>
         )}

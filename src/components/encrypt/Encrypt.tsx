@@ -17,7 +17,7 @@ import { HowEditor } from './HowEditor';
 import { IntroMessageEditor } from './IntroMessageEditor';
 import { GenerateEditor } from './GenerateEditor';
 import { StepIndicator } from '../ui/StepIndicator';
-import './Encrypt.css';
+import styles from './Encrypt.module.css';
 
 interface EncryptProps {
   onBack: () => void;
@@ -168,10 +168,10 @@ export function Encrypt({ onBack }: EncryptProps) {
   }, [scrollToTop, encryptData]);
 
   return (
-    <div className="app-container">
+    <div className={styles.appContainer}>
       <StepIndicator steps={steps} currentStep={currentStep} />
       
-      <div className="step-content">
+      <div className={styles.stepContent}>
         {!secretSubmitted ? (
           <SecretEditor
             initialValue={secretContent}
@@ -214,7 +214,7 @@ export function Encrypt({ onBack }: EncryptProps) {
             onBack={handleGenerateBack}
           />
         ) : (
-          <main>
+          <main className={styles.stepContentMain}>
             <h1>For When I'm Gone</h1>
             <p>Secret has been saved. Next steps will appear here.</p>
           </main>

@@ -20,7 +20,7 @@ import { CheckboxItem } from '../ui/CheckboxItem';
 import { RecipientCard } from '../ui/RecipientCard';
 import { Icon } from '../ui/Icons';
 import '../../styles/form-controls.css';
-import '../../styles/who-editor.css';
+import styles from './WhoEditor.module.css';
 import {
   type ContactType,
   type Recipient,
@@ -242,17 +242,17 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
     <>
       <p className="panel-intro">{t('whoEditor.sidePanel.intro')}</p>
       
-      <div className="recipient-count">
-        <span className="count-number">{recipients.length}</span>
-        <div className="count-details">
-          <span className="count-label">{t('whoEditor.sidePanel.recipientCount')}</span>
+      <div className={styles.recipientCount}>
+        <span className={styles.countNumber}>{recipients.length}</span>
+        <div className={styles.countDetails}>
+          <span className={styles.countLabel}>{t('whoEditor.sidePanel.recipientCount')}</span>
           {unnamedCount > 0 && (
-            <span className="count-warnings">
+            <span className={styles.countWarnings}>
               {t(unnamedCount > 1 ? 'whoEditor.sidePanel.warnings.unnamedPlural' : 'whoEditor.sidePanel.warnings.unnamed', { count: unnamedCount })}
             </span>
           )}
           {noContactsCount > 0 && (
-            <span className="count-warnings">
+            <span className={styles.countWarnings}>
               {t(unnamedCount > 0 ? 'whoEditor.sidePanel.warnings.noContactsAnd' : 'whoEditor.sidePanel.warnings.noContacts', { count: noContactsCount })}
             </span>
           )}
@@ -300,18 +300,18 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
 
   return (
     <EditorLayout title={t('whoEditor.title')}>
-      <div className="content-wrapper">
-        <div className="recipients-list" role="list">
+      <div className={styles.contentWrapper}>
+        <div className={styles.recipientsList} role="list">
           {recipients.map((recipient, index) => (
             <div key={recipient.id}>
               <div 
-                className={`drop-zone ${dragState.activeDropZone === index ? 'active' : ''} ${isDropZoneHidden(index) ? 'hidden' : ''}`}
+                className={`${styles.dropZone} ${dragState.activeDropZone === index ? styles.active : ''} ${isDropZoneHidden(index) ? styles.hidden : ''}`}
                 role="presentation"
                 onDragOver={(e) => handleDropZoneDragOver(e, index)}
                 onDragLeave={handleDropZoneDragLeave}
                 onDrop={(e) => handleDropZoneDrop(e, index)}
               >
-                <div className="drop-zone-indicator"></div>
+                <div className={styles.dropZoneIndicator}></div>
               </div>
               
               <div ref={(el) => { if (el) recipientCardRefs.current[recipient.id] = el; }}>
@@ -337,13 +337,13 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
           ))}
           
           <div 
-            className={`drop-zone ${dragState.activeDropZone === recipients.length ? 'active' : ''} ${isDropZoneHidden(recipients.length) ? 'hidden' : ''}`}
+            className={`${styles.dropZone} ${dragState.activeDropZone === recipients.length ? styles.active : ''} ${isDropZoneHidden(recipients.length) ? styles.hidden : ''}`}
             role="presentation"
             onDragOver={(e) => handleDropZoneDragOver(e, recipients.length)}
             onDragLeave={handleDropZoneDragLeave}
             onDrop={(e) => handleDropZoneDrop(e, recipients.length)}
           >
-            <div className="drop-zone-indicator"></div>
+            <div className={styles.dropZoneIndicator}></div>
           </div>
           
           <button 

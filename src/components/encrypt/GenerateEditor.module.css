@@ -1,4 +1,4 @@
-.generate-content {
+.generateContent {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -6,21 +6,21 @@
   min-height: 300px;
 }
 
-.placeholder-text {
+.placeholderText {
   color: #a0aec0;
   font-size: 1.1rem;
   text-align: center;
   margin: 2rem 0;
 }
 
-.processing-text {
+.processingText {
   color: #4299e1;
   font-size: 1.1rem;
   text-align: center;
   margin: 2rem 0;
 }
 
-.ready-text {
+.readyText {
   color: #48bb78;
   font-size: 1.1rem;
   text-align: center;
@@ -28,7 +28,7 @@
   font-weight: 600;
 }
 
-.error-text {
+.errorText {
   color: #f56565;
   font-size: 1.1rem;
   text-align: center;
@@ -36,62 +36,62 @@
   font-weight: 600;
 }
 
-.ready-section {
+.readySection {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-.shares-section {
+.sharesSection {
   margin-top: 1rem;
 }
 
-.shares-title {
+.sharesTitle {
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: #2d3748;
 }
 
-.shares-intro {
+.sharesIntro {
   color: #4a5568;
   margin-bottom: 1.5rem;
   line-height: 1.6;
 }
 
-.shares-list {
+.sharesList {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.share-item {
+.shareItem {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 1rem;
   background-color: #f7fafc;
 }
 
-.share-header {
+.shareHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
 }
 
-.share-recipient-name {
+.shareRecipientName {
   font-weight: 600;
   color: #2d3748;
   font-size: 1rem;
 }
 
-.share-recipient-number {
+.shareRecipientNumber {
   font-weight: 500;
   color: #718096;
   font-size: 0.9rem;
 }
 
-.copy-button {
+.copyButton {
   padding: 0.4rem 0.8rem;
   background-color: #4299e1;
   color: white;
@@ -102,15 +102,15 @@
   transition: background-color 0.2s;
 }
 
-.copy-button:hover {
+.copyButton:hover {
   background-color: #3182ce;
 }
 
-.copy-button:active {
+.copyButton:active {
   background-color: #2c5282;
 }
 
-.share-value {
+.shareValue {
   font-family: 'Courier New', monospace;
   font-size: 0.9rem;
   color: #1a202c;

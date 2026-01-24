@@ -2,7 +2,7 @@ import { useEffect, useRef, KeyboardEvent, MouseEvent, DragEvent } from 'react';
 import type { Recipient } from '../../lib/types/recipient';
 import { ContactRow } from './ContactRow';
 import { Icon } from './Icons';
-import './RecipientCard.css';
+import styles from './RecipientCard.module.css';
 
 interface ContactTypeOption {
   value: string;
@@ -97,14 +97,14 @@ export function RecipientCard({
   }
 
   const cardClassNames = [
-    'recipient-card',
-    expanded && 'expanded',
-    dragging && 'dragging',
+    styles.recipientCard,
+    expanded && styles.expanded,
+    dragging && styles.dragging,
   ].filter(Boolean).join(' ');
 
   const headerClassNames = [
-    'recipient-header',
-    toggleDisabled && 'toggle-disabled',
+    styles.recipientHeader,
+    toggleDisabled && styles.toggleDisabled,
   ].filter(Boolean).join(' ');
 
   return (
@@ -123,21 +123,21 @@ export function RecipientCard({
         onKeyDown={handleKeydown}
       >
         <div
-          className="drag-handle"
+          className={styles.dragHandle}
           role="presentation"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
           <Icon name="grip-vertical" size={18} />
         </div>
-        <div className="recipient-summary">
+        <div className={styles.recipientSummary}>
           {expanded ? (
-            <div className="name-input-wrapper">
+            <div className={styles.nameInputWrapper}>
               <input
                 ref={nameInputRef}
                 id={`name-${recipient.id}`}
                 type="text"
-                className="form-input recipient-name-input"
+                className={`form-input ${styles.recipientNameInput}`}
                 value={recipient.name}
                 onChange={(e) => onUpdateField('name', e.target.value)}
                 placeholder={t.placeholders.name}
@@ -145,28 +145,28 @@ export function RecipientCard({
                 onKeyDown={(e) => e.stopPropagation()}
               />
               {recipient.isPrivate ? (
-                <div className="private-info-message">
+                <div className={styles.privateInfoMessage}>
                   {t.fields.privateInfo}
                 </div>
               ) : recipient.number ? (
-                <div className="private-info-message">
+                <div className={styles.privateInfoMessage}>
                   {t.fields.numberedInfo}
                 </div>
               ) : null}
             </div>
           ) : (
-            <span className={`recipient-name ${recipient.isPrivate ? 'private' : ''}`}>
+            <span className={`${styles.recipientName} ${recipient.isPrivate ? styles.private : ''}`}>
               {recipient.name || t.newRecipient}
               {recipient.number !== undefined && (
-                <span className="recipient-number"> (#{recipient.number})</span>
+                <span className={styles.recipientNumber}> (#{recipient.number})</span>
               )}
             </span>
           )}
         </div>
-        <div className="recipient-actions">
+        <div className={styles.recipientActions}>
           {expanded && (
             <button
-              className="private-toggle-button"
+              className={styles.privateToggleButton}
               onClick={handlePrivateToggle}
               title={t.fields.notListedPublicly}
             >
@@ -175,22 +175,22 @@ export function RecipientCard({
           )}
           {expanded && !recipient.number && (
             <button
-              className="remove-button large"
+              className={`${styles.removeButton} ${styles.large}`}
               onClick={handleRemoveClick}
               title={t.removeRecipient}
             >
               <Icon name="minus" size={16} />
             </button>
           )}
-          <span className={`expand-icon ${expanded ? 'rotated' : ''}`}>
+          <span className={`${styles.expandIcon} ${expanded ? styles.rotated : ''}`}>
             <Icon name="chevron-right" size={20} />
           </span>
         </div>
       </div>
 
       {expanded && (
-        <div className="recipient-details">
-          <div className="contacts-section">
+        <div className={styles.recipientDetails}>
+          <div className={styles.contactsSection}>
             {recipient.contacts.map((contact) => (
               <ContactRow
                 key={contact.id}
@@ -204,7 +204,7 @@ export function RecipientCard({
               />
             ))}
 
-            <button className="add-button" onClick={onAddContact}>
+            <button className={styles.addButton} onClick={onAddContact}>
               <Icon name="plus" size={16} />
               {t.addContact}
             </button>

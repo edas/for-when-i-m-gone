@@ -1,21 +1,21 @@
-.warning-section {
+.tipSection {
   display: flex;
   gap: 0.75rem;
   padding: 1rem;
   margin-top: 1.5rem;
-  background: rgba(251, 146, 60, 0.1);
-  border: 1px solid rgba(251, 146, 60, 0.25);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
   border-radius: 10px;
 }
 
-.warning-icon {
+.tipIcon {
   flex-shrink: 0;
-  color: #fb923c;
+  color: #3b82f6;
 }
 
-.warning-text {
+.tipText {
   font-size: 0.85rem;
-  color: #fdba74;
+  color: #93c5fd;
   line-height: 1.5;
   margin: 0;
 }

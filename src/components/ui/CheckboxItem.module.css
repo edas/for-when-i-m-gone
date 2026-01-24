@@ -1,4 +1,4 @@
-.checkbox-item {
+.checkboxItem {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
@@ -7,11 +7,11 @@
   position: relative;
 }
 
-.checkbox-item.readonly {
+.checkboxItem.readonly {
   cursor: default;
 }
 
-.checkbox-item input[type="checkbox"] {
+.checkboxItem input[type="checkbox"] {
   position: absolute;
   opacity: 0;
   cursor: pointer;
@@ -19,7 +19,7 @@
   width: 0;
 }
 
-.checkbox-item .custom-checkbox {
+.checkboxItem .customCheckbox {
   flex-shrink: 0;
   width: 20px;
   height: 20px;
@@ -31,17 +31,17 @@
   margin-top: 2px;
 }
 
-.checkbox-item:hover .custom-checkbox {
+.checkboxItem:hover .customCheckbox {
   border-color: rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.15);
 }
 
-.checkbox-item input:checked ~ .custom-checkbox {
+.checkboxItem input:checked ~ .customCheckbox {
   background: #10b981;
   border-color: #10b981;
 }
 
-.checkbox-item .custom-checkbox::after {
+.checkboxItem .customCheckbox::after {
   content: '';
   position: absolute;
   display: none;
@@ -54,37 +54,37 @@
   transform: rotate(45deg);
 }
 
-.checkbox-item input:checked ~ .custom-checkbox::after {
+.checkboxItem input:checked ~ .customCheckbox::after {
   display: block;
 }
 
-.checkbox-item .label-text {
+.checkboxItem .labelText {
   color: #e2e8f0;
   font-size: 0.9rem;
   line-height: 1.4;
 }
 
-.checkbox-item .label-content {
+.checkboxItem .labelContent {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.checkbox-item .label-title {
+.checkboxItem .labelTitle {
   color: #e2e8f0;
   font-size: 0.9rem;
   line-height: 1.4;
 }
 
-.checkbox-item .label-description {
+.checkboxItem .labelDescription {
   color: #8892a0;
   font-size: 0.8rem;
   line-height: 1.4;
 }
 
-.checkbox-item.strikethrough .label-text,
-.checkbox-item.strikethrough .label-title,
-.checkbox-item.strikethrough .label-description {
+.checkboxItem.strikethrough .labelText,
+.checkboxItem.strikethrough .labelTitle,
+.checkboxItem.strikethrough .labelDescription {
   text-decoration: line-through;
   opacity: 0.5;
 }

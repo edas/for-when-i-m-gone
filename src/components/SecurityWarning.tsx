@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { recordSecurityConfirmation } from '../lib/security';
 import { LanguageSelector } from './ui/LanguageSelector';
 import { Icon } from './ui/Icons';
-import './SecurityWarning.css';
+import styles from './SecurityWarning.module.css';
 
 interface SecurityWarningProps {
   initialChecked?: boolean;
@@ -31,26 +31,26 @@ export function SecurityWarning({ initialChecked, onContinue }: SecurityWarningP
   }, [isChecked, onContinue]);
 
   return (
-    <div className="overlay">
+    <div className={styles.overlay}>
       <LanguageSelector />
 
-      <div className="warning-container">
-        <div className="warning-icon">
+      <div className={styles.warningContainer}>
+        <div className={styles.warningIcon}>
           <Icon name="warning" size={80} />
         </div>
 
         <h1>{t('securityWarning.title')}</h1>
-        <p className="subtitle">{t('securityWarning.subtitle')}</p>
+        <p className={styles.subtitle}>{t('securityWarning.subtitle')}</p>
 
-        <div className="checkbox-container">
-          <label className="checkbox-label">
+        <div className={styles.checkboxContainer}>
+          <label className={styles.checkboxLabel}>
             <input
               type="checkbox"
               checked={isChecked}
               onChange={handleCheckboxChange}
             />
-            <span className="checkmark"></span>
-            <span className="label-text">
+            <span className={styles.checkmark}></span>
+            <span className={styles.labelText}>
               {t('securityWarning.checkboxLabel')}
               <a
                 href="https://github.com/edas/for-when-i-m-gone"
@@ -65,7 +65,7 @@ export function SecurityWarning({ initialChecked, onContinue }: SecurityWarningP
         </div>
 
         <button
-          className="continue-button"
+          className={styles.continueButton}
           disabled={!isChecked}
           onClick={handleContinue}
         >

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Icon } from './Icons';
-import './EssentialSection.css';
+import styles from './EssentialSection.module.css';
 
 interface EssentialSectionProps {
   note?: string;
@@ -9,12 +9,12 @@ interface EssentialSectionProps {
 
 export function EssentialSection({ note, children }: EssentialSectionProps) {
   return (
-    <div className="essential-section">
-      <div className="essential-badge">
+    <div className={styles.essentialSection}>
+      <div className={styles.essentialBadge}>
         <Icon name="star" size={16} />
       </div>
       {children}
-      {note && <p className="essential-note">{note}</p>}
+      {note && <p className={styles.essentialNote}>{note}</p>}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import './CheckboxItem.css';
+import styles from './CheckboxItem.module.css';
 
 interface CheckboxItemProps {
   checked: boolean;
@@ -29,10 +29,10 @@ export function CheckboxItem({
   }
 
   const classNames = [
-    'checkbox-item',
-    essential && 'essential',
-    readonly && 'readonly',
-    strikethrough && 'strikethrough',
+    styles.checkboxItem,
+    essential && styles.essential,
+    readonly && styles.readonly,
+    strikethrough && styles.strikethrough,
   ].filter(Boolean).join(' ');
 
   return (
@@ -43,14 +43,14 @@ export function CheckboxItem({
         onChange={handleChange} 
         disabled={readonly} 
       />
-      <span className="custom-checkbox"></span>
+      <span className={styles.customCheckbox}></span>
       {description ? (
-        <div className="label-content">
-          <span className="label-title">{label}</span>
-          <span className="label-description">{description}</span>
+        <div className={styles.labelContent}>
+          <span className={styles.labelTitle}>{label}</span>
+          <span className={styles.labelDescription}>{description}</span>
         </div>
       ) : (
-        <span className="label-text">{label}</span>
+        <span className={styles.labelText}>{label}</span>
       )}
     </label>
   );

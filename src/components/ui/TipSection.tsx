@@ -1,5 +1,5 @@
 import { Icon } from './Icons';
-import './TipSection.css';
+import styles from './TipSection.module.css';
 
 interface TipSectionProps {
   text: string;
@@ -7,11 +7,11 @@ interface TipSectionProps {
 
 export function TipSection({ text }: TipSectionProps) {
   return (
-    <div className="tip-section">
-      <div className="tip-icon">
+    <div className={styles.tipSection}>
+      <div className={styles.tipIcon}>
         <Icon name="info" size={20} />
       </div>
-      <p className="tip-text">{text}</p>
+      <p className={styles.tipText}>{text}</p>
     </div>
   );
 }

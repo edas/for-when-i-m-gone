@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { EditorLayout } from '../ui/EditorLayout';
 import { ActionButtons } from '../ui/ActionButtons';
 import { HelpSection } from '../ui/HelpSection';
-import './RecoveryEditor.css';
+import styles from './RecoveryEditor.module.css';
 
 interface RecoveryEditorProps {
   onContinue: () => void;
@@ -44,12 +44,12 @@ export function RecoveryEditor({ onContinue, onBack }: RecoveryEditorProps) {
       title={t('recoveryEditor.title')}
       subtitle={t('recoveryEditor.subtitle')}
     >
-      <div className="tokens-container">
+      <div className={styles.tokensContainer}>
         {tokens.map((token, index) => (
-          <div key={index} className="token-row">
-            <span className="token-number">{index + 1}</span>
+          <div key={index} className={styles.tokenRow}>
+            <span className={styles.tokenNumber}>{index + 1}</span>
             <textarea
-              className="token-input"
+              className={styles.tokenInput}
               placeholder={t('recoveryEditor.placeholder')}
               value={token}
               onChange={(e) => updateToken(index, e.target.value)}
@@ -57,7 +57,7 @@ export function RecoveryEditor({ onContinue, onBack }: RecoveryEditorProps) {
             />
             {tokens.length > 1 && (
               <button
-                className="remove-token-btn"
+                className={styles.removeTokenBtn}
                 onClick={() => removeToken(index)}
                 aria-label="Remove token"
               >
@@ -67,7 +67,7 @@ export function RecoveryEditor({ onContinue, onBack }: RecoveryEditorProps) {
           </div>
         ))}
         
-        <button className="add-token-btn" onClick={addToken}>
+        <button className={styles.addTokenBtn} onClick={addToken}>
           + Ajouter un jeton
         </button>
       </div>

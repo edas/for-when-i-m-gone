@@ -1,9 +1,9 @@
-.tiptap-editor {
+.tiptapEditor {
   min-height: 350px;
 }
 
 @media (max-width: 600px) {
-  .tiptap-editor {
+  .tiptapEditor {
     min-height: 200px;
   }
 }

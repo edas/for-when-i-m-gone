@@ -17,7 +17,7 @@ import { TipSection } from '../ui/TipSection';
 import { RichTextToolbar } from '../ui/RichTextToolbar';
 import { Icon } from '../ui/Icons';
 import '../../styles/tiptap-editor.css';
-import '../../styles/how-editor.css';
+import styles from './HowEditor.module.css';
 
 interface HowEditorProps {
   recipientCount: number;
@@ -258,17 +258,17 @@ export function HowEditor({ recipientCount, initialData, aesKey, onContinue, onB
 
   return (
     <EditorLayout title={t('howEditor.title')}>
-      <div className="how-content">
+      <div className={styles.howContent}>
         {/* Threshold Section */}
-        <section className="threshold-section">
-          <h2 className="section-title">{t('howEditor.threshold.title')}</h2>
-          <p className="section-subtitle">{t('howEditor.threshold.subtitle')}</p>
+        <section className={styles.thresholdSection}>
+          <h2 className={styles.sectionTitle}>{t('howEditor.threshold.title')}</h2>
+          <p className={styles.sectionSubtitle}>{t('howEditor.threshold.subtitle')}</p>
           
-          <div className="threshold-content">
-            <div className="input-section">
-              <div className="number-input-wrapper">
+          <div className={styles.thresholdContent}>
+            <div className={styles.inputSection}>
+              <div className={styles.numberInputWrapper}>
                 <button 
-                  className="number-button" 
+                  className={styles.numberButton} 
                   onClick={decrement}
                   disabled={isAesKeyGenerated || threshold === null || threshold <= 2}
                   aria-label="Decrease"
@@ -279,13 +279,13 @@ export function HowEditor({ recipientCount, initialData, aesKey, onContinue, onB
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  className={`number-input ${isError ? 'error' : ''} ${isGreen ? 'optimal' : ''}`}
+                  className={`${styles.numberInput} ${isError ? styles.error : ''} ${isGreen ? styles.optimal : ''}`}
                   value={inputValue}
                   onChange={handleInputChange}
                   readOnly={isAesKeyGenerated}
                 />
                 <button 
-                  className="number-button" 
+                  className={styles.numberButton} 
                   onClick={increment}
                   disabled={isAesKeyGenerated || (threshold !== null && threshold >= recipientCount)}
                   aria-label="Increase"
@@ -293,21 +293,21 @@ export function HowEditor({ recipientCount, initialData, aesKey, onContinue, onB
                   <Icon name="plus" size={24} />
                 </button>
               </div>
-              <span className="recipient-info">
+              <span className={styles.recipientInfo}>
                 {t('howEditor.threshold.outOf', { count: recipientCount })}
               </span>
             </div>
 
-            <div className="quorum-warning-inline">
-              <div className="warning-icon">
+            <div className={styles.quorumWarningInline}>
+              <div className={styles.warningIcon}>
                 <Icon name="alert-triangle" size={20} />
               </div>
-              <p className="warning-text">{t('howEditor.sidePanel.quorumWarning')}</p>
+              <p className={styles.warningText}>{t('howEditor.sidePanel.quorumWarning')}</p>
             </div>
           </div>
 
           {isOne && (
-            <div className="error-message">
+            <div className={styles.errorMessage}>
               <Icon name="alert-triangle" size={20} />
               <p>{t('howEditor.threshold.errorOne')}</p>
             </div>
@@ -315,13 +315,13 @@ export function HowEditor({ recipientCount, initialData, aesKey, onContinue, onB
         </section>
 
         {/* Conditions Section */}
-        <section className="conditions-section">
-          <label className="condition-label">
+        <section className={styles.conditionsSection}>
+          <label className={styles.conditionLabel}>
             <Icon name="info" size={20} />
             {t('howEditor.conditions.title')}
           </label>
           
-          <div className="editor-wrapper">
+          <div className={styles.editorWrapper}>
             <RichTextToolbar 
               editor={editorInstanceRef.current} 
               labels={toolbarLabels} 

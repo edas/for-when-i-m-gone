@@ -1,5 +1,5 @@
 import { Icon } from './Icons';
-import './WarningSection.css';
+import styles from './WarningSection.module.css';
 
 interface WarningSectionProps {
   text: string;
@@ -7,11 +7,11 @@ interface WarningSectionProps {
 
 export function WarningSection({ text }: WarningSectionProps) {
   return (
-    <div className="warning-section">
-      <div className="warning-icon">
+    <div className={styles.warningSection}>
+      <div className={styles.warningIcon}>
         <Icon name="alert-triangle" size={20} />
       </div>
-      <p className="warning-text">{text}</p>
+      <p className={styles.warningText}>{text}</p>
     </div>
   );
 }

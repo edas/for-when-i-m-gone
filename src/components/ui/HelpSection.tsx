@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import './HelpSection.css';
+import styles from './HelpSection.module.css';
 
 interface HelpSectionProps {
   title: string;
@@ -12,22 +12,22 @@ export function HelpSection({ title, defaultOpen = false, children }: HelpSectio
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className={`help-section ${isOpen ? 'open' : ''}`}>
+    <div className={`${styles.helpSection} ${isOpen ? styles.open : ''}`}>
       <button 
-        className="help-section-header" 
+        className={styles.helpSectionHeader} 
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
         <ChevronDown 
           size={20} 
-          className="help-section-chevron"
+          className={styles.helpSectionChevron}
           style={{ display: 'block', flexShrink: 0 }}
         />
-        <span className="help-section-title">{title}</span>
+        <span className={styles.helpSectionTitle}>{title}</span>
       </button>
       
       {isOpen && (
-        <div className="help-section-content">
+        <div className={styles.helpSectionContent}>
           {children}
         </div>
       )}

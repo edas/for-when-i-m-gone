@@ -1,4 +1,4 @@
-.step-indicator-wrapper {
+.stepIndicatorWrapper {
   background: rgba(0, 0, 0, 0.2);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   overflow-x: auto;
@@ -7,24 +7,24 @@
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
-.step-indicator-wrapper::-webkit-scrollbar {
+.stepIndicatorWrapper::-webkit-scrollbar {
   height: 6px;
 }
 
-.step-indicator-wrapper::-webkit-scrollbar-track {
+.stepIndicatorWrapper::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.step-indicator-wrapper::-webkit-scrollbar-thumb {
+.stepIndicatorWrapper::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
 }
 
-.step-indicator-wrapper::-webkit-scrollbar-thumb:hover {
+.stepIndicatorWrapper::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
-.step-indicator {
+.stepIndicator {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -33,7 +33,7 @@
   min-width: min-content;
 }
 
-.step-indicator > div {
+.stepIndicator > div {
   display: flex;
   align-items: center;
 }
@@ -46,7 +46,7 @@
   min-width: 80px;
 }
 
-.step-circle {
+.stepCircle {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -58,50 +58,50 @@
   transition: all 0.3s ease;
 }
 
-.step-circle svg {
+.stepCircle svg {
   width: 16px;
   height: 16px;
 }
 
-.step.upcoming .step-circle {
+.step.upcoming .stepCircle {
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.25);
   color: rgba(255, 255, 255, 0.4);
 }
 
-.step.current .step-circle {
+.step.current .stepCircle {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border: 2px solid #3b82f6;
   color: white;
   box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
 }
 
-.step.completed .step-circle {
+.step.completed .stepCircle {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: 2px solid #10b981;
   color: white;
 }
 
-.step-label {
+.stepLabel {
   font-size: 0.75rem;
   text-align: center;
   transition: color 0.3s ease;
 }
 
-.step.upcoming .step-label {
+.step.upcoming .stepLabel {
   color: rgba(255, 255, 255, 0.4);
 }
 
-.step.current .step-label {
+.step.current .stepLabel {
   color: #60a5fa;
   font-weight: 600;
 }
 
-.step.completed .step-label {
+.step.completed .stepLabel {
   color: #10b981;
 }
 
-.step-line {
+.stepLine {
   flex: 1;
   height: 2px;
   background: rgba(255, 255, 255, 0.15);
@@ -112,12 +112,12 @@
   transition: background 0.3s ease;
 }
 
-.step-line.completed {
+.stepLine.completed {
   background: #10b981;
 }
 
 @media (max-width: 600px) {
-  .step-indicator {
+  .stepIndicator {
     padding: 0.75rem 1rem;
     justify-content: flex-start;
   }
@@ -126,17 +126,17 @@
     min-width: 60px;
   }
 
-  .step-circle {
+  .stepCircle {
     width: 28px;
     height: 28px;
     font-size: 0.75rem;
   }
 
-  .step-label {
+  .stepLabel {
     font-size: 0.65rem;
   }
 
-  .step-line {
+  .stepLine {
     min-width: 20px;
     max-width: 40px;
   }

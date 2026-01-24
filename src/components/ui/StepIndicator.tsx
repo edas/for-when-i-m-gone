@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import './StepIndicator.css';
+import styles from './StepIndicator.module.css';
 
 interface Step {
   key: string;
@@ -22,7 +22,7 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
       
       if (!scrollContainer || !stepContainer) return;
       
-      const stepElements = stepContainer.querySelectorAll<HTMLDivElement>('.step');
+      const stepElements = stepContainer.querySelectorAll<HTMLDivElement>(`.${styles.step}`);
       const currentStepElement = stepElements[stepIndex] as HTMLDivElement | undefined;
       
       if (!currentStepElement) return;
@@ -48,17 +48,17 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
   }, [currentStep]);
 
   return (
-    <div className="step-indicator-wrapper" ref={scrollContainerRef}>
-      <div className="step-indicator" ref={stepContainerRef}>
+    <div className={styles.stepIndicatorWrapper} ref={scrollContainerRef}>
+      <div className={styles.stepIndicator} ref={stepContainerRef}>
         {steps.map((step, index) => (
           <div key={step.key}>
             <div
-              className={`step ${
-                index < currentStep ? 'completed' : 
-                index === currentStep ? 'current' : 'upcoming'
+              className={`${styles.step} ${
+                index < currentStep ? styles.completed : 
+                index === currentStep ? styles.current : styles.upcoming
               }`}
             >
-              <div className="step-circle">
+              <div className={styles.stepCircle}>
                 {index < currentStep ? (
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -67,10 +67,10 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
                   <span>{index + 1}</span>
                 )}
               </div>
-              <span className="step-label">{step.label}</span>
+              <span className={styles.stepLabel}>{step.label}</span>
             </div>
             {index < steps.length - 1 && (
-              <div className={`step-line ${index < currentStep ? 'completed' : ''}`}></div>
+              <div className={`${styles.stepLine} ${index < currentStep ? styles.completed : ''}`}></div>
             )}
           </div>
         ))}

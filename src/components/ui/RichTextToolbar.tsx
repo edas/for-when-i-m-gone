@@ -1,7 +1,7 @@
 import type { Editor } from '@tiptap/core';
 import { hasRecipientsBlock, hasConditionsBlock } from '../../lib/tiptap/extensions';
 import { Icon, type IconName } from './Icons';
-import './RichTextToolbar.css';
+import styles from './RichTextToolbar.module.css';
 
 interface BaseLabels {
   bold: string;
@@ -92,11 +92,11 @@ export function RichTextToolbar({
     : null;
 
   const renderButtonGroup = (buttons: ToolbarButton[], isInsert = false) => (
-    <div className="toolbar-group">
+    <div className={styles.toolbarGroup}>
       {buttons.map((btn) => (
         <button 
           key={btn.icon}
-          className={`toolbar-btn ${isInsert ? 'insert-btn' : ''} ${btn.disabled ? 'already-inserted' : ''}`}
+          className={`${styles.toolbarBtn} ${isInsert ? styles.insertBtn : ''} ${btn.disabled ? styles.alreadyInserted : ''}`}
           onClick={btn.action} 
           title={btn.label}
           disabled={!editor || btn.disabled}
@@ -108,21 +108,21 @@ export function RichTextToolbar({
   );
 
   return (
-    <div className={`toolbar ${compact ? 'compact' : ''}`}>
+    <div className={`${styles.toolbar} ${compact ? styles.compact : ''}`}>
       {formatButtons && (
         <>
           {renderButtonGroup(formatButtons)}
-          <div className="toolbar-divider"></div>
+          <div className={styles.toolbarDivider}></div>
         </>
       )}
       
       {renderButtonGroup(styleButtons)}
-      <div className="toolbar-divider"></div>
+      <div className={styles.toolbarDivider}></div>
       {renderButtonGroup(listButtons)}
       
       {insertButtons && (
         <>
-          <div className="toolbar-divider"></div>
+          <div className={styles.toolbarDivider}></div>
           {renderButtonGroup(insertButtons, true)}
         </>
       )}

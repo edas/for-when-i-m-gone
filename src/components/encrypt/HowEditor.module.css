@@ -2,7 +2,7 @@
  * HowEditor styles
  */
 
-.how-content {
+.howContent {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -11,14 +11,14 @@
   overflow-y: auto;
 }
 
-.threshold-section,
-.conditions-section {
+.thresholdSection,
+.conditionsSection {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.section-title {
+.sectionTitle {
   font-family: 'Georgia', 'Times New Roman', serif;
   font-size: 1.5rem;
   font-weight: 600;
@@ -26,13 +26,13 @@
   margin: 0;
 }
 
-.section-subtitle {
+.sectionSubtitle {
   color: #a0aec0;
   margin: 0;
   font-size: 0.95rem;
 }
 
-.threshold-content {
+.thresholdContent {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -43,7 +43,7 @@
   width: 100%;
 }
 
-.input-section {
+.inputSection {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -52,13 +52,13 @@
   flex-grow: 0;
 }
 
-.number-input-wrapper {
+.numberInputWrapper {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.number-button {
+.numberButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,7 +72,7 @@
   transition: all 0.2s ease;
 }
 
-.number-button svg {
+.numberButton svg {
   display: block !important;
   width: 24px !important;
   height: 24px !important;
@@ -82,22 +82,22 @@
   fill: none !important;
 }
 
-.number-button:hover:not(:disabled) {
+.numberButton:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-.number-button:disabled {
+.numberButton:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
 
-.number-button:disabled svg {
+.numberButton:disabled svg {
   opacity: 1;
   stroke: currentColor;
 }
 
-.number-input {
+.numberInput {
   width: 80px;
   height: 60px;
   font-size: 2rem;
@@ -113,33 +113,33 @@
   -moz-appearance: textfield;
 }
 
-.number-input::-webkit-outer-spin-button,
-.number-input::-webkit-inner-spin-button {
+.numberInput::-webkit-outer-spin-button,
+.numberInput::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.number-input:focus {
+.numberInput:focus {
   border-color: rgba(96, 165, 250, 0.5);
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
 }
 
-.number-input.error {
+.numberInput.error {
   border-color: rgba(239, 68, 68, 0.7);
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
-.number-input.optimal {
+.numberInput.optimal {
   border-color: rgba(139, 92, 246, 0.7);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
 }
 
-.recipient-info {
+.recipientInfo {
   color: #a0aec0;
   font-size: 0.9rem;
 }
 
-.error-message {
+.errorMessage {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
@@ -152,13 +152,13 @@
   align-self: center;
 }
 
-.error-message p {
+.errorMessage p {
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.5;
 }
 
-.quorum-warning-inline {
+.quorumWarningInline {
   display: flex;
   gap: 0.75rem;
   padding: 1rem;
@@ -171,32 +171,32 @@
   align-self: flex-start;
 }
 
-.quorum-warning-inline .warning-icon {
+.quorumWarningInline .warningIcon {
   flex-shrink: 0;
   color: #fb923c;
   display: flex;
   align-items: center;
 }
 
-.quorum-warning-inline .warning-icon svg {
+.quorumWarningInline .warningIcon svg {
   display: block;
   color: inherit;
 }
 
-.quorum-warning-inline .warning-text {
+.quorumWarningInline .warningText {
   font-size: 0.85rem;
   color: #fdba74;
   line-height: 1.5;
   margin: 0;
 }
 
-.conditions-section {
+.conditionsSection {
   flex: 1;
   gap: 0.75rem;
   min-height: 0;
 }
 
-.condition-label {
+.conditionLabel {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -205,60 +205,60 @@
   font-weight: 500;
 }
 
-.condition-label svg {
+.conditionLabel svg {
   flex-shrink: 0;
   color: #60a5fa;
 }
 
-.editor-wrapper {
+.editorWrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 180px;
 }
 
-.optional-section {
+.optionalSection {
   margin-top: 1rem;
 }
 
-.section-divider {
+.sectionDivider {
   height: 1px;
   background: rgba(255, 255, 255, 0.1);
   margin: 1.5rem 0;
 }
 
 @media (max-width: 600px) {
-  .how-content {
+  .howContent {
     padding: 1.5rem 1rem;
     gap: 1.5rem;
   }
 
-  .section-title {
+  .sectionTitle {
     font-size: 1.25rem;
   }
 
-  .threshold-content {
+  .thresholdContent {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .quorum-warning-inline {
+  .quorumWarningInline {
     max-width: 100%;
     align-self: stretch;
   }
 
-  .number-input {
+  .numberInput {
     width: 70px;
     height: 50px;
     font-size: 1.75rem;
   }
 
-  .number-button {
+  .numberButton {
     width: 40px;
     height: 40px;
   }
 
-  .editor-wrapper {
+  .editorWrapper {
     min-height: 150px;
   }
 }

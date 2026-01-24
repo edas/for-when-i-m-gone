@@ -1,4 +1,4 @@
-.generate-example-button {
+.generateExampleButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,13 +15,13 @@
   transition: all 0.2s ease;
 }
 
-.generate-example-button:hover {
+.generateExampleButton:hover {
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(99, 102, 241, 0.3) 100%);
   border-color: rgba(139, 92, 246, 0.6);
   color: #ddd6fe;
   transform: translateY(-1px);
 }
 
-.generate-example-button:active {
+.generateExampleButton:active {
   transform: translateY(0);
 }

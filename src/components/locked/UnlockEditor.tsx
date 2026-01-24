@@ -8,7 +8,7 @@ import {
 } from '../../lib/dataStore';
 import { EditorLayout } from '../ui/EditorLayout';
 import { HelpSection } from '../ui/HelpSection';
-import './UnlockEditor.css';
+import styles from './UnlockEditor.module.css';
 
 interface UnlockEditorProps {
   onUnlocked: () => void;
@@ -61,11 +61,11 @@ export function UnlockEditor({ onUnlocked, onBack }: UnlockEditorProps) {
       title={t('unlockEditor.title')}
       subtitle={t('unlockEditor.subtitle')}
     >
-      <div className="unlock-container">
-        <div className="password-field">
+      <div className={styles.unlockContainer}>
+        <div className={styles.passwordField}>
           <input
             type="password"
-            className="password-input"
+            className={styles.passwordInput}
             placeholder={t('unlockEditor.placeholder')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -75,7 +75,7 @@ export function UnlockEditor({ onUnlocked, onBack }: UnlockEditorProps) {
         </div>
 
         {error && (
-          <div className="error-message">
+          <div className={styles.errorMessage}>
             {error}
           </div>
         )}
@@ -84,16 +84,16 @@ export function UnlockEditor({ onUnlocked, onBack }: UnlockEditorProps) {
           {helpContent}
         </HelpSection>
 
-        <div className="action-buttons">
+        <div className={styles.actionButtons}>
           <button
-            className="back-btn"
+            className={styles.backBtn}
             onClick={onBack}
             disabled={isUnlocking}
           >
             {t('common.back')}
           </button>
           <button
-            className="unlock-btn"
+            className={styles.unlockBtn}
             onClick={handleUnlock}
             disabled={!password.trim() || isUnlocking}
           >

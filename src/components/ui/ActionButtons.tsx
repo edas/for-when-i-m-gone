@@ -1,6 +1,6 @@
 import { Icon } from './Icons';
 import { type ButtonState } from '../../lib/buttonState';
-import './ActionButtons.css';
+import styles from './ActionButtons.module.css';
 
 interface ActionButtonsProps {
   backLabel: string;
@@ -27,24 +27,29 @@ export function ActionButtons({
   onAlternative,
   showContinue = true,
 }: ActionButtonsProps) {
-  const stateClass = `state-${buttonState}`;
+  const stateClassMap: Record<ButtonState, string> = {
+    none: styles.stateNone,
+    partial: styles.statePartial,
+    complete: styles.stateComplete,
+  };
+  const stateClass = stateClassMap[buttonState];
 
   return (
-    <div className="button-container">
-      <button className="back-button" onClick={onBack}>
+    <div className={styles.buttonContainer}>
+      <button className={styles.backButton} onClick={onBack}>
         <Icon name="arrow-left" size={18} />
         {backLabel}
       </button>
       {showContinue && (
         <>
           {showAlternative && alternativeLabel && onAlternative ? (
-            <button className="alternative-button" onClick={onAlternative}>
+            <button className={styles.alternativeButton} onClick={onAlternative}>
               <Icon name="plus" size={18} />
               {alternativeLabel}
             </button>
           ) : (
             <button
-              className={`continue-button ${stateClass}`}
+              className={`${styles.continueButton} ${stateClass}`}
               disabled={disabled}
               onClick={onContinue}
             >

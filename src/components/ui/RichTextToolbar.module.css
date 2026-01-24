@@ -14,24 +14,24 @@
   border-radius: 10px 10px 0 0;
 }
 
-.toolbar-group {
+.toolbarGroup {
   display: flex;
   gap: 0.25rem;
 }
 
-.toolbar-divider {
+.toolbarDivider {
   width: 1px;
   height: 24px;
   background: rgba(255, 255, 255, 0.2);
   margin: 0 0.5rem;
 }
 
-.toolbar.compact .toolbar-divider {
+.toolbar.compact .toolbarDivider {
   height: 20px;
   margin: 0 0.25rem;
 }
 
-.toolbar-btn {
+.toolbarBtn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,39 +45,39 @@
   transition: all 0.2s ease;
 }
 
-.toolbar.compact .toolbar-btn {
+.toolbar.compact .toolbarBtn {
   width: 32px;
   height: 32px;
 }
 
-.toolbar-btn:hover:not(:disabled) {
+.toolbarBtn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.toolbar-btn:active:not(:disabled) {
+.toolbarBtn:active:not(:disabled) {
   background: rgba(255, 255, 255, 0.15);
 }
 
-.toolbar-btn:disabled {
+.toolbarBtn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
 /* Insert buttons have distinct styling */
-.insert-btn {
+.insertBtn {
   color: #93c5fd;
 }
 
-.insert-btn:hover:not(:disabled) {
+.insertBtn:hover:not(:disabled) {
   background: rgba(96, 165, 250, 0.15);
   color: #bfdbfe;
   border-color: rgba(96, 165, 250, 0.3);
 }
 
 /* Already inserted buttons show as "done" */
-.insert-btn.already-inserted {
+.insertBtn.alreadyInserted {
   color: #93c5fd;
   background: rgba(96, 165, 250, 0.1);
   border-color: rgba(96, 165, 250, 0.2);

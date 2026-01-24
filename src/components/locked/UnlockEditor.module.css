@@ -1,4 +1,4 @@
-.unlock-container {
+.unlockContainer {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -6,13 +6,13 @@
   margin: 0 auto;
 }
 
-.password-field {
+.passwordField {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.password-input {
+.passwordInput {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
@@ -22,21 +22,21 @@
   transition: border-color 0.2s ease;
 }
 
-.password-input:focus {
+.passwordInput:focus {
   outline: none;
   border-color: rgba(59, 130, 246, 0.5);
 }
 
-.password-input::placeholder {
+.passwordInput::placeholder {
   color: rgba(255, 255, 255, 0.3);
 }
 
-.password-input:disabled {
+.passwordInput:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.error-message {
+.errorMessage {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 8px;
@@ -45,14 +45,14 @@
   font-size: 0.9rem;
 }
 
-.action-buttons {
+.actionButtons {
   display: flex;
   gap: 1rem;
   justify-content: center;
   margin-top: 1rem;
 }
 
-.back-btn {
+.backBtn {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
@@ -63,17 +63,17 @@
   transition: all 0.2s ease;
 }
 
-.back-btn:hover:not(:disabled) {
+.backBtn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-.back-btn:disabled {
+.backBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.unlock-btn {
+.unlockBtn {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border: none;
   border-radius: 8px;
@@ -85,25 +85,25 @@
   transition: all 0.2s ease;
 }
 
-.unlock-btn:hover:not(:disabled) {
+.unlockBtn:hover:not(:disabled) {
   background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
   transform: translateY(-1px);
 }
 
-.unlock-btn:disabled {
+.unlockBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
 
-.unlock-container h3 {
+.unlockContainer h3 {
   font-family: 'Georgia', 'Times New Roman', serif;
   font-size: 1.25rem;
   color: #ffffff;
   margin-bottom: 1rem;
 }
 
-.intro-text {
+.introText {
   color: #a0aec0;
   font-size: 0.9rem;
   line-height: 1.6;

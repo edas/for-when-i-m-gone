@@ -1,4 +1,4 @@
-.button-container {
+.buttonContainer {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -6,7 +6,7 @@
   margin-top: 1.5rem;
 }
 
-.back-button {
+.backButton {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -22,12 +22,12 @@
   text-decoration: none;
 }
 
-.back-button:hover {
+.backButton:hover {
   background: none;
   color: rgba(160, 174, 192, 0.9);
 }
 
-.continue-button {
+.continueButton {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -41,44 +41,44 @@
   color: white;
 }
 
-.continue-button.state-none {
+.continueButton.stateNone {
   background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
 }
 
-.continue-button.state-partial {
+.continueButton.statePartial {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
 }
 
-.continue-button.state-complete {
+.continueButton.stateComplete {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
-.continue-button:hover:not(:disabled) {
+.continueButton:hover:not(:disabled) {
   transform: translateY(-2px);
 }
 
-.continue-button.state-none:hover:not(:disabled) {
+.continueButton.stateNone:hover:not(:disabled) {
   box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
 }
 
-.continue-button.state-partial:hover:not(:disabled) {
+.continueButton.statePartial:hover:not(:disabled) {
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
 }
 
-.continue-button.state-complete:hover:not(:disabled) {
+.continueButton.stateComplete:hover:not(:disabled) {
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
-.continue-button:disabled {
+.continueButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none !important;
 }
 
-.alternative-button {
+.alternativeButton {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -93,7 +93,7 @@
   color: #ddd6fe;
 }
 
-.alternative-button:hover {
+.alternativeButton:hover {
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(99, 102, 241, 0.4) 100%);
   border-color: rgba(139, 92, 246, 0.7);
   color: #ede9fe;
@@ -101,23 +101,23 @@
   box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
 }
 
-.alternative-button:active {
+.alternativeButton:active {
   transform: translateY(0);
 }
 
 /* Responsive */
 @media (max-width: 600px) {
-  .button-container {
+  .buttonContainer {
     flex-direction: column-reverse;
   }
 
-  .continue-button,
-  .alternative-button {
+  .continueButton,
+  .alternativeButton {
     width: 100%;
     justify-content: center;
   }
 
-  .back-button {
+  .backButton {
     align-self: flex-start;
     margin-top: 0.5rem;
   }

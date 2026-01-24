@@ -29,7 +29,7 @@ import { EssentialSection } from '../ui/EssentialSection';
 import { HelpSection } from '../ui/HelpSection';
 import { RichTextToolbar } from '../ui/RichTextToolbar';
 import '../../styles/tiptap-editor.css';
-import './IntroMessageEditor.css';
+import styles from './IntroMessageEditor.module.css';
 
 interface IntroMessageEditorProps {
   initialValue?: JSONContent | null;
@@ -338,7 +338,7 @@ export function IntroMessageEditor({
         />
       }
     >
-      <div className="tiptap-editor" ref={editorRef}></div>
+      <div className={`tiptap-editor ${styles.tiptapEditor}`} ref={editorRef}></div>
 
       <HelpSection title={t('introEditor.sidePanel.title')}>
         {helpContent}
