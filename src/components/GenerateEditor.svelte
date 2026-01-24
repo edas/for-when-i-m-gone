@@ -8,7 +8,7 @@
   // #endregion
   import { getTranslations, type Language } from '../lib/i18n';
   import { computeButtonState, getButtonText } from '../lib/buttonState';
-  import { updateStoredData, getStoredData } from '../lib/dataStore';
+  import { updateStoredData } from '../lib/dataStore';
   import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
   import { 
     generateAES256Key, 
@@ -17,7 +17,6 @@
     encryptBuffer, 
     textToBuffer,
   } from '../lib/crypto/aes';
-  // @ts-expect-error - ssss-js types may not be fully defined, but splitBuffer exists and accepts Uint8Array
   import { splitBuffer } from 'ssss-js';
   import EditorLayout from './ui/EditorLayout.svelte';
   import ActionButtons from './ui/ActionButtons.svelte';
