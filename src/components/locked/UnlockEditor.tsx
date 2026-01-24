@@ -1,6 +1,5 @@
-import { useState, useMemo, useEffect, useCallback, KeyboardEvent } from 'react';
+import { useState, useMemo, useCallback, KeyboardEvent } from 'react';
 import { getTranslations, type Language } from '../../lib/i18n';
-import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
 import { 
   getStoredData, 
   decryptExportableData, 
@@ -8,6 +7,7 @@ import {
   type LockedStoredData
 } from '../../lib/dataStore';
 import { EditorLayout } from '../ui/EditorLayout';
+import { HelpSection } from '../ui/HelpSection';
 import './UnlockEditor.css';
 
 interface UnlockEditorProps {
@@ -18,19 +18,10 @@ interface UnlockEditorProps {
 
 export function UnlockEditor({ lang, onUnlocked, onBack }: UnlockEditorProps) {
   const t = useMemo(() => getTranslations(lang), [lang]);
-  const [sidePanelOpen, setSidePanelOpen] = useState(() => getInitialSidePanelState('unlock', true));
 
   const [password, setPassword] = useState('');
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const toggleSidePanel = useCallback(() => {
-    setSidePanelOpen(prev => {
-      const newState = !prev;
-      saveSidePanelState('unlock', newState);
-      return newState;
-    });
-  }, []);
 
   const handleUnlock = useCallback(async () => {
     if (!password.trim() || isUnlocking) return;
@@ -62,27 +53,14 @@ export function UnlockEditor({ lang, onUnlocked, onBack }: UnlockEditorProps) {
     }
   }, [password, isUnlocking, handleUnlock]);
 
-  useEffect(() => {
-    saveSidePanelState('unlock', sidePanelOpen);
-  }, [sidePanelOpen]);
-
-  const sidePanelContent = (
-    <>
-      <h3>{t.unlockEditor.sidePanel.title}</h3>
-      <p className="intro-text">{t.unlockEditor.sidePanel.intro}</p>
-    </>
+  const helpContent = (
+    <p className="panel-intro">{t.unlockEditor.sidePanel.intro}</p>
   );
 
   return (
     <EditorLayout
       title={t.unlockEditor.title}
       subtitle={t.unlockEditor.subtitle}
-      sidePanelOpen={sidePanelOpen}
-      collapseLabel={t.unlockEditor.sidePanel.collapse}
-      expandLabel={t.unlockEditor.sidePanel.expand}
-      onToggleSidePanel={toggleSidePanel}
-      editorId="unlock"
-      sidePanelContent={sidePanelContent}
     >
       <div className="unlock-container">
         <div className="password-field">
@@ -102,6 +80,10 @@ export function UnlockEditor({ lang, onUnlocked, onBack }: UnlockEditorProps) {
             {error}
           </div>
         )}
+
+        <HelpSection title={t.unlockEditor.sidePanel.title}>
+          {helpContent}
+        </HelpSection>
 
         <div className="action-buttons">
           <button

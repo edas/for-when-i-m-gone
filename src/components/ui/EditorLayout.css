@@ -9,11 +9,6 @@
   display: flex;
   flex-direction: column;
   padding: 2rem;
-  transition: margin-right 0.3s ease;
-}
-
-.main-content.panel-closed {
-  margin-right: 0;
 }
 
 .editor-wrapper {
@@ -42,29 +37,9 @@
 }
 
 /* Responsive */
-@media (max-width: 900px) {
-  .main-content {
-    margin-right: 50px;
-  }
-
-  .main-content.panel-closed {
-    margin-right: 50px;
-  }
-}
-
 @media (max-width: 600px) {
-  .editor-container {
-    flex-direction: column;
-  }
-
   .main-content {
-    margin-right: 0;
     padding: 1rem;
-    padding-bottom: 70px;
-  }
-
-  .main-content.panel-closed {
-    margin-right: 0;
   }
 
   .editor-title {

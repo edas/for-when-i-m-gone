@@ -15,6 +15,7 @@ import { EditorLayout } from '../ui/EditorLayout';
 import { ActionButtons } from '../ui/ActionButtons';
 import { TipSection } from '../ui/TipSection';
 import { EssentialSection } from '../ui/EssentialSection';
+import { HelpSection } from '../ui/HelpSection';
 import { CheckboxItem } from '../ui/CheckboxItem';
 import { RecipientCard } from '../ui/RecipientCard';
 import { Icon } from '../ui/Icons';
@@ -22,12 +23,10 @@ import '../../styles/form-controls.css';
 import '../../styles/who-editor.css';
 import {
   type ContactType,
-  type ContactInfo,
   type Recipient,
   createEmptyContact,
   createEmptyRecipient,
 } from '../../lib/types/recipient';
-import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
 
 interface WhoEditorProps {
   lang: Language;
@@ -62,7 +61,6 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
 
   const initialState = getInitialState();
   const [recipients, setRecipients] = useState<Recipient[]>(initialState.recipients);
-  const [sidePanelOpen, setSidePanelOpen] = useState(() => getInitialSidePanelState('who', true));
   const [expandedRecipientId, setExpandedRecipientId] = useState<string | null>(initialState.expandedId);
   const [autoFocusRecipientId, setAutoFocusRecipientId] = useState<string | null>(null);
   const [dragState, setDragState] = useState<DragDropState>({ draggedItemId: null, activeDropZone: null });
@@ -171,7 +169,7 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
     ));
   }, []);
 
-  const updateContact = useCallback((recipientId: string, contactId: string, field: keyof ContactInfo, value: string) => {
+  const updateContact = useCallback((recipientId: string, contactId: string, field: 'type' | 'value', value: string) => {
     setRecipients(prev => prev.map(r => 
       r.id === recipientId 
         ? { ...r, contacts: r.contacts.map(c => c.id === contactId ? { ...c, [field]: value } : c) }
@@ -225,11 +223,6 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
     }));
   }, [recipients]);
 
-  // Save side panel state
-  useEffect(() => {
-    saveSidePanelState('who', sidePanelOpen);
-  }, [sidePanelOpen]);
-
   // Auto focus on first visit
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -244,9 +237,8 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
     return () => clearTimeout(timer);
   }, []);
 
-  const sidePanelContent = (
+  const helpContent = (
     <>
-      <h2>{t.whoEditor.sidePanel.title}</h2>
       <p className="panel-intro">{t.whoEditor.sidePanel.intro}</p>
       
       <div className="recipient-count">
@@ -287,16 +279,7 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
   );
 
   return (
-    <EditorLayout
-      title={t.whoEditor.title}
-      sidePanelOpen={sidePanelOpen}
-      collapseLabel={t.whoEditor.sidePanel.collapse}
-      expandLabel={t.whoEditor.sidePanel.expand}
-      wideSidePanel
-      onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
-      editorId="who"
-      sidePanelContent={sidePanelContent}
-    >
+    <EditorLayout title={t.whoEditor.title}>
       <div className="content-wrapper">
         <div className="recipients-list" role="list">
           {recipients.map((recipient, index) => (
@@ -352,6 +335,10 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
             {t.whoEditor.addRecipient}
           </button>
         </div>
+
+        <HelpSection title={t.whoEditor.sidePanel.title}>
+          {helpContent}
+        </HelpSection>
 
         <ActionButtons
           backLabel={t.common.back}

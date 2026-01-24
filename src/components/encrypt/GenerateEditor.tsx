@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { getTranslations, type Language } from '../../lib/i18n';
 import { computeButtonState, getButtonText } from '../../lib/buttonState';
 import { updateStoredData, type EncryptStoredData } from '../../lib/dataStore';
-import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
 import { 
   generateAES256Key, 
   exportKeyToUint8Array,
@@ -13,6 +12,7 @@ import {
 import { splitBuffer } from 'ssss-js';
 import { EditorLayout } from '../ui/EditorLayout';
 import { ActionButtons } from '../ui/ActionButtons';
+import { HelpSection } from '../ui/HelpSection';
 import type { Recipient } from '../../lib/types/recipient';
 import './GenerateEditor.css';
 
@@ -40,7 +40,6 @@ export function GenerateEditor({
   const t = useMemo(() => getTranslations(lang), [lang]);
   
   const [recipients, setRecipients] = useState<Recipient[]>([]);
-  const [sidePanelOpen, setSidePanelOpen] = useState(() => getInitialSidePanelState('generate', true));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -216,28 +215,12 @@ export function GenerateEditor({
     onBack();
   }, [onBack]);
 
-  // Save side panel state
-  useEffect(() => {
-    saveSidePanelState('generate', sidePanelOpen);
-  }, [sidePanelOpen]);
-
-  const sidePanelContent = (
-    <>
-      <h2>{t.generateEditor.sidePanel.title}</h2>
-      <p className="panel-intro">{t.generateEditor.sidePanel.intro}</p>
-    </>
+  const helpContent = (
+    <p className="panel-intro">{t.generateEditor.sidePanel.intro}</p>
   );
 
   return (
-    <EditorLayout
-      title={t.generateEditor.title}
-      sidePanelOpen={sidePanelOpen}
-      collapseLabel={t.generateEditor.sidePanel.collapse}
-      expandLabel={t.generateEditor.sidePanel.expand}
-      onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
-      editorId="generate"
-      sidePanelContent={sidePanelContent}
-    >
+    <EditorLayout title={t.generateEditor.title}>
       <div className="generate-content">
         {errorMessage ? (
           <p className="error-text">{errorMessage}</p>
@@ -285,6 +268,10 @@ export function GenerateEditor({
           <p className="placeholder-text">{t.generateEditor.placeholder}</p>
         )}
       </div>
+
+      <HelpSection title={t.generateEditor.sidePanel.title}>
+        {helpContent}
+      </HelpSection>
 
       <ActionButtons
         backLabel={t.common.back}

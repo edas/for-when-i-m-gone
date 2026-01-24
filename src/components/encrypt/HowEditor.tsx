@@ -8,10 +8,10 @@ import { parseHtmlToJson } from '../../lib/htmlParser';
 import { createTiptapEditor } from '../../lib/tiptap/createEditor';
 import { hasJsonContent } from '../../lib/tiptap/utils';
 import { generateExampleInEditor } from '../../lib/tiptap/editorHelpers';
-import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
 import { EditorLayout } from '../ui/EditorLayout';
 import { ActionButtons } from '../ui/ActionButtons';
 import { EssentialSection } from '../ui/EssentialSection';
+import { HelpSection } from '../ui/HelpSection';
 import { CheckboxItem } from '../ui/CheckboxItem';
 import { TipSection } from '../ui/TipSection';
 import { RichTextToolbar } from '../ui/RichTextToolbar';
@@ -56,7 +56,6 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
   const [hasNoOpenConditions, setHasNoOpenConditions] = useState(() => 
     isConditionsUnmodified ? true : (initialData?.hasNoOpenConditions ?? false)
   );
-  const [sidePanelOpen, setSidePanelOpen] = useState(() => getInitialSidePanelState('how', true));
   const [editorVersion, setEditorVersion] = useState(0);
   
   const editorRef = useRef<HTMLDivElement>(null);
@@ -203,15 +202,8 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
     }));
   }, [getCurrentData]);
 
-  // Save side panel state
-  useEffect(() => {
-    saveSidePanelState('how', sidePanelOpen);
-  }, [sidePanelOpen]);
-
-  const sidePanelContent = (
+  const helpContent = (
     <>
-      <h2>{t.howEditor.sidePanel.title}</h2>
-
       <EssentialSection note={t.howEditor.sidePanel.essentialNote}>
         <CheckboxItem
           checked={isValidThreshold && !isTooHigh}
@@ -259,15 +251,7 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
   );
 
   return (
-    <EditorLayout
-      title={t.howEditor.title}
-      sidePanelOpen={sidePanelOpen}
-      collapseLabel={t.howEditor.sidePanel.collapse}
-      expandLabel={t.howEditor.sidePanel.expand}
-      onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
-      editorId="how"
-      sidePanelContent={sidePanelContent}
-    >
+    <EditorLayout title={t.howEditor.title}>
       <div className="how-content">
         {/* Threshold Section */}
         <section className="threshold-section">
@@ -342,6 +326,10 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
           </div>
         </section>
       </div>
+
+      <HelpSection title={t.howEditor.sidePanel.title}>
+        {helpContent}
+      </HelpSection>
 
       <ActionButtons
         backLabel={t.common.back}

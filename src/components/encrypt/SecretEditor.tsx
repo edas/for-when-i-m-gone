@@ -3,11 +3,11 @@ import { getTranslations, type Language } from '../../lib/i18n';
 import { computeButtonState, getButtonText } from '../../lib/buttonState';
 import { updateStoredData } from '../../lib/dataStore';
 import { type SecretCheckboxState } from '../../lib/types/editorTypes';
-import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
 import { EditorLayout } from '../ui/EditorLayout';
 import { CheckboxItem } from '../ui/CheckboxItem';
 import { ActionButtons } from '../ui/ActionButtons';
 import { EssentialSection } from '../ui/EssentialSection';
+import { HelpSection } from '../ui/HelpSection';
 import { GenerateExampleButton } from '../ui/GenerateExampleButton';
 import { Icon } from '../ui/Icons';
 import '../../styles/form-controls.css';
@@ -23,7 +23,6 @@ interface SecretEditorProps {
 
 export function SecretEditor({ lang, initialValue, initialCheckboxState, onContinue, onBack }: SecretEditorProps) {
   const [secretText, setSecretText] = useState(initialValue ?? '');
-  const [sidePanelOpen, setSidePanelOpen] = useState(() => getInitialSidePanelState('secret', true));
 
   // Checkbox states
   const [checkEmails, setCheckEmails] = useState(initialCheckboxState?.emails ?? false);
@@ -84,15 +83,8 @@ export function SecretEditor({ lang, initialValue, initialCheckboxState, onConti
     }));
   }, [secretText, getCurrentCheckboxState]);
 
-  // Save side panel state
-  useEffect(() => {
-    saveSidePanelState('secret', sidePanelOpen);
-  }, [sidePanelOpen]);
-
-  const sidePanelContent = (
+  const helpContent = (
     <>
-      <h2>{t.secretEditor.sidePanel.title}</h2>
-
       <EssentialSection note={t.secretEditor.sidePanel.essentialNote}>
         <CheckboxItem
           checked={checkEmails}
@@ -154,15 +146,7 @@ export function SecretEditor({ lang, initialValue, initialCheckboxState, onConti
   );
 
   return (
-    <EditorLayout
-      title={t.secretEditor.title}
-      sidePanelOpen={sidePanelOpen}
-      collapseLabel={t.secretEditor.sidePanel.collapse}
-      expandLabel={t.secretEditor.sidePanel.expand}
-      onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
-      editorId="secret"
-      sidePanelContent={sidePanelContent}
-    >
+    <EditorLayout title={t.secretEditor.title}>
       <textarea
         autoComplete="off"
         className="form-textarea"
@@ -170,6 +154,10 @@ export function SecretEditor({ lang, initialValue, initialCheckboxState, onConti
         onChange={(e) => setSecretText(e.target.value)}
         placeholder={t.secretEditor.placeholder}
       />
+
+      <HelpSection title={t.secretEditor.sidePanel.title}>
+        {helpContent}
+      </HelpSection>
 
       {isEmpty ? (
         <div className="button-container">

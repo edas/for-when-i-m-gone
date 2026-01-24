@@ -21,12 +21,12 @@ import {
   computeInitialCheckboxState,
   type CheckboxSyncState,
 } from '../../lib/checkboxSync';
-import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
 import type { Recipient } from '../../lib/types/recipient';
 import { EditorLayout } from '../ui/EditorLayout';
 import { CheckboxItem } from '../ui/CheckboxItem';
 import { ActionButtons } from '../ui/ActionButtons';
 import { EssentialSection } from '../ui/EssentialSection';
+import { HelpSection } from '../ui/HelpSection';
 import { RichTextToolbar } from '../ui/RichTextToolbar';
 import '../../styles/tiptap-editor.css';
 import './IntroMessageEditor.css';
@@ -69,7 +69,6 @@ export function IntroMessageEditor({
     };
   }, []);
 
-  const [sidePanelOpen, setSidePanelOpen] = useState(() => getInitialSidePanelState('intro', true));
   const [messageJson, setMessageJson] = useState<JSONContent | null>(initialContent);
   const [editorVersion, setEditorVersion] = useState(0);
 
@@ -230,14 +229,8 @@ export function IntroMessageEditor({
     }));
   }, [messageJson, getCurrentCheckboxState]);
 
-  // Save side panel state
-  useEffect(() => {
-    saveSidePanelState('intro', sidePanelOpen);
-  }, [sidePanelOpen]);
-
-  const sidePanelContent = (
+  const helpContent = (
     <>
-      <h2>{t.introEditor.sidePanel.title}</h2>
       <p className="panel-intro">{t.introEditor.sidePanel.intro}</p>
 
       <EssentialSection note={t.introEditor.sidePanel.essentialNote}>
@@ -297,13 +290,6 @@ export function IntroMessageEditor({
     <EditorLayout
       title={t.introEditor.title}
       subtitle={t.introEditor.subtitle}
-      sidePanelOpen={sidePanelOpen}
-      collapseLabel={t.introEditor.sidePanel.collapse}
-      expandLabel={t.introEditor.sidePanel.expand}
-      wideSidePanel
-      onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
-      editorId="intro"
-      sidePanelContent={sidePanelContent}
       toolbar={
         <RichTextToolbar 
           editor={editorInstanceRef.current} 
@@ -314,6 +300,10 @@ export function IntroMessageEditor({
       }
     >
       <div className="tiptap-editor" ref={editorRef}></div>
+
+      <HelpSection title={t.introEditor.sidePanel.title}>
+        {helpContent}
+      </HelpSection>
 
       <ActionButtons
         backLabel={t.common.back}
