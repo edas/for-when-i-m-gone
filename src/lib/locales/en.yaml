@@ -8,6 +8,40 @@ steps:
   intro: Intro
   generate: Generate
 
+decryptSteps:
+  recovery: Recovery
+  decrypt: Decrypt
+
+recoveryEditor:
+  title: Token Recovery
+  subtitle: Gather the recipients' tokens to reconstruct the secret
+  placeholder: Enter the shared tokens here...
+  buttons:
+    continue: Continue
+  sidePanel:
+    title: Instructions
+    intro: >-
+      To decrypt the secret, you need to gather enough tokens 
+      from the recipients. Each person received a unique token.
+    collapse: Collapse
+    expand: Help
+
+decryptEditor:
+  title: Decryption
+  subtitle: The secret is being reconstructed
+  processing: Decrypting...
+  success: Secret decrypted successfully
+  error: Decryption error
+  buttons:
+    back: Back
+  sidePanel:
+    title: Result
+    intro: >-
+      Once all tokens are gathered, the secret will be automatically 
+      decrypted and displayed below.
+    collapse: Collapse
+    expand: Help
+
 whoEditor:
   title: Who will receive this secret?
   newRecipient: Unnamed person

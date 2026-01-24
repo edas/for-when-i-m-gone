@@ -8,9 +8,11 @@
   import HowEditor from './components/HowEditor.svelte';
   import IntroMessageEditor from './components/IntroMessageEditor.svelte';
   import GenerateEditor from './components/GenerateEditor.svelte';
+  import RecoveryEditor from './components/RecoveryEditor.svelte';
+  import DecryptEditor from './components/DecryptEditor.svelte';
   import StepIndicator from './components/ui/StepIndicator.svelte';
   import { detectLanguage, getTranslations, type Language } from './lib/i18n';
-  import { getStoredData, updateStoredData } from './lib/dataStore';
+  import { getStoredData, updateStoredData, getAppMode, type AppMode } from './lib/dataStore';
   import { 
     type SecretCheckboxState, 
     type HowData, 
@@ -27,9 +29,14 @@
   // Load initial data from stored JSON
   const storedData = getStoredData();
 
+  // Determine app mode from initial DOM data
+  const appMode: AppMode = getAppMode();
+
   let currentLang: Language = $state((storedData.language as Language) ?? detectLanguage());
   let securityConfirmed: boolean = $state(false);
   let securityChecked: boolean = $state(!!storedData.security?.confirmedAt);
+
+  // ===== Encrypt path state =====
   let secretContent: string = $state(storedData.what?.content ?? '');
   let secretCheckboxState: SecretCheckboxState = $state({
     ...defaultSecretCheckboxState,
@@ -52,6 +59,10 @@
   let aesKey: Uint8Array | undefined = $state(storedData.generate?.aesKey);
   let shares: string[] | undefined = $state(storedData.generate?.shares);
   let generateSubmitted: boolean = $state(false);
+
+  // ===== Decrypt path state =====
+  let recoverySubmitted: boolean = $state(false);
+  let decryptSubmitted: boolean = $state(false);
 
   async function scrollToTop(): Promise<void> {
     await tick();
@@ -139,6 +150,22 @@
     await scrollToTop();
   }
 
+  // ===== Decrypt path handlers =====
+  async function handleRecoveryContinue(): Promise<void> {
+    recoverySubmitted = true;
+    await scrollToTop();
+  }
+
+  async function handleRecoveryBack(): Promise<void> {
+    securityConfirmed = false;
+    await scrollToTop();
+  }
+
+  async function handleDecryptBack(): Promise<void> {
+    recoverySubmitted = false;
+    await scrollToTop();
+  }
+
   function handleLanguageChange(lang: Language): void {
     currentLang = lang;
     updateStoredData((currentData) => ({ ...currentData, language: lang }));
@@ -146,21 +173,37 @@
 
   let t = $derived(getTranslations(currentLang));
 
-  let steps = $derived([
-    { key: 'secret', label: t.steps.secret },
-    { key: 'who', label: t.steps.who },
-    { key: 'how', label: t.steps.how },
-    { key: 'intro', label: t.steps.intro },
-    { key: 'generate', label: t.steps.generate },
-  ]);
+  // Steps depend on the app mode
+  let steps = $derived(
+    appMode === 'encrypt'
+      ? [
+          { key: 'secret', label: t.steps.secret },
+          { key: 'who', label: t.steps.who },
+          { key: 'how', label: t.steps.how },
+          { key: 'intro', label: t.steps.intro },
+          { key: 'generate', label: t.steps.generate },
+        ]
+      : [
+          { key: 'recovery', label: t.decryptSteps.recovery },
+          { key: 'decrypt', label: t.decryptSteps.decrypt },
+        ]
+  );
 
+  // Current step depends on the app mode
   let currentStep = $derived.by(() => {
-    if (!secretSubmitted) return 0;
-    if (!whoSubmitted) return 1;
-    if (!howSubmitted) return 2;
-    if (!introSubmitted) return 3;
-    if (!generateSubmitted) return 4;
-    return 4; // Stay on last step when completed
+    if (appMode === 'encrypt') {
+      if (!secretSubmitted) return 0;
+      if (!whoSubmitted) return 1;
+      if (!howSubmitted) return 2;
+      if (!introSubmitted) return 3;
+      if (!generateSubmitted) return 4;
+      return 4; // Stay on last step when completed
+    } else {
+      // Decrypt mode
+      if (!recoverySubmitted) return 0;
+      if (!decryptSubmitted) return 1;
+      return 1; // Stay on last step when completed
+    }
   });
 
   // Synchronize aesKey with store when on HowEditor screen
@@ -186,57 +229,79 @@
     <StepIndicator {steps} {currentStep} />
     
     <div class="step-content">
-      {#if !secretSubmitted}
-        <SecretEditor
-          lang={currentLang}
-          initialValue={secretContent}
-          initialCheckboxState={secretCheckboxState}
-          onContinue={handleSecretContinue}
-          onBack={handleSecretBack}
-        />
-      {:else if !whoSubmitted}
-        <WhoEditor
-          lang={currentLang}
-          initialRecipients={recipients}
-          onContinue={handleWhoContinue}
-          onBack={handleWhoBack}
-        />
-      {:else if !howSubmitted}
-        <HowEditor
-          lang={currentLang}
-          recipientCount={recipients.length}
-          initialData={howData}
-          {aesKey}
-          onContinue={handleHowContinue}
-          onBack={handleHowBack}
-        />
-      {:else if !introSubmitted}
-        <IntroMessageEditor
-          lang={currentLang}
-          initialValue={introMessage}
-          initialCheckboxState={introCheckboxState}
-          threshold={howData.threshold!}
-          conditions={howData.conditions ?? null}
-          {recipients}
-          onContinue={handleIntroContinue}
-          onBack={handleIntroBack}
-        />
-      {:else if !generateSubmitted}
-        <GenerateEditor
-          lang={currentLang}
-          secret={secretContent}
-          recipients={recipients}
-          threshold={howData.threshold!}
-          {aesKey}
-          {shares}
-          onContinue={handleGenerateContinue}
-          onBack={handleGenerateBack}
-        />
+      {#if appMode === 'encrypt'}
+        <!-- Encrypt path -->
+        {#if !secretSubmitted}
+          <SecretEditor
+            lang={currentLang}
+            initialValue={secretContent}
+            initialCheckboxState={secretCheckboxState}
+            onContinue={handleSecretContinue}
+            onBack={handleSecretBack}
+          />
+        {:else if !whoSubmitted}
+          <WhoEditor
+            lang={currentLang}
+            initialRecipients={recipients}
+            onContinue={handleWhoContinue}
+            onBack={handleWhoBack}
+          />
+        {:else if !howSubmitted}
+          <HowEditor
+            lang={currentLang}
+            recipientCount={recipients.length}
+            initialData={howData}
+            {aesKey}
+            onContinue={handleHowContinue}
+            onBack={handleHowBack}
+          />
+        {:else if !introSubmitted}
+          <IntroMessageEditor
+            lang={currentLang}
+            initialValue={introMessage}
+            initialCheckboxState={introCheckboxState}
+            threshold={howData.threshold!}
+            conditions={howData.conditions ?? null}
+            {recipients}
+            onContinue={handleIntroContinue}
+            onBack={handleIntroBack}
+          />
+        {:else if !generateSubmitted}
+          <GenerateEditor
+            lang={currentLang}
+            secret={secretContent}
+            recipients={recipients}
+            threshold={howData.threshold!}
+            {aesKey}
+            {shares}
+            onContinue={handleGenerateContinue}
+            onBack={handleGenerateBack}
+          />
+        {:else}
+          <main>
+            <h1>For When I'm Gone</h1>
+            <p>Secret has been saved. Next steps will appear here.</p>
+          </main>
+        {/if}
       {:else}
-        <main>
-          <h1>For When I'm Gone</h1>
-          <p>Secret has been saved. Next steps will appear here.</p>
-        </main>
+        <!-- Decrypt path -->
+        {#if !recoverySubmitted}
+          <RecoveryEditor
+            lang={currentLang}
+            onContinue={handleRecoveryContinue}
+            onBack={handleRecoveryBack}
+          />
+        {:else if !decryptSubmitted}
+          <DecryptEditor
+            lang={currentLang}
+            onBack={handleDecryptBack}
+          />
+        {:else}
+          <main>
+            <h1>For When I'm Gone</h1>
+            <p>Secret has been decrypted.</p>
+          </main>
+        {/if}
       {/if}
     </div>
   </div>

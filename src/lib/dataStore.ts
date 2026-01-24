@@ -35,8 +35,13 @@ interface GenerateData {
   shares?: string[]; // Array of shares from ssss-js split
 }
 
+/**
+ * Application mode determined from initial DOM data
+ */
+export type AppMode = 'encrypt' | 'decrypt';
+
 export interface StoredData {
-  encrypt?: number;
+  mode?: AppMode;
   security?: SecurityData;
   what?: WhatData;
   who?: WhoData;
@@ -44,6 +49,14 @@ export interface StoredData {
   intro?: IntroData;
   generate?: GenerateData; // Can be internal (buffers) or serialized (base64)
   language?: string;
+}
+
+/**
+ * Determine the application mode from stored data
+ * @returns 'decrypt' if mode is 'decrypt', 'encrypt' otherwise (default)
+ */
+export function getAppMode(): AppMode {
+  return storedData.mode === 'decrypt' ? 'decrypt' : 'encrypt';
 }
 
 

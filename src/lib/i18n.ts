@@ -26,6 +26,10 @@ export interface Translations {
     intro: string;
     generate: string;
   };
+  decryptSteps: {
+    recovery: string;
+    decrypt: string;
+  };
   securityWarning: {
     title: string;
     subtitle: string;
@@ -255,6 +259,36 @@ export interface Translations {
       continueWithoutConfirm: string;
       continueWithoutEssentials: string;
       continue: string;
+    };
+  };
+  recoveryEditor: {
+    title: string;
+    subtitle: string;
+    placeholder: string;
+    buttons: {
+      continue: string;
+    };
+    sidePanel: {
+      title: string;
+      intro: string;
+      collapse: string;
+      expand: string;
+    };
+  };
+  decryptEditor: {
+    title: string;
+    subtitle: string;
+    processing: string;
+    success: string;
+    error: string;
+    buttons: {
+      back: string;
+    };
+    sidePanel: {
+      title: string;
+      intro: string;
+      collapse: string;
+      expand: string;
     };
   };
 }

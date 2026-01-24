@@ -8,6 +8,40 @@ steps:
   intro: Intro
   generate: Générer
 
+decryptSteps:
+  recovery: Récupération
+  decrypt: Déchiffrement
+
+recoveryEditor:
+  title: Récupération des jetons
+  subtitle: Rassemblez les jetons des destinataires pour reconstituer le secret
+  placeholder: Entrez les jetons partagés ici...
+  buttons:
+    continue: Continuer
+  sidePanel:
+    title: Instructions
+    intro: >-
+      Pour déchiffrer le secret, vous devez rassembler suffisamment de jetons 
+      provenant des destinataires. Chaque personne a reçu un jeton unique.
+    collapse: Replier
+    expand: Aide
+
+decryptEditor:
+  title: Déchiffrement
+  subtitle: Le secret est en cours de reconstitution
+  processing: Déchiffrement en cours...
+  success: Secret déchiffré avec succès
+  error: Erreur lors du déchiffrement
+  buttons:
+    back: Retour
+  sidePanel:
+    title: Résultat
+    intro: >-
+      Une fois tous les jetons rassemblés, le secret sera automatiquement 
+      déchiffré et affiché ci-dessous.
+    collapse: Replier
+    expand: Aide
+
 whoEditor:
   title: À qui destinez-vous ce secret ?
   newRecipient: Personne non-nommée
