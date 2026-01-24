@@ -167,6 +167,7 @@ function fromExportable(exportable: ExportableStoredData) : StoredData {
 
 type ExportableEncryptedDataWithPassword ={
   mode: AppMode;
+  security?: SecurityData;
   salt: string;
   iv: string;
   ciphertext: string; 
@@ -181,6 +182,7 @@ async function encryptExportableData(exportableData: ExportableStoredData, passw
   const encryptedData = await encryptBufferWithPassword(exportableBuffer, password);
   return {
     mode: 'locked',
+    security: exportableData.security,
     salt: uint8ArrayToBase64(encryptedData.salt),
     iv: uint8ArrayToBase64(encryptedData.iv),
     ciphertext: uint8ArrayToBase64(new Uint8Array(encryptedData.ciphertext)),
