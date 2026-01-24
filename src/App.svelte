@@ -10,6 +10,7 @@
   import GenerateEditor from './components/GenerateEditor.svelte';
   import RecoveryEditor from './components/RecoveryEditor.svelte';
   import DecryptEditor from './components/DecryptEditor.svelte';
+  import UnlockEditor from './components/UnlockEditor.svelte';
   import StepIndicator from './components/ui/StepIndicator.svelte';
   import { detectLanguage, getTranslations, type Language } from './lib/i18n';
   import { getStoredData, updateStoredData, getAppMode, type AppMode } from './lib/dataStore';
@@ -27,37 +28,40 @@
   };
 
   // Load initial data from stored JSON
-  const storedData = getStoredData();
+  let initialStoredData = getStoredData();
 
-  // Determine app mode from initial DOM data
-  const appMode: AppMode = getAppMode();
+  // Determine app mode from initial DOM data (can change after unlock)
+  let appMode: AppMode = $state(getAppMode());
 
-  let currentLang: Language = $state((storedData.language as Language) ?? detectLanguage());
+  let currentLang: Language = $state((initialStoredData.language as Language) ?? detectLanguage());
   let securityConfirmed: boolean = $state(false);
-  let securityChecked: boolean = $state(!!storedData.security?.confirmedAt);
+  let securityChecked: boolean = $state(!!initialStoredData.security?.confirmedAt);
+
+  // ===== Locked path state =====
+  let unlockSubmitted: boolean = $state(false);
 
   // ===== Encrypt path state =====
-  let secretContent: string = $state(storedData.what?.content ?? '');
+  let secretContent: string = $state(initialStoredData.what?.content ?? '');
   let secretCheckboxState: SecretCheckboxState = $state({
     ...defaultSecretCheckboxState,
-    ...storedData.what?.checkboxState,
+    ...initialStoredData.what?.checkboxState,
   });
   let secretSubmitted: boolean = $state(false);
-  let recipients: Recipient[] = $state(storedData.who?.recipients ?? []);
+  let recipients: Recipient[] = $state(initialStoredData.who?.recipients ?? []);
   let whoSubmitted: boolean = $state(false);
   let howData: Partial<HowData> = $state({
     ...defaultHowData,
-    ...storedData.how,
+    ...initialStoredData.how,
   });
   let howSubmitted: boolean = $state(false);
-  let introMessage: JSONContent | null = $state(storedData.intro?.message ?? null);
+  let introMessage: JSONContent | null = $state(initialStoredData.intro?.message ?? null);
   let introCheckboxState: IntroCheckboxState = $state({
     ...defaultIntroCheckboxState,
-    ...storedData.intro?.checkboxState,
+    ...initialStoredData.intro?.checkboxState,
   });
   let introSubmitted: boolean = $state(false);
-  let aesKey: Uint8Array | undefined = $state(storedData.generate?.aesKey);
-  let shares: string[] | undefined = $state(storedData.generate?.shares);
+  let aesKey: Uint8Array | undefined = $state(initialStoredData.generate?.aesKey);
+  let shares: string[] | undefined = $state(initialStoredData.generate?.shares);
   let generateSubmitted: boolean = $state(false);
 
   // ===== Decrypt path state =====
@@ -79,6 +83,46 @@
   async function handleSecurityContinue(checked: boolean): Promise<void> {
     securityChecked = checked;
     securityConfirmed = true;
+    await scrollToTop();
+  }
+
+  // ===== Locked path handlers =====
+  async function handleUnlocked(): Promise<void> {
+    // After successful unlock, reload data from store and update state
+    const newStoredData = getStoredData();
+    
+    // Update appMode to the decrypted mode
+    appMode = newStoredData.mode;
+    
+    // Reinitialize all state from the decrypted data
+    currentLang = (newStoredData.language as Language) ?? currentLang;
+    securityChecked = !!newStoredData.security?.confirmedAt;
+    
+    // Encrypt path state
+    secretContent = newStoredData.what?.content ?? '';
+    secretCheckboxState = {
+      ...defaultSecretCheckboxState,
+      ...newStoredData.what?.checkboxState,
+    };
+    recipients = newStoredData.who?.recipients ?? [];
+    howData = {
+      ...defaultHowData,
+      ...newStoredData.how,
+    };
+    introMessage = newStoredData.intro?.message ?? null;
+    introCheckboxState = {
+      ...defaultIntroCheckboxState,
+      ...newStoredData.intro?.checkboxState,
+    };
+    aesKey = newStoredData.generate?.aesKey;
+    shares = newStoredData.generate?.shares;
+    
+    unlockSubmitted = true;
+    await scrollToTop();
+  }
+
+  async function handleUnlockBack(): Promise<void> {
+    securityConfirmed = false;
     await scrollToTop();
   }
 
@@ -174,23 +218,33 @@
   let t = $derived(getTranslations(currentLang));
 
   // Steps depend on the app mode
-  let steps = $derived(
-    appMode === 'encrypt'
-      ? [
-          { key: 'secret', label: t.steps.secret },
-          { key: 'who', label: t.steps.who },
-          { key: 'how', label: t.steps.how },
-          { key: 'intro', label: t.steps.intro },
-          { key: 'generate', label: t.steps.generate },
-        ]
-      : [
-          { key: 'recovery', label: t.decryptSteps.recovery },
-          { key: 'decrypt', label: t.decryptSteps.decrypt },
-        ]
-  );
+  let steps = $derived.by(() => {
+    if (appMode === 'locked') {
+      return [
+        { key: 'unlock', label: t.lockedSteps.unlock },
+      ];
+    }
+    if (appMode === 'encrypt') {
+      return [
+        { key: 'secret', label: t.steps.secret },
+        { key: 'who', label: t.steps.who },
+        { key: 'how', label: t.steps.how },
+        { key: 'intro', label: t.steps.intro },
+        { key: 'generate', label: t.steps.generate },
+      ];
+    }
+    // decrypt mode
+    return [
+      { key: 'recovery', label: t.decryptSteps.recovery },
+      { key: 'decrypt', label: t.decryptSteps.decrypt },
+    ];
+  });
 
   // Current step depends on the app mode
   let currentStep = $derived.by(() => {
+    if (appMode === 'locked') {
+      return 0; // Single step for unlock
+    }
     if (appMode === 'encrypt') {
       if (!secretSubmitted) return 0;
       if (!whoSubmitted) return 1;
@@ -198,12 +252,11 @@
       if (!introSubmitted) return 3;
       if (!generateSubmitted) return 4;
       return 4; // Stay on last step when completed
-    } else {
-      // Decrypt mode
-      if (!recoverySubmitted) return 0;
-      if (!decryptSubmitted) return 1;
-      return 1; // Stay on last step when completed
     }
+    // Decrypt mode
+    if (!recoverySubmitted) return 0;
+    if (!decryptSubmitted) return 1;
+    return 1; // Stay on last step when completed
   });
 
   // Synchronize aesKey with store when on HowEditor screen
@@ -229,7 +282,14 @@
     <StepIndicator {steps} {currentStep} />
     
     <div class="step-content">
-      {#if appMode === 'encrypt'}
+      {#if appMode === 'locked'}
+        <!-- Locked path: password unlock -->
+        <UnlockEditor
+          lang={currentLang}
+          onUnlocked={handleUnlocked}
+          onBack={handleUnlockBack}
+        />
+      {:else if appMode === 'encrypt'}
         <!-- Encrypt path -->
         {#if !secretSubmitted}
           <SecretEditor

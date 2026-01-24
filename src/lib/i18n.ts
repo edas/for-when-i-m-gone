@@ -30,6 +30,25 @@ export interface Translations {
     recovery: string;
     decrypt: string;
   };
+  lockedSteps: {
+    unlock: string;
+  };
+  unlockEditor: {
+    title: string;
+    subtitle: string;
+    placeholder: string;
+    unlocking: string;
+    error: string;
+    buttons: {
+      unlock: string;
+    };
+    sidePanel: {
+      title: string;
+      intro: string;
+      collapse: string;
+      expand: string;
+    };
+  };
   securityWarning: {
     title: string;
     subtitle: string;

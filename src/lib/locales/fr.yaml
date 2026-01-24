@@ -12,6 +12,26 @@ decryptSteps:
   recovery: Récupération
   decrypt: Déchiffrement
 
+lockedSteps:
+  unlock: Déverrouillage
+
+unlockEditor:
+  title: Déverrouillage du document
+  subtitle: Ce document est protégé par un mot de passe
+  placeholder: Entrez le mot de passe...
+  unlocking: Déverrouillage en cours...
+  error: Mot de passe incorrect ou données corrompues
+  buttons:
+    unlock: Déverrouiller
+  sidePanel:
+    title: Document protégé
+    intro: >-
+      Ce document a été chiffré avec un mot de passe pour protéger 
+      vos données en cas de perte ou de vol du fichier. 
+      Entrez le mot de passe pour continuer.
+    collapse: Replier
+    expand: Aide
+
 recoveryEditor:
   title: Récupération des jetons
   subtitle: Rassemblez les jetons des destinataires pour reconstituer le secret

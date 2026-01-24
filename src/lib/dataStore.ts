@@ -49,26 +49,29 @@ export interface ExportableGenerateData {
  */
 export type AppMode = 'encrypt' | 'decrypt' | 'locked';
 
-export interface StoredData {
+export type StoredData = EncryptStoredData | DecryptStoredData | LockedStoredData;
+
+export type baseStoredData = {
   mode: AppMode;
   security?: SecurityData;
+  language?: string;
+}
+
+export type EncryptStoredData = baseStoredData & {
+  mode: 'encrypt';
   what?: WhatData;
   who?: WhoData;
   how?: HowData;
   intro?: IntroData;
   generate?: GenerateData; // Can be internal (buffers) or serialized (base64)
-  language?: string;
 }
 
-interface ExportableStoredData {
-  mode: AppMode;
-  security?: SecurityData;
-  what?: WhatData;
-  who?: WhoData;
-  how?: HowData;
-  intro?: IntroData;
+export type ExportableEncryptStoredData = Omit<EncryptStoredData, 'generate'> & {
   generate?: ExportableGenerateData; // Can be internal (buffers) or serialized (base64)
-  language?: string;
+}
+
+export type DecryptStoredData = baseStoredData & {
+  mode: 'decrypt';
 }
 
 /**
@@ -100,8 +103,8 @@ function readInitialDataFromDOM(): StoredData {
   }
   
   try {
-    const parsed = JSON.parse(scriptElement.textContent) as StoredData;
-    return parsed;
+    const parsed = JSON.parse(scriptElement.textContent) as ExportableStoredData;
+    return fromExportable(parsed);
   } catch (error) {
     throw new Error(`Failed to parse JSON from script element #${SCRIPT_ID}: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -142,54 +145,68 @@ export function updateStoredData(updater: (currentData: StoredData) => StoredDat
 }
 
 function toExportable(storedData: StoredData) : ExportableStoredData {
-  return {
-    ...storedData,
-    generate: storedData.generate ? {
-      ...storedData.generate,
-      aesKey: storedData.generate?.aesKey ? uint8ArrayToBase64(storedData.generate.aesKey) : undefined,
-      encryptedSecret: storedData.generate?.encryptedSecret ? uint8ArrayToBase64(storedData.generate.encryptedSecret) : undefined,
-      iv: storedData.generate?.iv ? uint8ArrayToBase64(storedData.generate.iv) : undefined,
-    } : undefined,
+  if (isEncryptData(storedData)) {
+    const exportable: ExportableEncryptStoredData = {
+      ...storedData,
+      generate: storedData.generate ? {
+        ...storedData.generate,
+        aesKey: storedData.generate?.aesKey ? uint8ArrayToBase64(storedData.generate.aesKey) : undefined,
+        encryptedSecret: storedData.generate?.encryptedSecret ? uint8ArrayToBase64(storedData.generate.encryptedSecret) : undefined,
+        iv: storedData.generate?.iv ? uint8ArrayToBase64(storedData.generate.iv) : undefined,
+      } : undefined,
+    }
+    return exportable;
+  } else if (isDecryptData(storedData)) {
+    return storedData;
+  } else if (isLockedData(storedData)) {
+    return storedData;
   }
+  throw new Error('Invalid stored data');
 }
 
 function fromExportable(exportable: ExportableStoredData) : StoredData {
-  return {
-    ...exportable,
-    generate: exportable.generate ? {
-      ...exportable.generate,
-      aesKey: exportable.generate?.aesKey ? base64ToUint8Array(exportable.generate.aesKey) : undefined,
-      encryptedSecret: exportable.generate?.encryptedSecret ? base64ToUint8Array(exportable.generate.encryptedSecret) : undefined,
-      iv: exportable.generate?.iv ? base64ToUint8Array(exportable.generate.iv) : undefined,
-    } : undefined,
-  };
+  if (isExportableEncryptData(exportable)) {
+    return {
+      ...exportable,
+      generate: exportable.generate ? {
+        ...exportable.generate,
+        aesKey: exportable.generate?.aesKey ? base64ToUint8Array(exportable.generate.aesKey) : undefined,
+        encryptedSecret: exportable.generate?.encryptedSecret ? base64ToUint8Array(exportable.generate.encryptedSecret) : undefined,
+        iv: exportable.generate?.iv ? base64ToUint8Array(exportable.generate.iv) : undefined,
+      } : undefined,
+    }
+  } else if (isExportableDecryptData(exportable)) {
+    return exportable;
+  } else if (isLockedData(exportable)) {
+    return exportable;
+  }
+  throw new Error('Invalid exportable data');
 }
 
-type ExportableEncryptedDataWithPassword ={
-  mode: AppMode;
-  security?: SecurityData;
+export type LockedStoredData = baseStoredData & {
+  mode: 'locked';
   salt: string;
   iv: string;
   ciphertext: string; 
 }
 
-type ExportedStoredData = ExportableStoredData | ExportableEncryptedDataWithPassword
+type ExportableStoredData = ExportableEncryptStoredData | DecryptStoredData | LockedStoredData;
 
-
-async function encryptExportableData(exportableData: ExportableStoredData, password: string): Promise<ExportableEncryptedDataWithPassword> {
+async function encryptExportableData(exportableData: ExportableStoredData, password: string): Promise<LockedStoredData> {
   const exportableString = JSON.stringify(exportableData);
   const exportableBuffer = textToBuffer(exportableString);
   const encryptedData = await encryptBufferWithPassword(exportableBuffer, password);
   return {
     mode: 'locked',
     security: exportableData.security,
+    language: exportableData.language,
     salt: uint8ArrayToBase64(encryptedData.salt),
     iv: uint8ArrayToBase64(encryptedData.iv),
     ciphertext: uint8ArrayToBase64(new Uint8Array(encryptedData.ciphertext)),
   };
 }
 
-async function decryptExportableData(exportableData: ExportableEncryptedDataWithPassword, password: string): Promise<ExportableStoredData> {
+export async function decryptExportableData(exportableData: LockedStoredData, password: string): Promise<ExportableStoredData> {
   const encryptedBuffer = {
     salt: base64ToUint8Array(exportableData.salt),
     iv: base64ToUint8Array(exportableData.iv),
@@ -198,4 +215,35 @@ async function decryptExportableData(exportableData: ExportableEncryptedDataWith
   const encryptedData = await decryptBufferWithPassword(encryptedBuffer, password);
   const exportableString = bufferToText(encryptedData);
   return JSON.parse(exportableString) as ExportableStoredData;
+}
+
+/**
+ * Check if the current stored data is in locked/encrypted format
+ */
+export function isLockedData(data: ExportableStoredData): data is ExportableStoredData & LockedStoredData {
+  return data.mode === 'locked';
+}
+
+export function isEncryptData(data: StoredData): data is StoredData & EncryptStoredData {
+  return data.mode === 'encrypt';
+}
+
+export function isExportableEncryptData(data: ExportableStoredData): data is ExportableStoredData & ExportableEncryptStoredData {
+  return data.mode === 'encrypt';
+}
+
+export function isDecryptData(data: StoredData): data is StoredData & DecryptStoredData {
+  return data.mode === 'decrypt';
+}
+
+export function isExportableDecryptData(data: ExportableStoredData): data is ExportableStoredData & DecryptStoredData {
+  return data.mode === 'decrypt';
+}
+
+/**
+ * Replace the stored data with decrypted data and update internal state
+ * Converts from exportable format (base64) to internal format (buffers)
+ */
+export function replaceWithDecryptedData(decryptedExportable: ExportableStoredData): void {
+  storedData = fromExportable(decryptedExportable);
 }

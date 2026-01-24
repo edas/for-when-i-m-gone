@@ -12,6 +12,26 @@ decryptSteps:
   recovery: Recovery
   decrypt: Decrypt
 
+lockedSteps:
+  unlock: Unlock
+
+unlockEditor:
+  title: Unlock Document
+  subtitle: This document is password protected
+  placeholder: Enter the password...
+  unlocking: Unlocking...
+  error: Incorrect password or corrupted data
+  buttons:
+    unlock: Unlock
+  sidePanel:
+    title: Protected Document
+    intro: >-
+      This document has been encrypted with a password to protect 
+      your data in case of loss or theft. 
+      Enter the password to continue.
+    collapse: Collapse
+    expand: Help
+
 recoveryEditor:
   title: Token Recovery
   subtitle: Gather the recipients' tokens to reconstruct the secret
