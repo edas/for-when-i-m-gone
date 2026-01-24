@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onDestroy, untrack } from 'svelte';
   import type { Editor, JSONContent } from '@tiptap/core';
-  import { getTranslations, type Language } from '../lib/i18n';
-  import { computeButtonState, getButtonText } from '../lib/buttonState';
-  import { updateStoredData } from '../lib/dataStore';
-  import { type IntroCheckboxState, defaultIntroCheckboxState } from '../lib/types/editorTypes';
-  import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
+  import { getTranslations, type Language } from '../../lib/i18n';
+  import { computeButtonState, getButtonText } from '../../lib/buttonState';
+  import { updateStoredData } from '../../lib/dataStore';
+  import { type IntroCheckboxState, defaultIntroCheckboxState } from '../../lib/types/editorTypes';
+  import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
   import { 
     RecipientsBlock, 
     ConditionsBlock, 
@@ -13,22 +13,22 @@
     QuorumInline, 
     DynamicDataExtension,
     hasNodeTypeInJSON 
-  } from '../lib/tiptap/extensions';
-  import { createTiptapEditor } from '../lib/tiptap/createEditor';
-  import { hasJsonContent } from '../lib/tiptap/utils';
-  import { generateExampleInEditor } from '../lib/tiptap/editorHelpers';
+  } from '../../lib/tiptap/extensions';
+  import { createTiptapEditor } from '../../lib/tiptap/createEditor';
+  import { hasJsonContent } from '../../lib/tiptap/utils';
+  import { generateExampleInEditor } from '../../lib/tiptap/editorHelpers';
   import {
     createCheckboxSyncState,
     syncCheckboxWithNode,
     computeInitialCheckboxState,
-  } from '../lib/checkboxSync';
-  import type { Recipient } from '../lib/types/recipient';
-  import EditorLayout from './ui/EditorLayout.svelte';
-  import CheckboxItem from './ui/CheckboxItem.svelte';
-  import ActionButtons from './ui/ActionButtons.svelte';
-  import EssentialSection from './ui/EssentialSection.svelte';
-  import RichTextToolbar from './ui/RichTextToolbar.svelte';
-  import '../styles/tiptap-editor.css';
+  } from '../../lib/checkboxSync';
+  import type { Recipient } from '../../lib/types/recipient';
+  import EditorLayout from '../ui/EditorLayout.svelte';
+  import CheckboxItem from '../ui/CheckboxItem.svelte';
+  import ActionButtons from '../ui/ActionButtons.svelte';
+  import EssentialSection from '../ui/EssentialSection.svelte';
+  import RichTextToolbar from '../ui/RichTextToolbar.svelte';
+  import '../../styles/tiptap-editor.css';
 
   interface Props {
     lang: Language;

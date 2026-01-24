@@ -1,8 +1,8 @@
 <script lang="ts">
   import { untrack, tick, onMount } from 'svelte';
-  import { getTranslations, type Language } from '../lib/i18n';
-  import { updateStoredData } from '../lib/dataStore';
-  import { computeButtonStateCustom, getButtonText, type ButtonState } from '../lib/buttonState';
+  import { getTranslations, type Language } from '../../lib/i18n';
+  import { updateStoredData } from '../../lib/dataStore';
+  import { computeButtonStateCustom, getButtonText, type ButtonState } from '../../lib/buttonState';
   import {
     handleDragStart as dndDragStart,
     handleDragEnd as dndDragEnd,
@@ -11,24 +11,24 @@
     handleDrop as dndDrop,
     isDropZoneHidden as dndIsHidden,
     type DragDropState,
-  } from '../lib/dragAndDrop';
-  import EditorLayout from './ui/EditorLayout.svelte';
-  import ActionButtons from './ui/ActionButtons.svelte';
-  import TipSection from './ui/TipSection.svelte';
-  import EssentialSection from './ui/EssentialSection.svelte';
-  import CheckboxItem from './ui/CheckboxItem.svelte';
-  import RecipientCard from './ui/RecipientCard.svelte';
-  import Icon from './ui/Icons.svelte';
-  import '../styles/form-controls.css';
-  import '../styles/who-editor.css';
+  } from '../../lib/dragAndDrop';
+  import EditorLayout from '../ui/EditorLayout.svelte';
+  import ActionButtons from '../ui/ActionButtons.svelte';
+  import TipSection from '../ui/TipSection.svelte';
+  import EssentialSection from '../ui/EssentialSection.svelte';
+  import CheckboxItem from '../ui/CheckboxItem.svelte';
+  import RecipientCard from '../ui/RecipientCard.svelte';
+  import Icon from '../ui/Icons.svelte';
+  import '../../styles/form-controls.css';
+  import '../../styles/who-editor.css';
   import {
     type ContactType,
     type ContactInfo,
     type Recipient,
     createEmptyContact,
     createEmptyRecipient,
-  } from '../lib/types/recipient';
-  import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
+  } from '../../lib/types/recipient';
+  import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
 
   interface Props {
     lang: Language;

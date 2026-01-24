@@ -1,17 +1,17 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { getTranslations, type Language } from '../lib/i18n';
-  import { computeButtonState, getButtonText } from '../lib/buttonState';
-  import { updateStoredData } from '../lib/dataStore';
-  import { type SecretCheckboxState, defaultSecretCheckboxState } from '../lib/types/editorTypes';
-  import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
-  import EditorLayout from './ui/EditorLayout.svelte';
-  import CheckboxItem from './ui/CheckboxItem.svelte';
-  import ActionButtons from './ui/ActionButtons.svelte';
-  import EssentialSection from './ui/EssentialSection.svelte';
-  import GenerateExampleButton from './ui/GenerateExampleButton.svelte';
-  import Icon from './ui/Icons.svelte';
-  import '../styles/form-controls.css';
+  import { getTranslations, type Language } from '../../lib/i18n';
+  import { computeButtonState, getButtonText } from '../../lib/buttonState';
+  import { updateStoredData } from '../../lib/dataStore';
+  import { type SecretCheckboxState, defaultSecretCheckboxState } from '../../lib/types/editorTypes';
+  import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
+  import EditorLayout from '../ui/EditorLayout.svelte';
+  import CheckboxItem from '../ui/CheckboxItem.svelte';
+  import ActionButtons from '../ui/ActionButtons.svelte';
+  import EssentialSection from '../ui/EssentialSection.svelte';
+  import GenerateExampleButton from '../ui/GenerateExampleButton.svelte';
+  import Icon from '../ui/Icons.svelte';
+  import '../../styles/form-controls.css';
 
   interface Props {
     lang: Language;

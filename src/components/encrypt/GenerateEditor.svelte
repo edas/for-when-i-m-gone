@@ -1,30 +1,24 @@
 <script lang="ts">
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/ae4b1377-63e3-4eb9-a9ff-0f51f71a7a34',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GenerateEditor.svelte:2',message:'Checking imports before untrack usage',data:{hasOnMount:true,hasUntrack:true,typeofUntrack:'function'},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-  // #endregion
   import { onMount, untrack } from 'svelte';
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/ae4b1377-63e3-4eb9-a9ff-0f51f71a7a34',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GenerateEditor.svelte:3',message:'After onMount and untrack import, checking untrack availability',data:{typeofUntrack:typeof untrack,untrackDefined:typeof untrack !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-  // #endregion
-  import { getTranslations, type Language } from '../lib/i18n';
-  import { computeButtonState, getButtonText } from '../lib/buttonState';
-  import { updateStoredData } from '../lib/dataStore';
-  import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
+  import { getTranslations, type Language } from '../../lib/i18n';
+  import { computeButtonState, getButtonText } from '../../lib/buttonState';
+  import { updateStoredData } from '../../lib/dataStore';
+  import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
   import { 
     generateAES256Key, 
     exportKeyToUint8Array,
     importKeyFromUint8Array,
     encryptBuffer, 
     textToBuffer,
-  } from '../lib/crypto/aes';
+  } from '../../lib/crypto/aes';
   import { splitBuffer } from 'ssss-js';
-  import EditorLayout from './ui/EditorLayout.svelte';
-  import ActionButtons from './ui/ActionButtons.svelte';
+  import EditorLayout from '../ui/EditorLayout.svelte';
+  import ActionButtons from '../ui/ActionButtons.svelte';
 
   interface Props {
     lang: Language;
     secret: string;
-    recipients: import('../lib/types/recipient').Recipient[];
+    recipients: import('../../lib/types/recipient').Recipient[];
     threshold: number;
     aesKey?: Uint8Array;
     shares?: string[];
@@ -43,9 +37,6 @@
   });
 
   let t = $derived(getTranslations(lang));
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/ae4b1377-63e3-4eb9-a9ff-0f51f71a7a34',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GenerateEditor.svelte:50',message:'Before untrack usage - checking if untrack is defined',data:{typeofUntrack:typeof untrack,untrackDefined:typeof untrack !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-  // #endregion
   let sidePanelOpen: boolean = $state(untrack(() => getInitialSidePanelState('generate', true)));
   let errorMessage: string | null = $state(null);
   let isReady: boolean = $state(false);
@@ -71,7 +62,7 @@
    * Numbers start from 1 if no recipient has a number, otherwise from the highest existing number + 1
    */
   async function assignRecipientNumbers(): Promise<void> {
-    type Recipient = import('../lib/types/recipient').Recipient;
+    type Recipient = import('../../lib/types/recipient').Recipient;
     
     // Find the highest existing number
     const existingNumbers = recipients
@@ -201,7 +192,7 @@
    * Gets the share (token) for a recipient based on their number
    * The token at index (number - 1) is assigned to the recipient with that number
    */
-  function getShareForRecipient(recipient: import('../lib/types/recipient').Recipient): string | undefined {
+  function getShareForRecipient(recipient: import('../../lib/types/recipient').Recipient): string | undefined {
     if (recipient.number === undefined || recipient.number < 1) {
       return undefined;
     }

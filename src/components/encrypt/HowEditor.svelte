@@ -1,24 +1,24 @@
 <script lang="ts">
   import { onDestroy, untrack } from 'svelte';
   import type { Editor, JSONContent } from '@tiptap/core';
-  import { getTranslations, type Language } from '../lib/i18n';
-  import { updateStoredData } from '../lib/dataStore';
-  import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
-  import { computeButtonStateCustom, getButtonText, type ButtonState } from '../lib/buttonState';
-  import { type HowData } from '../lib/types/editorTypes';
-  import { parseHtmlToJson } from '../lib/htmlParser';
-  import { createTiptapEditor } from '../lib/tiptap/createEditor';
-  import { hasJsonContent } from '../lib/tiptap/utils';
-  import { generateExampleInEditor } from '../lib/tiptap/editorHelpers';
-  import EditorLayout from './ui/EditorLayout.svelte';
-  import ActionButtons from './ui/ActionButtons.svelte';
-  import EssentialSection from './ui/EssentialSection.svelte';
-  import CheckboxItem from './ui/CheckboxItem.svelte';
-import TipSection from './ui/TipSection.svelte';
-import RichTextToolbar from './ui/RichTextToolbar.svelte';
-import Icon from './ui/Icons.svelte';
-  import '../styles/tiptap-editor.css';
-  import '../styles/how-editor.css';
+  import { getTranslations, type Language } from '../../lib/i18n';
+  import { updateStoredData } from '../../lib/dataStore';
+  import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
+  import { computeButtonStateCustom, getButtonText, type ButtonState } from '../../lib/buttonState';
+  import { type HowData } from '../../lib/types/editorTypes';
+  import { parseHtmlToJson } from '../../lib/htmlParser';
+  import { createTiptapEditor } from '../../lib/tiptap/createEditor';
+  import { hasJsonContent } from '../../lib/tiptap/utils';
+  import { generateExampleInEditor } from '../../lib/tiptap/editorHelpers';
+  import EditorLayout from '../ui/EditorLayout.svelte';
+  import ActionButtons from '../ui/ActionButtons.svelte';
+  import EssentialSection from '../ui/EssentialSection.svelte';
+  import CheckboxItem from '../ui/CheckboxItem.svelte';
+import TipSection from '../ui/TipSection.svelte';
+import RichTextToolbar from '../ui/RichTextToolbar.svelte';
+import Icon from '../ui/Icons.svelte';
+  import '../../styles/tiptap-editor.css';
+  import '../../styles/how-editor.css';
 
   interface Props {
     lang: Language;

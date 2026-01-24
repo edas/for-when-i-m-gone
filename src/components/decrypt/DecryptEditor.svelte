@@ -1,9 +1,9 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { getTranslations, type Language } from '../lib/i18n';
-  import { getInitialSidePanelState, saveSidePanelState } from '../lib/sidePanelState';
-  import EditorLayout from './ui/EditorLayout.svelte';
-  import ActionButtons from './ui/ActionButtons.svelte';
+  import { getTranslations, type Language } from '../../lib/i18n';
+  import { getInitialSidePanelState, saveSidePanelState } from '../../lib/sidePanelState';
+  import EditorLayout from '../ui/EditorLayout.svelte';
+  import ActionButtons from '../ui/ActionButtons.svelte';
 
   interface Props {
     lang: Language;
