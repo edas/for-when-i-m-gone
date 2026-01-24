@@ -1,0 +1,123 @@
+.generate-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  min-height: 300px;
+}
+
+.placeholder-text {
+  color: #a0aec0;
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.processing-text {
+  color: #4299e1;
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.ready-text {
+  color: #48bb78;
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 2rem 0;
+  font-weight: 600;
+}
+
+.error-text {
+  color: #f56565;
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 2rem 0;
+  font-weight: 600;
+}
+
+.ready-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.shares-section {
+  margin-top: 1rem;
+}
+
+.shares-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #2d3748;
+}
+
+.shares-intro {
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.shares-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.share-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: #f7fafc;
+}
+
+.share-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.share-recipient-name {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.share-recipient-number {
+  font-weight: 500;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.copy-button {
+  padding: 0.4rem 0.8rem;
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.copy-button:hover {
+  background-color: #3182ce;
+}
+
+.copy-button:active {
+  background-color: #2c5282;
+}
+
+.share-value {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: #1a202c;
+  background-color: white;
+  padding: 0.75rem;
+  border-radius: 4px;
+  word-break: break-all;
+  border: 1px solid #cbd5e0;
+  line-height: 1.5;
+}

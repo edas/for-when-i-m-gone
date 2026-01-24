@@ -73,6 +73,8 @@ export interface Translations {
       name: string;
       contacts: string;
       notListedPublicly: string;
+      privateInfo: string;
+      numberedInfo: string;
     };
     placeholders: {
       name: string;

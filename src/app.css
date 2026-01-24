@@ -1,35 +1,42 @@
-:root {
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-  line-height: 1.6;
-  font-weight: 400;
-
-  /* Dark theme - light text on dark background */
-  color: #e2e8f0;
-  background-color: #1a1a2e;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow-x: hidden;
-}
-
-body {
+.app-container {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
 }
 
-#app {
-  width: 100%;
-  min-height: 100vh;
+.app-container main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.app-container h1 {
+  font-size: 2.5rem;
+  color: #ffffff;
+}
+
+.app-container p {
+  color: #a0aec0;
+  max-width: 500px;
+}
+
+.app-container button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  color: #a0aec0;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.app-container button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
 }

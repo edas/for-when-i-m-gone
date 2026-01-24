@@ -1,0 +1,92 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+}
+
+.toolbar.compact {
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px 10px 0 0;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 0.5rem;
+}
+
+.toolbar.compact .toolbar-divider {
+  height: 20px;
+  margin: 0 0.25rem;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #a0aec0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toolbar.compact .toolbar-btn {
+  width: 32px;
+  height: 32px;
+}
+
+.toolbar-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.toolbar-btn:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Insert buttons have distinct styling */
+.insert-btn {
+  color: #93c5fd;
+}
+
+.insert-btn:hover:not(:disabled) {
+  background: rgba(96, 165, 250, 0.15);
+  color: #bfdbfe;
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+/* Already inserted buttons show as "done" */
+.insert-btn.already-inserted {
+  color: #93c5fd;
+  background: rgba(96, 165, 250, 0.1);
+  border-color: rgba(96, 165, 250, 0.2);
+  opacity: 1;
+}
+
+@media (max-width: 600px) {
+  .toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

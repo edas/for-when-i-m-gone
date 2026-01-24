@@ -2,8 +2,6 @@
  * Helper for syncing checkbox state with node presence in TipTap editor
  */
 
-import { untrack } from 'svelte';
-
 export interface CheckboxSyncState {
   prevValue: boolean;
 }
@@ -17,7 +15,7 @@ export function createCheckboxSyncState(initialValue: boolean): CheckboxSyncStat
 
 /**
  * Sync a checkbox with a node presence value.
- * Call this in a $effect to automatically check/uncheck when nodes are added/removed.
+ * Call this in a useEffect to automatically check/uncheck when nodes are added/removed.
  * 
  * @param currentHasNode - Current presence of the node (reactive)
  * @param state - Mutable state object to track previous value
@@ -28,7 +26,7 @@ export function syncCheckboxWithNode(
   state: CheckboxSyncState,
   setChecked: (checked: boolean) => void
 ): void {
-  const prev = untrack(() => state.prevValue);
+  const prev = state.prevValue;
   
   if (currentHasNode && !prev) {
     // Node added → check

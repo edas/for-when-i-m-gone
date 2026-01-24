@@ -1,0 +1,178 @@
+.recipient-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.recipient-card.expanded {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.recipient-card.dragging {
+  opacity: 0.5;
+}
+
+.recipient-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  cursor: pointer;
+}
+
+.recipient-header.toggle-disabled {
+  cursor: default;
+}
+
+.drag-handle {
+  color: rgba(255, 255, 255, 0.3);
+  cursor: grab;
+  padding: 0.25rem;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.recipient-summary {
+  flex: 1;
+  min-width: 0;
+}
+
+.recipient-name {
+  color: #e2e8f0;
+  font-size: 1rem;
+}
+
+.recipient-name.private {
+  font-style: italic;
+  color: #a0aec0;
+}
+
+.recipient-number {
+  color: #60a5fa;
+  font-size: 0.9rem;
+}
+
+.name-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.recipient-name-input {
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.private-info-message {
+  font-size: 0.75rem;
+  color: #a78bfa;
+  font-style: italic;
+}
+
+.recipient-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.private-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(167, 139, 250, 0.15);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 6px;
+  color: #a78bfa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.private-toggle-button:hover {
+  background: rgba(167, 139, 250, 0.25);
+  border-color: rgba(167, 139, 250, 0.5);
+}
+
+.remove-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  color: #f87171;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.remove-button:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.remove-button.large {
+  width: 32px;
+  height: 32px;
+}
+
+.expand-icon {
+  color: rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.expand-icon.rotated {
+  transform: rotate(90deg);
+}
+
+.recipient-details {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.contacts-section {
+  padding-top: 1rem;
+}
+
+.contact-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.contact-type {
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.contact-value {
+  flex: 1;
+}
+
+.add-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin-top: 0.75rem;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  color: #60a5fa;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-button:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.5);
+}

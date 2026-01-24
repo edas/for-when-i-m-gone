@@ -6,7 +6,7 @@
 import type { JSONContent } from '@tiptap/core';
 import type { SecretCheckboxState, IntroCheckboxState, HowData } from './types/editorTypes';
 import type { Recipient } from './types/recipient';
-import { base64ToUint8Array, bufferToText, decryptBufferWithPassword, encryptBufferWithPassword, exportKeyToBase64, textToBuffer } from './crypto/aes';
+import { base64ToUint8Array, bufferToText, decryptBufferWithPassword, encryptBufferWithPassword, textToBuffer } from './crypto/aes';
 import { uint8ArrayToBase64 } from './crypto/aes';
 
 interface SecurityData {
@@ -144,7 +144,7 @@ export function updateStoredData(updater: (currentData: StoredData) => StoredDat
   return result;
 }
 
-function toExportable(storedData: StoredData) : ExportableStoredData {
+export function toExportable(storedData: StoredData) : ExportableStoredData {
   if (isEncryptData(storedData)) {
     const exportable: ExportableEncryptStoredData = {
       ...storedData,
@@ -192,7 +192,7 @@ export type LockedStoredData = baseStoredData & {
 
 type ExportableStoredData = ExportableEncryptStoredData | DecryptStoredData | LockedStoredData;
 
-async function encryptExportableData(exportableData: ExportableStoredData, password: string): Promise<LockedStoredData> {
+export async function encryptExportableData(exportableData: ExportableStoredData, password: string): Promise<LockedStoredData> {
   const exportableString = JSON.stringify(exportableData);
   const exportableBuffer = textToBuffer(exportableString);
   const encryptedData = await encryptBufferWithPassword(exportableBuffer, password);
