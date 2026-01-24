@@ -6,7 +6,10 @@
   import { 
     getStoredData, 
     decryptExportableData, 
-    replaceWithDecryptedData
+    replaceWithDecryptedData,
+
+    type LockedStoredData
+
   } from '../../lib/dataStore';
   import EditorLayout from '../ui/EditorLayout.svelte';
 
@@ -43,7 +46,7 @@
       }
 
       // At this point we know storedData is LockedStoredData
-      const lockedData = storedData as import('../../lib/dataStore').LockedStoredData;
+      const lockedData = storedData as LockedStoredData;
       const decryptedData = await decryptExportableData(lockedData, password);
       replaceWithDecryptedData(decryptedData);
       onUnlocked();

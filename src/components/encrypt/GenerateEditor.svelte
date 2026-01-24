@@ -14,11 +14,12 @@
   import { splitBuffer } from 'ssss-js';
   import EditorLayout from '../ui/EditorLayout.svelte';
   import ActionButtons from '../ui/ActionButtons.svelte';
+  import type { Recipient } from '../../lib/types/recipient';
 
   interface Props {
     lang: Language;
     secret: string;
-    recipients: import('../../lib/types/recipient').Recipient[];
+    recipients: Recipient[];
     threshold: number;
     aesKey?: Uint8Array;
     shares?: string[];
@@ -62,7 +63,6 @@
    * Numbers start from 1 if no recipient has a number, otherwise from the highest existing number + 1
    */
   async function assignRecipientNumbers(): Promise<void> {
-    type Recipient = import('../../lib/types/recipient').Recipient;
     
     // Find the highest existing number
     const existingNumbers = recipients
@@ -192,7 +192,7 @@
    * Gets the share (token) for a recipient based on their number
    * The token at index (number - 1) is assigned to the recipient with that number
    */
-  function getShareForRecipient(recipient: import('../../lib/types/recipient').Recipient): string | undefined {
+  function getShareForRecipient(recipient: Recipient): string | undefined {
     if (recipient.number === undefined || recipient.number < 1) {
       return undefined;
     }
