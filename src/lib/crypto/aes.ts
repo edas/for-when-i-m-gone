@@ -27,7 +27,7 @@ export interface EncryptedData {
   /** The encrypted data */
   ciphertext: ArrayBuffer;
   /** The initialization vector used for encryption */
-  iv: Uint8Array;
+  iv: Uint8Array<ArrayBuffer>;
 }
 
 /**
@@ -49,7 +49,7 @@ export async function encryptBuffer(
     const ciphertext = await crypto.subtle.encrypt(
       {
         name: 'AES-GCM',
-        iv: iv,
+        iv,
       },
       key,
       data
@@ -80,7 +80,7 @@ export async function decryptBuffer(
     const decryptedData = await crypto.subtle.decrypt(
       {
         name: 'AES-GCM',
-        iv: new Uint8Array(encryptedData.iv),
+        iv: encryptedData.iv,
       },
       key,
       encryptedData.ciphertext
@@ -144,11 +144,11 @@ export async function exportKeyToUint8Array(key: CryptoKey): Promise<Uint8Array>
  * @returns A promise that resolves with the imported CryptoKey
  * @throws If key import fails
  */
-export async function importKeyFromUint8Array(keyBytes: Uint8Array): Promise<CryptoKey> {
+export async function importKeyFromUint8Array(keyBytes: Uint8Array<ArrayBuffer>): Promise<CryptoKey> {
   try {
     return await crypto.subtle.importKey(
       'raw',
-      keyBytes as Uint8Array<ArrayBuffer>,
+      keyBytes,
       {
         name: 'AES-GCM',
         length: 256,
@@ -179,7 +179,7 @@ export function uint8ArrayToBase64(bytes: Uint8Array): string {
  * @param base64 - The base64 string to convert
  * @returns The Uint8Array
  */
-export function base64ToUint8Array(base64: string): Uint8Array {
+export function base64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
@@ -206,4 +206,55 @@ export function arrayBufferToBase64(buffer: ArrayBuffer): string {
 export async function importKeyFromBase64(base64Key: string): Promise<CryptoKey> {
   const keyBytes = base64ToUint8Array(base64Key);
   return importKeyFromUint8Array(keyBytes);
+}
+
+
+async function getKeyFromPasswordAndSalt(password: string, salt: Uint8Array<ArrayBuffer>) {
+  const enc = new TextEncoder();
+  const keyMaterial = await window.crypto.subtle.importKey(
+    "raw",
+    enc.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits", "deriveKey"],
+  );
+  const key = await window.crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: salt,
+      iterations: 100000,
+      hash: "SHA-256",
+    },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"],
+  );
+  return key
+}
+
+
+export interface EncryptedDataWithPassword {
+  salt: Uint8Array<ArrayBuffer>;
+  iv: Uint8Array<ArrayBuffer>;
+  ciphertext: ArrayBuffer; 
+}
+
+export async function encryptBufferWithPassword(buffer: BufferSource, password: string): Promise<EncryptedDataWithPassword> {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await getKeyFromPasswordAndSalt(password, salt);
+  const encryptedData = await encryptBuffer(key, buffer);
+  return {
+    ...encryptedData,
+    salt,
+  };
+}
+
+export async function decryptBufferWithPassword(encryptedData: EncryptedDataWithPassword, password: string): Promise<ArrayBuffer> {
+  const key = await getKeyFromPasswordAndSalt(password, encryptedData.salt);
+  const decryptedData = await decryptBuffer(key, {
+    ciphertext: encryptedData.ciphertext,
+    iv: encryptedData.iv,
+  });
+  return decryptedData;
 }
