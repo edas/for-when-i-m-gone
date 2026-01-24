@@ -30,7 +30,7 @@ interface IntroData {
  */
 interface GenerateData {
   aesKey?: Uint8Array; // AES key as Uint8Array
-  encryptedSecret?: ArrayBuffer; // Encrypted secret as ArrayBuffer
+  encryptedSecret?: Uint8Array; // Encrypted secret as Uint8Array
   iv?: Uint8Array; // IV as Uint8Array
   shares?: string[]; // Array of shares from ssss-js split
 }

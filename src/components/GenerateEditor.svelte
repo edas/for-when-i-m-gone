@@ -145,7 +145,7 @@
       ...data,
       generate: {
         ...data.generate,
-        encryptedSecret: ciphertext,
+        encryptedSecret: new Uint8Array(ciphertext),
         iv: iv,
       },
     }));

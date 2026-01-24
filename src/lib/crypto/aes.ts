@@ -148,7 +148,7 @@ export async function importKeyFromUint8Array(keyBytes: Uint8Array): Promise<Cry
   try {
     return await crypto.subtle.importKey(
       'raw',
-      keyBytes.buffer,
+      keyBytes as Uint8Array<ArrayBuffer>,
       {
         name: 'AES-GCM',
         length: 256,
