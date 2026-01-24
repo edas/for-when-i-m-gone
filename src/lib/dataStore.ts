@@ -1,6 +1,6 @@
 /**
- * Module for managing JSON data storage in memory
- * The data is read from the DOM at initialization, then stored in a JavaScript object
+ * Module for managing JSON data storage in memory with Zustand
+ * The data is read from the DOM at initialization, then stored in a Zustand store
  */
 
 import type { JSONContent } from '@tiptap/core';
@@ -8,6 +8,7 @@ import type { SecretCheckboxState, IntroCheckboxState, HowData } from './types/e
 import type { Recipient } from './types/recipient';
 import { base64ToUint8Array, bufferToText, decryptBufferWithPassword, encryptBufferWithPassword, textToBuffer } from './crypto/aes';
 import { uint8ArrayToBase64 } from './crypto/aes';
+import { create } from 'zustand';
 
 interface SecurityData {
   confirmedAt?: string; // ISO datetime with timezone
@@ -79,7 +80,7 @@ export type DecryptStoredData = baseStoredData & {
  * @returns 'decrypt' if mode is 'decrypt', 'encrypt' otherwise (default)
  */
 export function getAppMode(): AppMode {
-  return storedData.mode;
+  return useDataStore.getState().storedData.mode;
 }
 
 
@@ -111,63 +112,46 @@ function readInitialDataFromDOM(): StoredData {
 }
 
 /**
- * In-memory data store, initialized from DOM at module load
+ * Zustand store interface
  */
-let storedData: StoredData = readInitialDataFromDOM();
-
-/**
- * Subscription system for reactive updates
- */
-type Listener = (data: StoredData) => void;
-const listeners = new Set<Listener>();
-
-/**
- * Subscribe to data store changes
- * @param listener Function called when data changes
- * @returns Unsubscribe function
- */
-export function subscribe(listener: Listener): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
+interface DataStore {
+  storedData: StoredData;
+  updateStoredData: (updater: (current: StoredData) => StoredData) => StoredData;
+  replaceStoredData: (newData: StoredData) => void;
 }
 
 /**
- * Notify all listeners of data change
+ * Zustand store for reactive data management
+ * Initialized from DOM at module load
  */
-function notifyListeners(data: StoredData): void {
-  listeners.forEach(listener => listener(data));
-}
+export const useDataStore = create<DataStore>((set, get) => ({
+  storedData: readInitialDataFromDOM(),
+  
+  updateStoredData: (updater) => {
+    const currentData = get().storedData;
+    const newData = updater(currentData);
+    set({ storedData: newData });
+    return newData;
+  },
+  
+  replaceStoredData: (newData) => {
+    set({ storedData: newData });
+  },
+}));
 
 /**
- * Read the current stored data from memory
+ * Read the current stored data from memory (non-reactive)
  */
 export function getStoredData(): StoredData {
-  return storedData;
+  return useDataStore.getState().storedData;
 }
 
 /**
- * Mutex for serializing updateStoredData calls
- * Resolves to the last written data
- */
-let updateMutex = Promise.resolve(storedData);
-
-/**
- * Update the stored data in memory
- * Uses mutex to ensure only one update runs at a time
+ * Update the stored data (non-reactive, for use outside React)
  * @param updater Function that receives current data and returns the complete new data
  */
-export function updateStoredData(updater: (currentData: StoredData) => StoredData): Promise<StoredData> {
-  const result = updateMutex.then((currentData): StoredData => {
-    const newData = updater(currentData);
-    storedData = newData;
-    notifyListeners(newData);
-    return newData;
-  });
-  
-  updateMutex = result;
-  return result;
+export function updateStoredData(updater: (currentData: StoredData) => StoredData): StoredData {
+  return useDataStore.getState().updateStoredData(updater);
 }
 
 export function toExportable(storedData: StoredData) : ExportableStoredData {
@@ -271,6 +255,6 @@ export function isExportableDecryptData(data: ExportableStoredData): data is Exp
  * Converts from exportable format (base64) to internal format (buffers)
  */
 export function replaceWithDecryptedData(decryptedExportable: ExportableStoredData): void {
-  storedData = fromExportable(decryptedExportable);
-  notifyListeners(storedData);
+  const newData = fromExportable(decryptedExportable);
+  useDataStore.getState().replaceStoredData(newData);
 }

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../../lib/DataContext';
+import { useDataStore } from '../../lib/dataStore';
 import { computeButtonStateCustom, getButtonText } from '../../lib/buttonState';
 import {
   handleDragStart as dndDragStart,
@@ -35,7 +35,7 @@ interface WhoEditorProps {
 }
 
 export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorProps) {
-  const { updateStoredData } = useData();
+  const updateStoredData = useDataStore((state) => state.updateStoredData);
   const { t } = useTranslation();
   
   const getInitialExpandedId = (recipients: Recipient[]): string | null => {

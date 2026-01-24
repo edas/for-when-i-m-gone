@@ -1,8 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import type { JSONContent } from '@tiptap/core';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../../lib/DataContext';
-import { isEncryptData } from '../../lib/dataStore';
+import { useDataStore, isEncryptData } from '../../lib/dataStore';
 import { 
   type SecretCheckboxState, 
   type HowData, 
@@ -29,7 +28,7 @@ const defaultHowData: Partial<HowData> = {
 };
 
 export function Encrypt({ onBack }: EncryptProps) {
-  const { storedData } = useData();
+  const storedData = useDataStore((state) => state.storedData);
   const { t } = useTranslation();
   
   // Type guard to ensure we have encrypt data

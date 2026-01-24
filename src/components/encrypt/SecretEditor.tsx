@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { computeButtonState, getButtonText } from '../../lib/buttonState';
-import { useData } from '../../lib/DataContext';
+import { useDataStore } from '../../lib/dataStore';
 import { type SecretCheckboxState } from '../../lib/types/editorTypes';
 import { EditorLayout } from '../ui/EditorLayout';
 import { CheckboxItem } from '../ui/CheckboxItem';
@@ -21,7 +21,7 @@ interface SecretEditorProps {
 }
 
 export function SecretEditor({ initialValue, initialCheckboxState, onContinue, onBack }: SecretEditorProps) {
-  const { updateStoredData } = useData();
+  const updateStoredData = useDataStore((state) => state.updateStoredData);
   const { t } = useTranslation();
   const [secretText, setSecretText] = useState(initialValue ?? '');
 

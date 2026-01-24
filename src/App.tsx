@@ -4,12 +4,11 @@ import { SecurityWarning } from './components/SecurityWarning';
 import { Locked } from './components/locked/Locked';
 import { Encrypt } from './components/encrypt/Encrypt';
 import { detectLanguage, type Language } from './lib/i18n';
-import { useData } from './lib/DataContext';
-import { type AppMode } from './lib/dataStore';
+import { useDataStore, type AppMode } from './lib/dataStore';
 import styles from './App.module.css';
 
 export function App() {
-  const { storedData } = useData();
+  const storedData = useDataStore((state) => state.storedData);
   const { i18n } = useTranslation();
 
   // Determine app mode from stored data (reactive)

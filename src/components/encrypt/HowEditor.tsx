@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { Editor, JSONContent } from '@tiptap/core';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../../lib/DataContext';
+import { useDataStore } from '../../lib/dataStore';
 import { computeButtonStateCustom, getButtonText } from '../../lib/buttonState';
 import { type HowData } from '../../lib/types/editorTypes';
 import { parseHtmlToJson } from '../../lib/htmlParser';
@@ -34,7 +34,7 @@ function getDefaultThreshold(count: number): number {
 }
 
 export function HowEditor({ recipientCount, initialData, aesKey, onContinue, onBack }: HowEditorProps) {
-  const { updateStoredData } = useData();
+  const updateStoredData = useDataStore((state) => state.updateStoredData);
   const { t } = useTranslation();
 
   const getDefaultConditions = useCallback((): JSONContent => {

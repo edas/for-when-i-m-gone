@@ -1,8 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { computeButtonState, getButtonText } from '../../lib/buttonState';
-import { useData } from '../../lib/DataContext';
-import { type EncryptStoredData } from '../../lib/dataStore';
+import { useDataStore, type EncryptStoredData } from '../../lib/dataStore';
 import { 
   generateAES256Key, 
   exportKeyToUint8Array,
@@ -36,7 +35,7 @@ export function GenerateEditor({
   onContinue, 
   onBack 
 }: GenerateEditorProps) {
-  const { updateStoredData } = useData();
+  const updateStoredData = useDataStore((state) => state.updateStoredData);
   const { t } = useTranslation();
   
   const [recipients, setRecipients] = useState<Recipient[]>([]);

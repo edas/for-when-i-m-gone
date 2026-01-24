@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { Editor, JSONContent } from '@tiptap/core';
 import { useTranslation } from 'react-i18next';
 import { computeButtonState, getButtonText } from '../../lib/buttonState';
-import { useData } from '../../lib/DataContext';
+import { useDataStore } from '../../lib/dataStore';
 import { type IntroCheckboxState } from '../../lib/types/editorTypes';
 import { 
   RecipientsBlock, 
@@ -50,7 +50,7 @@ export function IntroMessageEditor({
   onContinue, 
   onBack 
 }: IntroMessageEditorProps) {
-  const { updateStoredData } = useData();
+  const updateStoredData = useDataStore((state) => state.updateStoredData);
   const { t, i18n } = useTranslation();
 
   // Get initial content - empty by default

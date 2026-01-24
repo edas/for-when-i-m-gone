@@ -1,7 +1,7 @@
 import { useState, useCallback, KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../../lib/DataContext';
 import { 
+  useDataStore,
   decryptExportableData, 
   replaceWithDecryptedData,
   type LockedStoredData
@@ -16,7 +16,7 @@ interface UnlockEditorProps {
 }
 
 export function UnlockEditor({ onUnlocked, onBack }: UnlockEditorProps) {
-  const { storedData } = useData();
+  const storedData = useDataStore((state) => state.storedData);
   const { t } = useTranslation();
 
   const [password, setPassword] = useState('');
