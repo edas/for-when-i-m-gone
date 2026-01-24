@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { getTranslations, type Language } from '../../lib/i18n';
-import { updateStoredData } from '../../lib/dataStore';
+import { useTranslation } from 'react-i18next';
+import { useData } from '../../lib/DataContext';
 import { computeButtonStateCustom, getButtonText } from '../../lib/buttonState';
 import {
   handleDragStart as dndDragStart,
@@ -29,13 +29,15 @@ import {
 } from '../../lib/types/recipient';
 
 interface WhoEditorProps {
-  lang: Language;
   initialRecipients?: Recipient[];
   onContinue: (recipients: Recipient[]) => void;
   onBack: (recipients: Recipient[]) => void;
 }
 
-export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEditorProps) {
+export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorProps) {
+  const { updateStoredData } = useData();
+  const { t } = useTranslation();
+  
   const getInitialExpandedId = (recipients: Recipient[]): string | null => {
     const unnamedRecipient = recipients.find(r => !r.name.trim());
     if (unnamedRecipient) return unnamedRecipient.id;
@@ -67,8 +69,6 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
   
   const recipientCardRefs = useRef<Record<string, HTMLDivElement>>({});
 
-  const t = useMemo(() => getTranslations(lang), [lang]);
-
   // Derived states
   const hasAtLeast2 = useMemo(() => recipients.length >= 2, [recipients]);
   const hasAtLeast3 = useMemo(() => recipients.length >= 3, [recipients]);
@@ -96,10 +96,11 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
   , [expandedRecipientId, recipients]);
 
   const buttonState = useMemo(() => computeButtonStateCustom(hasAtLeast2, allEssentialsChecked), [hasAtLeast2, allEssentialsChecked]);
-  const buttonText = useMemo(() => getButtonText(buttonState, {
-    continueWithoutEssentials: t.whoEditor.buttons.continueWithoutEssentials,
-    continue: t.whoEditor.buttons.continue,
-  }), [buttonState, t]);
+  const buttonTexts = useMemo(() => ({
+    continueWithoutEssentials: t('whoEditor.buttons.continueWithoutEssentials'),
+    continue: t('whoEditor.buttons.continue'),
+  }), [t]);
+  const buttonText = useMemo(() => getButtonText(buttonState, buttonTexts), [buttonState, buttonTexts]);
 
   const CONTACT_TYPES: ContactType[] = [
     'phone', 'email', 'address', 'x', 'bluesky', 'mastodon',
@@ -107,7 +108,7 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
     'instagram', 'snapchat', 'linkedin', 'web', 'other',
   ];
   const contactTypeOptions = useMemo(() => 
-    CONTACT_TYPES.map((type) => ({ value: type, label: t.whoEditor.contactTypes[type] }))
+    CONTACT_TYPES.map((type) => ({ value: type, label: t(`whoEditor.contactTypes.${type}`) }))
   , [t]);
 
   // Recipient management
@@ -221,7 +222,7 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
       ...currentData,
       who: { recipients }
     }));
-  }, [recipients]);
+  }, [recipients, updateStoredData]);
 
   // Auto focus on first visit
   useEffect(() => {
@@ -239,47 +240,66 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
 
   const helpContent = (
     <>
-      <p className="panel-intro">{t.whoEditor.sidePanel.intro}</p>
+      <p className="panel-intro">{t('whoEditor.sidePanel.intro')}</p>
       
       <div className="recipient-count">
         <span className="count-number">{recipients.length}</span>
         <div className="count-details">
-          <span className="count-label">{t.whoEditor.sidePanel.recipientCount}</span>
+          <span className="count-label">{t('whoEditor.sidePanel.recipientCount')}</span>
           {unnamedCount > 0 && (
             <span className="count-warnings">
-              {(unnamedCount > 1 ? t.whoEditor.sidePanel.warnings.unnamedPlural : t.whoEditor.sidePanel.warnings.unnamed)
-                .replace('{count}', String(unnamedCount))}
+              {t(unnamedCount > 1 ? 'whoEditor.sidePanel.warnings.unnamedPlural' : 'whoEditor.sidePanel.warnings.unnamed', { count: unnamedCount })}
             </span>
           )}
           {noContactsCount > 0 && (
             <span className="count-warnings">
-              {(unnamedCount > 0 ? t.whoEditor.sidePanel.warnings.noContactsAnd : t.whoEditor.sidePanel.warnings.noContacts)
-                .replace('{count}', String(noContactsCount))}
+              {t(unnamedCount > 0 ? 'whoEditor.sidePanel.warnings.noContactsAnd' : 'whoEditor.sidePanel.warnings.noContacts', { count: noContactsCount })}
             </span>
           )}
         </div>
       </div>
 
-      <EssentialSection note={t.whoEditor.sidePanel.essentialNote}>
-        <CheckboxItem checked={hasAtLeast3} label={t.whoEditor.sidePanel.checklist.atLeast3} readonly />
-        <CheckboxItem checked={allNamed} label={t.whoEditor.sidePanel.checklist.allNamed} readonly />
-        <CheckboxItem checked={allHaveContact} label={t.whoEditor.sidePanel.checklist.allHaveContact} readonly />
+      <EssentialSection note={t('whoEditor.sidePanel.essentialNote')}>
+        <CheckboxItem checked={hasAtLeast3} label={t('whoEditor.sidePanel.checklist.atLeast3')} readonly />
+        <CheckboxItem checked={allNamed} label={t('whoEditor.sidePanel.checklist.allNamed')} readonly />
+        <CheckboxItem checked={allHaveContact} label={t('whoEditor.sidePanel.checklist.allHaveContact')} readonly />
       </EssentialSection>
 
       <div className="optional-section">
-        <CheckboxItem checked={hasAtLeast5} label={t.whoEditor.sidePanel.checklist.atLeast5} readonly />
-        <CheckboxItem checked={allHaveAddress} label={t.whoEditor.sidePanel.checklist.allHaveAddress} readonly />
-        <CheckboxItem checked={allHaveEmail} label={t.whoEditor.sidePanel.checklist.allHaveEmail} readonly />
-        <CheckboxItem checked={allHavePhone} label={t.whoEditor.sidePanel.checklist.allHavePhone} readonly />
+        <CheckboxItem checked={hasAtLeast5} label={t('whoEditor.sidePanel.checklist.atLeast5')} readonly />
+        <CheckboxItem checked={allHaveAddress} label={t('whoEditor.sidePanel.checklist.allHaveAddress')} readonly />
+        <CheckboxItem checked={allHaveEmail} label={t('whoEditor.sidePanel.checklist.allHaveEmail')} readonly />
+        <CheckboxItem checked={allHavePhone} label={t('whoEditor.sidePanel.checklist.allHavePhone')} readonly />
       </div>
 
-      <TipSection text={t.whoEditor.sidePanel.tip} />
-      <TipSection text={t.whoEditor.sidePanel.tip2} />
+      <TipSection text={t('whoEditor.sidePanel.tip')} />
+      <TipSection text={t('whoEditor.sidePanel.tip2')} />
     </>
   );
 
+  // Create translations object for RecipientCard
+  const recipientCardTranslations = useMemo(() => ({
+    newRecipient: t('whoEditor.newRecipient'),
+    addRecipient: t('whoEditor.addRecipient'),
+    removeRecipient: t('whoEditor.removeRecipient'),
+    addContact: t('whoEditor.addContact'),
+    removeContact: t('whoEditor.removeContact'),
+    fields: {
+      name: t('whoEditor.fields.name'),
+      contacts: t('whoEditor.fields.contacts'),
+      notListedPublicly: t('whoEditor.fields.notListedPublicly'),
+      privateInfo: t('whoEditor.fields.privateInfo'),
+      numberedInfo: t('whoEditor.fields.numberedInfo'),
+    },
+    placeholders: {
+      name: t('whoEditor.placeholders.name'),
+      contactValue: t('whoEditor.placeholders.contactValue'),
+      contactComment: t('whoEditor.placeholders.contactComment'),
+    },
+  }), [t]);
+
   return (
-    <EditorLayout title={t.whoEditor.title}>
+    <EditorLayout title={t('whoEditor.title')}>
       <div className="content-wrapper">
         <div className="recipients-list" role="list">
           {recipients.map((recipient, index) => (
@@ -300,7 +320,7 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
                   expanded={expandedRecipientId === recipient.id}
                   dragging={dragState.draggedItemId === recipient.id}
                   contactTypeOptions={contactTypeOptions}
-                  translations={t.whoEditor}
+                  translations={recipientCardTranslations}
                   autoFocus={autoFocusRecipientId === recipient.id}
                   toggleDisabled={expandedRecipientId !== null && !expandedRecipientHasName}
                   onToggle={() => toggleExpanded(recipient.id)}
@@ -332,16 +352,16 @@ export function WhoEditor({ lang, initialRecipients, onContinue, onBack }: WhoEd
             disabled={expandedRecipientId !== null && !expandedRecipientHasName}
           >
             <Icon name="plus" size={20} />
-            {t.whoEditor.addRecipient}
+            {t('whoEditor.addRecipient')}
           </button>
         </div>
 
-        <HelpSection title={t.whoEditor.sidePanel.title}>
+        <HelpSection title={t('whoEditor.sidePanel.title')}>
           {helpContent}
         </HelpSection>
 
         <ActionButtons
-          backLabel={t.common.back}
+          backLabel={t('common.back')}
           continueLabel={buttonText}
           buttonState={buttonState}
           disabled={!hasAtLeast2 || (expandedRecipientId !== null && !expandedRecipientHasName)}

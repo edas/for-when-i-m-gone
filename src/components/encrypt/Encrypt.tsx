@@ -1,7 +1,8 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import type { JSONContent } from '@tiptap/core';
-import { getTranslations, type Language } from '../../lib/i18n';
-import { getStoredData, type EncryptStoredData } from '../../lib/dataStore';
+import { useTranslation } from 'react-i18next';
+import { useData } from '../../lib/DataContext';
+import { isEncryptData } from '../../lib/dataStore';
 import { 
   type SecretCheckboxState, 
   type HowData, 
@@ -19,9 +20,7 @@ import { StepIndicator } from '../ui/StepIndicator';
 import './Encrypt.css';
 
 interface EncryptProps {
-  lang: Language;
   onBack: () => void;
-  onLanguageChange: (lang: Language) => void;
 }
 
 const defaultHowData: Partial<HowData> = {
@@ -29,43 +28,47 @@ const defaultHowData: Partial<HowData> = {
   hasNoOpenConditions: false,
 };
 
-export function Encrypt({ lang, onBack }: EncryptProps) {
-  // Load initial data from stored JSON
-  const initialStoredData = useMemo(() => getStoredData() as EncryptStoredData, []);
+export function Encrypt({ onBack }: EncryptProps) {
+  const { storedData } = useData();
+  const { t } = useTranslation();
+  
+  // Type guard to ensure we have encrypt data
+  const encryptData = isEncryptData(storedData) ? storedData : null;
+  if (!encryptData) {
+    throw new Error('Encrypt component requires encrypt mode data');
+  }
 
-  // Encrypt path state
-  const [secretContent, setSecretContent] = useState(initialStoredData.what?.content ?? '');
-  const [secretCheckboxState, setSecretCheckboxState] = useState<SecretCheckboxState>({
+  // Encrypt path state - initialized from context
+  const [secretContent, setSecretContent] = useState(() => encryptData.what?.content ?? '');
+  const [secretCheckboxState, setSecretCheckboxState] = useState<SecretCheckboxState>(() => ({
     ...defaultSecretCheckboxState,
-    ...initialStoredData.what?.checkboxState,
-  });
+    ...encryptData.what?.checkboxState,
+  }));
   const [secretSubmitted, setSecretSubmitted] = useState(false);
-  const [recipients, setRecipients] = useState<Recipient[]>(initialStoredData.who?.recipients ?? []);
+  const [recipients, setRecipients] = useState<Recipient[]>(() => encryptData.who?.recipients ?? []);
   const [whoSubmitted, setWhoSubmitted] = useState(false);
-  const [howData, setHowData] = useState<Partial<HowData>>({
+  const [howData, setHowData] = useState<Partial<HowData>>(() => ({
     ...defaultHowData,
-    ...initialStoredData.how,
-  });
+    ...encryptData.how,
+  }));
   const [howSubmitted, setHowSubmitted] = useState(false);
-  const [introMessage, setIntroMessage] = useState<JSONContent | null>(initialStoredData.intro?.message ?? null);
-  const [introCheckboxState, setIntroCheckboxState] = useState<IntroCheckboxState>({
+  const [introMessage, setIntroMessage] = useState<JSONContent | null>(() => encryptData.intro?.message ?? null);
+  const [introCheckboxState, setIntroCheckboxState] = useState<IntroCheckboxState>(() => ({
     ...defaultIntroCheckboxState,
-    ...initialStoredData.intro?.checkboxState,
-  });
+    ...encryptData.intro?.checkboxState,
+  }));
   const [introSubmitted, setIntroSubmitted] = useState(false);
-  const [aesKey, setAesKey] = useState<Uint8Array | undefined>(initialStoredData.generate?.aesKey);
-  const [shares] = useState<string[] | undefined>(initialStoredData.generate?.shares);
+  const [aesKey, setAesKey] = useState<Uint8Array | undefined>(() => encryptData.generate?.aesKey);
+  const [shares] = useState<string[] | undefined>(() => encryptData.generate?.shares);
   const [generateSubmitted, setGenerateSubmitted] = useState(false);
-
-  const t = useMemo(() => getTranslations(lang), [lang]);
 
   // Steps for encrypt mode
   const steps = useMemo(() => [
-    { key: 'secret', label: t.steps.secret },
-    { key: 'who', label: t.steps.who },
-    { key: 'how', label: t.steps.how },
-    { key: 'intro', label: t.steps.intro },
-    { key: 'generate', label: t.steps.generate },
+    { key: 'secret', label: t('steps.secret') },
+    { key: 'who', label: t('steps.who') },
+    { key: 'how', label: t('steps.how') },
+    { key: 'intro', label: t('steps.intro') },
+    { key: 'generate', label: t('steps.generate') },
   ], [t]);
 
   // Current step based on submitted state
@@ -151,25 +154,18 @@ export function Encrypt({ lang, onBack }: EncryptProps) {
   }, [scrollToTop]);
 
   const handleGenerateBack = useCallback(() => {
-    const storedData = getStoredData() as EncryptStoredData;
     // Synchronize recipients with store to get updated numbers
-    if (storedData.who?.recipients) {
-      setRecipients(storedData.who.recipients);
+    if (encryptData.who?.recipients) {
+      setRecipients(encryptData.who.recipients);
+    }
+    // Synchronize aesKey with store
+    if (encryptData.generate?.aesKey instanceof Uint8Array) {
+      setAesKey(encryptData.generate.aesKey);
     }
     setGenerateSubmitted(false);
     setIntroSubmitted(false);
     scrollToTop();
-  }, [scrollToTop]);
-
-  // Synchronize aesKey with store when on HowEditor screen
-  useEffect(() => {
-    if (!howSubmitted && secretSubmitted && whoSubmitted) {
-      const storedData = getStoredData() as EncryptStoredData;
-      if (storedData.generate?.aesKey instanceof Uint8Array) {
-        setAesKey(storedData.generate.aesKey);
-      }
-    }
-  }, [howSubmitted, secretSubmitted, whoSubmitted]);
+  }, [scrollToTop, encryptData]);
 
   return (
     <div className="app-container">
@@ -178,7 +174,6 @@ export function Encrypt({ lang, onBack }: EncryptProps) {
       <div className="step-content">
         {!secretSubmitted ? (
           <SecretEditor
-            lang={lang}
             initialValue={secretContent}
             initialCheckboxState={secretCheckboxState}
             onContinue={handleSecretContinue}
@@ -186,14 +181,12 @@ export function Encrypt({ lang, onBack }: EncryptProps) {
           />
         ) : !whoSubmitted ? (
           <WhoEditor
-            lang={lang}
             initialRecipients={recipients}
             onContinue={handleWhoContinue}
             onBack={handleWhoBack}
           />
         ) : !howSubmitted ? (
           <HowEditor
-            lang={lang}
             recipientCount={recipients.length}
             initialData={howData}
             aesKey={aesKey}
@@ -202,7 +195,6 @@ export function Encrypt({ lang, onBack }: EncryptProps) {
           />
         ) : !introSubmitted ? (
           <IntroMessageEditor
-            lang={lang}
             initialValue={introMessage}
             initialCheckboxState={introCheckboxState}
             threshold={howData.threshold!}
@@ -213,7 +205,6 @@ export function Encrypt({ lang, onBack }: EncryptProps) {
           />
         ) : !generateSubmitted ? (
           <GenerateEditor
-            lang={lang}
             secret={secretContent}
             recipients={recipients}
             threshold={howData.threshold!}

@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { Editor, JSONContent } from '@tiptap/core';
-import { getTranslations, type Language } from '../../lib/i18n';
+import { useTranslation } from 'react-i18next';
 import { computeButtonState, getButtonText } from '../../lib/buttonState';
-import { updateStoredData } from '../../lib/dataStore';
+import { useData } from '../../lib/DataContext';
 import { type IntroCheckboxState } from '../../lib/types/editorTypes';
 import { 
   RecipientsBlock, 
@@ -32,7 +32,6 @@ import '../../styles/tiptap-editor.css';
 import './IntroMessageEditor.css';
 
 interface IntroMessageEditorProps {
-  lang: Language;
   initialValue?: JSONContent | null;
   initialCheckboxState?: IntroCheckboxState;
   threshold: number;
@@ -43,7 +42,6 @@ interface IntroMessageEditorProps {
 }
 
 export function IntroMessageEditor({ 
-  lang, 
   initialValue, 
   initialCheckboxState, 
   threshold, 
@@ -52,7 +50,8 @@ export function IntroMessageEditor({
   onContinue, 
   onBack 
 }: IntroMessageEditorProps) {
-  const t = useMemo(() => getTranslations(lang), [lang]);
+  const { updateStoredData } = useData();
+  const { t, i18n } = useTranslation();
 
   // Get initial content - empty by default
   const initialContent = initialValue ?? null;
@@ -132,7 +131,12 @@ export function IntroMessageEditor({
   );
 
   const buttonState = useMemo(() => computeButtonState(hasContent, anyChecked, allEssentialsChecked), [hasContent, anyChecked, allEssentialsChecked]);
-  const buttonText = useMemo(() => getButtonText(buttonState, t.introEditor.buttons), [buttonState, t]);
+  const buttonTexts = useMemo(() => ({
+    continueWithoutConfirm: t('introEditor.buttons.continueWithoutConfirm'),
+    continueWithoutEssentials: t('introEditor.buttons.continueWithoutEssentials'),
+    continue: t('introEditor.buttons.continue'),
+  }), [t]);
+  const buttonText = useMemo(() => getButtonText(buttonState, buttonTexts), [buttonState, buttonTexts]);
 
   const getCurrentCheckboxState = useCallback((): IntroCheckboxState => ({
     authorIdentity: checkAuthorIdentity,
@@ -158,13 +162,34 @@ export function IntroMessageEditor({
   const generateExample = useCallback(() => {
     const editor = editorInstanceRef.current;
     if (!editor) return;
-    const exampleContent = t.introEditor.sidePanel.exampleContentJson;
+    // Get example content from i18next resources
+    const exampleContent = t('introEditor.sidePanel.exampleContentJson', { returnObjects: true }) as JSONContent;
 
     generateExampleInEditor(editor, exampleContent, hasContent);
     
     setMessageJson(editor.getJSON());
     setEditorVersion(v => v + 1);
   }, [t, hasContent]);
+
+  const contactTypeLabels = useMemo(() => {
+    return {
+      phone: t('whoEditor.contactTypes.phone'),
+      email: t('whoEditor.contactTypes.email'),
+      address: t('whoEditor.contactTypes.address'),
+      x: t('whoEditor.contactTypes.x'),
+      bluesky: t('whoEditor.contactTypes.bluesky'),
+      mastodon: t('whoEditor.contactTypes.mastodon'),
+      facebook: t('whoEditor.contactTypes.facebook'),
+      telegram: t('whoEditor.contactTypes.telegram'),
+      whatsapp: t('whoEditor.contactTypes.whatsapp'),
+      signal: t('whoEditor.contactTypes.signal'),
+      instagram: t('whoEditor.contactTypes.instagram'),
+      snapchat: t('whoEditor.contactTypes.snapchat'),
+      linkedin: t('whoEditor.contactTypes.linkedin'),
+      web: t('whoEditor.contactTypes.web'),
+      other: t('whoEditor.contactTypes.other'),
+    };
+  }, [t]);
 
   /**
    * Update dynamic data via TipTap command (triggers NodeView updates)
@@ -176,10 +201,24 @@ export function IntroMessageEditor({
       recipients: recipients ?? [],
       conditions: conditions ?? null,
       threshold,
-      lang,
-      contactTypeLabels: t.whoEditor.contactTypes,
+      lang: i18n.language as 'fr' | 'en',
+      contactTypeLabels,
     });
-  }, [recipients, conditions, threshold, lang, t]);
+  }, [recipients, conditions, threshold, i18n.language, contactTypeLabels]);
+
+  const toolbarLabels = useMemo(() => ({
+    heading: t('introEditor.toolbar.heading'),
+    paragraph: t('introEditor.toolbar.paragraph'),
+    bold: t('introEditor.toolbar.bold'),
+    italic: t('introEditor.toolbar.italic'),
+    underline: t('introEditor.toolbar.underline'),
+    bulletList: t('introEditor.toolbar.bulletList'),
+    numberedList: t('introEditor.toolbar.numberedList'),
+    insertRecipients: t('introEditor.toolbar.insertRecipients'),
+    insertConditions: t('introEditor.toolbar.insertConditions'),
+    insertDateTime: t('introEditor.toolbar.insertDateTime'),
+    insertQuorum: t('introEditor.toolbar.insertQuorum'),
+  }), [t]);
 
   // Initialize TipTap editor
   useEffect(() => {
@@ -187,7 +226,7 @@ export function IntroMessageEditor({
       const newEditor = createTiptapEditor({
         element: editorRef.current,
         content: initialContent,
-        placeholder: t.introEditor.placeholder,
+        placeholder: t('introEditor.placeholder'),
         contentClass: 'tiptap-content',
         enableHeadings: true,
         extensions: [
@@ -214,7 +253,7 @@ export function IntroMessageEditor({
       editorInstanceRef.current?.destroy();
       editorInstanceRef.current = null;
     };
-  }, [t.introEditor.placeholder]);
+  }, [t]);
 
   // Update dynamic content when props change
   useEffect(() => {
@@ -227,50 +266,50 @@ export function IntroMessageEditor({
       ...currentData,
       intro: { message: messageJson, checkboxState: getCurrentCheckboxState() }
     }));
-  }, [messageJson, getCurrentCheckboxState]);
+  }, [messageJson, getCurrentCheckboxState, updateStoredData]);
 
   const helpContent = (
     <>
-      <p className="panel-intro">{t.introEditor.sidePanel.intro}</p>
+      <p className="panel-intro">{t('introEditor.sidePanel.intro')}</p>
 
-      <EssentialSection note={t.introEditor.sidePanel.essentialNote}>
+      <EssentialSection note={t('introEditor.sidePanel.essentialNote')}>
         <CheckboxItem
           checked={checkDated}
           onChange={setCheckDated}
-          label={t.introEditor.sidePanel.checkboxes.dated.title}
-          description={t.introEditor.sidePanel.checkboxes.dated.description}
+          label={t('introEditor.sidePanel.checkboxes.dated.title')}
+          description={t('introEditor.sidePanel.checkboxes.dated.description')}
           essential
           readonly={hasDateTimeInline}
         />
         <CheckboxItem
           checked={checkQuorum}
           onChange={setCheckQuorum}
-          label={t.introEditor.sidePanel.checkboxes.quorum.title}
-          description={t.introEditor.sidePanel.checkboxes.quorum.description}
+          label={t('introEditor.sidePanel.checkboxes.quorum.title')}
+          description={t('introEditor.sidePanel.checkboxes.quorum.description')}
           essential
           readonly={hasQuorumInline}
         />
         <CheckboxItem
           checked={checkOpeningConditions}
           onChange={setCheckOpeningConditions}
-          label={t.introEditor.sidePanel.checkboxes.openingConditions.title}
-          description={t.introEditor.sidePanel.checkboxes.openingConditions.description}
+          label={t('introEditor.sidePanel.checkboxes.openingConditions.title')}
+          description={t('introEditor.sidePanel.checkboxes.openingConditions.description')}
           essential
           readonly={hasConditionsBlock}
         />
         <CheckboxItem
           checked={checkSecretHolders}
           onChange={setCheckSecretHolders}
-          label={t.introEditor.sidePanel.checkboxes.secretHolders.title}
-          description={t.introEditor.sidePanel.checkboxes.secretHolders.description}
+          label={t('introEditor.sidePanel.checkboxes.secretHolders.title')}
+          description={t('introEditor.sidePanel.checkboxes.secretHolders.description')}
           essential
           readonly={hasRecipientsBlock}
         />
         <CheckboxItem
           checked={checkAuthorIdentity}
           onChange={setCheckAuthorIdentity}
-          label={t.introEditor.sidePanel.checkboxes.authorIdentity.title}
-          description={t.introEditor.sidePanel.checkboxes.authorIdentity.description}
+          label={t('introEditor.sidePanel.checkboxes.authorIdentity.title')}
+          description={t('introEditor.sidePanel.checkboxes.authorIdentity.description')}
           essential
         />
       </EssentialSection>
@@ -279,8 +318,8 @@ export function IntroMessageEditor({
         <CheckboxItem
           checked={checkDirectives}
           onChange={setCheckDirectives}
-          label={t.introEditor.sidePanel.checkboxes.directives.title}
-          description={t.introEditor.sidePanel.checkboxes.directives.description}
+          label={t('introEditor.sidePanel.checkboxes.directives.title')}
+          description={t('introEditor.sidePanel.checkboxes.directives.description')}
         />
       </div>
     </>
@@ -288,32 +327,32 @@ export function IntroMessageEditor({
 
   return (
     <EditorLayout
-      title={t.introEditor.title}
-      subtitle={t.introEditor.subtitle}
+      title={t('introEditor.title')}
+      subtitle={t('introEditor.subtitle')}
       toolbar={
         <RichTextToolbar 
           editor={editorInstanceRef.current} 
           editorVersion={editorVersion} 
-          labels={t.introEditor.toolbar} 
+          labels={toolbarLabels} 
           threshold={threshold} 
         />
       }
     >
       <div className="tiptap-editor" ref={editorRef}></div>
 
-      <HelpSection title={t.introEditor.sidePanel.title}>
+      <HelpSection title={t('introEditor.sidePanel.title')}>
         {helpContent}
       </HelpSection>
 
       <ActionButtons
-        backLabel={t.common.back}
+        backLabel={t('common.back')}
         continueLabel={buttonText}
         buttonState={buttonState}
         disabled={!hasContent}
         onBack={handleBack}
         onContinue={handleContinue}
         showAlternative={!hasContent}
-        alternativeLabel={t.introEditor.sidePanel.generateExample}
+        alternativeLabel={t('introEditor.sidePanel.generateExample')}
         onAlternative={generateExample}
       />
     </EditorLayout>

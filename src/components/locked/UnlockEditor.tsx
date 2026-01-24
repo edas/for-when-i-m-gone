@@ -1,7 +1,7 @@
-import { useState, useMemo, useCallback, KeyboardEvent } from 'react';
-import { getTranslations, type Language } from '../../lib/i18n';
+import { useState, useCallback, KeyboardEvent } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useData } from '../../lib/DataContext';
 import { 
-  getStoredData, 
   decryptExportableData, 
   replaceWithDecryptedData,
   type LockedStoredData
@@ -11,13 +11,13 @@ import { HelpSection } from '../ui/HelpSection';
 import './UnlockEditor.css';
 
 interface UnlockEditorProps {
-  lang: Language;
   onUnlocked: () => void;
   onBack: () => void;
 }
 
-export function UnlockEditor({ lang, onUnlocked, onBack }: UnlockEditorProps) {
-  const t = useMemo(() => getTranslations(lang), [lang]);
+export function UnlockEditor({ onUnlocked, onBack }: UnlockEditorProps) {
+  const { storedData } = useData();
+  const { t } = useTranslation();
 
   const [password, setPassword] = useState('');
   const [isUnlocking, setIsUnlocking] = useState(false);
@@ -30,7 +30,6 @@ export function UnlockEditor({ lang, onUnlocked, onBack }: UnlockEditorProps) {
     setError(null);
 
     try {
-      const storedData = getStoredData();
       if (storedData.mode !== 'locked') {
         throw new Error('Data is not in locked format');
       }
@@ -40,12 +39,12 @@ export function UnlockEditor({ lang, onUnlocked, onBack }: UnlockEditorProps) {
       replaceWithDecryptedData(decryptedData);
       onUnlocked();
     } catch (e) {
-      setError(t.unlockEditor.error);
+      setError(t('unlockEditor.error'));
       console.error('Unlock failed:', e);
     } finally {
       setIsUnlocking(false);
     }
-  }, [password, isUnlocking, t, onUnlocked]);
+  }, [password, isUnlocking, t, onUnlocked, storedData]);
 
   const handleKeydown = useCallback((event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && password.trim() && !isUnlocking) {
@@ -54,20 +53,20 @@ export function UnlockEditor({ lang, onUnlocked, onBack }: UnlockEditorProps) {
   }, [password, isUnlocking, handleUnlock]);
 
   const helpContent = (
-    <p className="panel-intro">{t.unlockEditor.sidePanel.intro}</p>
+    <p className="panel-intro">{t('unlockEditor.sidePanel.intro')}</p>
   );
 
   return (
     <EditorLayout
-      title={t.unlockEditor.title}
-      subtitle={t.unlockEditor.subtitle}
+      title={t('unlockEditor.title')}
+      subtitle={t('unlockEditor.subtitle')}
     >
       <div className="unlock-container">
         <div className="password-field">
           <input
             type="password"
             className="password-input"
-            placeholder={t.unlockEditor.placeholder}
+            placeholder={t('unlockEditor.placeholder')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={handleKeydown}
@@ -81,7 +80,7 @@ export function UnlockEditor({ lang, onUnlocked, onBack }: UnlockEditorProps) {
           </div>
         )}
 
-        <HelpSection title={t.unlockEditor.sidePanel.title}>
+        <HelpSection title={t('unlockEditor.sidePanel.title')}>
           {helpContent}
         </HelpSection>
 
@@ -91,14 +90,14 @@ export function UnlockEditor({ lang, onUnlocked, onBack }: UnlockEditorProps) {
             onClick={onBack}
             disabled={isUnlocking}
           >
-            {t.common.back}
+            {t('common.back')}
           </button>
           <button
             className="unlock-btn"
             onClick={handleUnlock}
             disabled={!password.trim() || isUnlocking}
           >
-            {isUnlocking ? t.unlockEditor.unlocking : t.unlockEditor.buttons.unlock}
+            {isUnlocking ? t('unlockEditor.unlocking') : t('unlockEditor.buttons.unlock')}
           </button>
         </div>
       </div>

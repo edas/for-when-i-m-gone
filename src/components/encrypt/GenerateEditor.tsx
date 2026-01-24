@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { getTranslations, type Language } from '../../lib/i18n';
+import { useTranslation } from 'react-i18next';
 import { computeButtonState, getButtonText } from '../../lib/buttonState';
-import { updateStoredData, type EncryptStoredData } from '../../lib/dataStore';
+import { useData } from '../../lib/DataContext';
+import { type EncryptStoredData } from '../../lib/dataStore';
 import { 
   generateAES256Key, 
   exportKeyToUint8Array,
@@ -17,7 +18,6 @@ import type { Recipient } from '../../lib/types/recipient';
 import './GenerateEditor.css';
 
 interface GenerateEditorProps {
-  lang: Language;
   secret: string;
   recipients: Recipient[];
   threshold: number;
@@ -28,7 +28,6 @@ interface GenerateEditorProps {
 }
 
 export function GenerateEditor({ 
-  lang, 
   secret, 
   recipients: recipientsProp, 
   threshold, 
@@ -37,7 +36,8 @@ export function GenerateEditor({
   onContinue, 
   onBack 
 }: GenerateEditorProps) {
-  const t = useMemo(() => getTranslations(lang), [lang]);
+  const { updateStoredData } = useData();
+  const { t } = useTranslation();
   
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -62,7 +62,12 @@ export function GenerateEditor({
   const anyChecked = true;
 
   const buttonState = useMemo(() => computeButtonState(canContinue, anyChecked, allEssentialsChecked), [canContinue]);
-  const buttonText = useMemo(() => getButtonText(buttonState, t.generateEditor.buttons), [buttonState, t]);
+  const buttonTexts = useMemo(() => ({
+    continueWithoutConfirm: t('generateEditor.buttons.continueWithoutConfirm'),
+    continueWithoutEssentials: t('generateEditor.buttons.continueWithoutEssentials'),
+    continue: t('generateEditor.buttons.continue'),
+  }), [t]);
+  const buttonText = useMemo(() => getButtonText(buttonState, buttonTexts), [buttonState, buttonTexts]);
 
   const assignRecipientNumbers = useCallback(async (): Promise<void> => {
     const existingNumbers = recipients
@@ -216,23 +221,23 @@ export function GenerateEditor({
   }, [onBack]);
 
   const helpContent = (
-    <p className="panel-intro">{t.generateEditor.sidePanel.intro}</p>
+    <p className="panel-intro">{t('generateEditor.sidePanel.intro')}</p>
   );
 
   return (
-    <EditorLayout title={t.generateEditor.title}>
+    <EditorLayout title={t('generateEditor.title')}>
       <div className="generate-content">
         {errorMessage ? (
           <p className="error-text">{errorMessage}</p>
         ) : isProcessing ? (
-          <p className="processing-text">{t.generateEditor.processing}</p>
+          <p className="processing-text">{t('generateEditor.processing')}</p>
         ) : isReady ? (
           <div className="ready-section">
-            <p className="ready-text">{t.generateEditor.ready}</p>
+            <p className="ready-text">{t('generateEditor.ready')}</p>
             {currentShares.length > 0 && currentShares.length === recipients.length && (
               <div className="shares-section">
-                <h3 className="shares-title">{t.generateEditor.shares.title}</h3>
-                <p className="shares-intro">{t.generateEditor.shares.intro}</p>
+                <h3 className="shares-title">{t('generateEditor.shares.title')}</h3>
+                <p className="shares-intro">{t('generateEditor.shares.intro')}</p>
                 <div className="shares-list">
                   {recipients.map((recipient) => {
                     const share = getShareForRecipient(recipient);
@@ -241,7 +246,7 @@ export function GenerateEditor({
                       <div key={recipient.id} className="share-item">
                         <div className="share-header">
                           <span className="share-recipient-name">
-                            {recipient.name || t.generateEditor.shares.unnamedRecipient}
+                            {recipient.name || t('generateEditor.shares.unnamedRecipient')}
                             {recipient.number !== undefined && (
                               <span className="share-recipient-number"> (#{recipient.number})</span>
                             )}
@@ -249,9 +254,9 @@ export function GenerateEditor({
                           <button
                             className="copy-button"
                             onClick={() => copyShareToClipboard(share)}
-                            title={t.generateEditor.shares.copyButton}
+                            title={t('generateEditor.shares.copyButton')}
                           >
-                            {t.generateEditor.shares.copyButton}
+                            {t('generateEditor.shares.copyButton')}
                           </button>
                         </div>
                         <div className="share-value" title={share}>
@@ -265,16 +270,16 @@ export function GenerateEditor({
             )}
           </div>
         ) : (
-          <p className="placeholder-text">{t.generateEditor.placeholder}</p>
+          <p className="placeholder-text">{t('generateEditor.placeholder')}</p>
         )}
       </div>
 
-      <HelpSection title={t.generateEditor.sidePanel.title}>
+      <HelpSection title={t('generateEditor.sidePanel.title')}>
         {helpContent}
       </HelpSection>
 
       <ActionButtons
-        backLabel={t.common.back}
+        backLabel={t('common.back')}
         continueLabel={buttonText}
         buttonState={buttonState}
         disabled={!canContinue}

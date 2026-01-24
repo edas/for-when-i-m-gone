@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { Editor, JSONContent } from '@tiptap/core';
-import { getTranslations, type Language } from '../../lib/i18n';
-import { updateStoredData } from '../../lib/dataStore';
+import { useTranslation } from 'react-i18next';
+import { useData } from '../../lib/DataContext';
 import { computeButtonStateCustom, getButtonText } from '../../lib/buttonState';
 import { type HowData } from '../../lib/types/editorTypes';
 import { parseHtmlToJson } from '../../lib/htmlParser';
@@ -20,7 +20,6 @@ import '../../styles/tiptap-editor.css';
 import '../../styles/how-editor.css';
 
 interface HowEditorProps {
-  lang: Language;
   recipientCount: number;
   initialData?: Partial<HowData>;
   aesKey?: Uint8Array;
@@ -34,11 +33,12 @@ function getDefaultThreshold(count: number): number {
   return 4;
 }
 
-export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinue, onBack }: HowEditorProps) {
-  const t = useMemo(() => getTranslations(lang), [lang]);
+export function HowEditor({ recipientCount, initialData, aesKey, onContinue, onBack }: HowEditorProps) {
+  const { updateStoredData } = useData();
+  const { t } = useTranslation();
 
   const getDefaultConditions = useCallback((): JSONContent => {
-    return parseHtmlToJson(t.howEditor.sidePanel.exampleContent);
+    return parseHtmlToJson(t('howEditor.sidePanel.exampleContent'));
   }, [t]);
 
   // State
@@ -99,13 +99,11 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
   const isAesKeyGenerated = aesKey instanceof Uint8Array;
 
   const buttonState = useMemo(() => computeButtonStateCustom(canContinue, allEssentialsChecked), [canContinue, allEssentialsChecked]);
-  const buttonText = useMemo(() => 
-    getButtonText(buttonState, {
-      continueWithoutEssentials: t.howEditor.buttons.continueWithoutEssentials,
-      continue: t.howEditor.buttons.continue,
-    }),
-    [buttonState, t]
-  );
+  const buttonTexts = useMemo(() => ({
+    continueWithoutEssentials: t('howEditor.buttons.continueWithoutEssentials'),
+    continue: t('howEditor.buttons.continue'),
+  }), [t]);
+  const buttonText = useMemo(() => getButtonText(buttonState, buttonTexts), [buttonState, buttonTexts]);
 
   const getCurrentData = useCallback((): HowData => ({
     threshold: threshold ?? getDefaultThreshold(recipientCount),
@@ -171,7 +169,7 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
       const editor = createTiptapEditor({
         element: editorRef.current,
         content: conditionsJson,
-        placeholder: t.howEditor.conditions.placeholder,
+        placeholder: t('howEditor.conditions.placeholder'),
         contentClass: 'tiptap-content',
         enableHeadings: false,
         onUpdate: (json) => {
@@ -192,7 +190,7 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
       editorInstanceRef.current?.destroy();
       editorInstanceRef.current = null;
     };
-  }, [t.howEditor.conditions.placeholder]); // Only re-run if placeholder changes (language change)
+  }, [t]); // Re-run if language changes
 
   // Auto-save
   useEffect(() => {
@@ -200,26 +198,34 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
       ...currentData,
       how: getCurrentData()
     }));
-  }, [getCurrentData]);
+  }, [getCurrentData, updateStoredData]);
+
+  const toolbarLabels = useMemo(() => ({
+    bold: t('howEditor.toolbar.bold'),
+    italic: t('howEditor.toolbar.italic'),
+    underline: t('howEditor.toolbar.underline'),
+    bulletList: t('howEditor.toolbar.bulletList'),
+    numberedList: t('howEditor.toolbar.numberedList'),
+  }), [t]);
 
   const helpContent = (
     <>
-      <EssentialSection note={t.howEditor.sidePanel.essentialNote}>
+      <EssentialSection note={t('howEditor.sidePanel.essentialNote')}>
         <CheckboxItem
           checked={isValidThreshold && !isTooHigh}
-          label={t.howEditor.sidePanel.checklist.validThreshold}
+          label={t('howEditor.sidePanel.checklist.validThreshold')}
           readonly
         />
         <CheckboxItem
           checked={isLowerThanRecipientCount}
-          label={t.howEditor.sidePanel.checklist.lowerThanRecipientCount}
-          description={t.howEditor.sidePanel.checklist.lowerThanRecipientCountHelp}
+          label={t('howEditor.sidePanel.checklist.lowerThanRecipientCount')}
+          description={t('howEditor.sidePanel.checklist.lowerThanRecipientCountHelp')}
           strikethrough={recipientCount <= 2}
           readonly
         />
         <CheckboxItem
           checked={hasConditions}
-          label={t.howEditor.sidePanel.checklist.hasConditions}
+          label={t('howEditor.sidePanel.checklist.hasConditions')}
           readonly
         />
       </EssentialSection>
@@ -227,36 +233,36 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
       <div className="optional-section">
         <CheckboxItem
           checked={isAtLeast3}
-          label={t.howEditor.sidePanel.checklist.atLeast3}
-          description={t.howEditor.sidePanel.checklist.atLeast3Help}
+          label={t('howEditor.sidePanel.checklist.atLeast3')}
+          description={t('howEditor.sidePanel.checklist.atLeast3Help')}
           strikethrough={recipientCount <= 2}
           readonly
         />
         <CheckboxItem
           checked={isAtMost5}
-          label={t.howEditor.sidePanel.checklist.atMost5}
-          description={t.howEditor.sidePanel.checklist.atMost5Help}
+          label={t('howEditor.sidePanel.checklist.atMost5')}
+          description={t('howEditor.sidePanel.checklist.atMost5Help')}
           readonly
         />
         <CheckboxItem
           checked={hasNoOpenConditions}
           onChange={setHasNoOpenConditions}
-          label={t.howEditor.sidePanel.checklist.hasNoOpenConditions}
+          label={t('howEditor.sidePanel.checklist.hasNoOpenConditions')}
           readonly={!hasConditions}
         />
       </div>
 
-      <TipSection text={t.howEditor.sidePanel.tip} />
+      <TipSection text={t('howEditor.sidePanel.tip')} />
     </>
   );
 
   return (
-    <EditorLayout title={t.howEditor.title}>
+    <EditorLayout title={t('howEditor.title')}>
       <div className="how-content">
         {/* Threshold Section */}
         <section className="threshold-section">
-          <h2 className="section-title">{t.howEditor.threshold.title}</h2>
-          <p className="section-subtitle">{t.howEditor.threshold.subtitle}</p>
+          <h2 className="section-title">{t('howEditor.threshold.title')}</h2>
+          <p className="section-subtitle">{t('howEditor.threshold.subtitle')}</p>
           
           <div className="threshold-content">
             <div className="input-section">
@@ -288,7 +294,7 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
                 </button>
               </div>
               <span className="recipient-info">
-                {t.howEditor.threshold.outOf.replace('{count}', String(recipientCount))}
+                {t('howEditor.threshold.outOf', { count: recipientCount })}
               </span>
             </div>
 
@@ -296,14 +302,14 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
               <div className="warning-icon">
                 <Icon name="alert-triangle" size={20} />
               </div>
-              <p className="warning-text">{t.howEditor.sidePanel.quorumWarning}</p>
+              <p className="warning-text">{t('howEditor.sidePanel.quorumWarning')}</p>
             </div>
           </div>
 
           {isOne && (
             <div className="error-message">
               <Icon name="alert-triangle" size={20} />
-              <p>{t.howEditor.threshold.errorOne}</p>
+              <p>{t('howEditor.threshold.errorOne')}</p>
             </div>
           )}
         </section>
@@ -312,13 +318,13 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
         <section className="conditions-section">
           <label className="condition-label">
             <Icon name="info" size={20} />
-            {t.howEditor.conditions.title}
+            {t('howEditor.conditions.title')}
           </label>
           
           <div className="editor-wrapper">
             <RichTextToolbar 
               editor={editorInstanceRef.current} 
-              labels={t.howEditor.toolbar} 
+              labels={toolbarLabels} 
               compact 
               editorVersion={editorVersion}
             />
@@ -327,18 +333,18 @@ export function HowEditor({ lang, recipientCount, initialData, aesKey, onContinu
         </section>
       </div>
 
-      <HelpSection title={t.howEditor.sidePanel.title}>
+      <HelpSection title={t('howEditor.sidePanel.title')}>
         {helpContent}
       </HelpSection>
 
       <ActionButtons
-        backLabel={t.common.back}
+        backLabel={t('common.back')}
         continueLabel={buttonText}
         buttonState={buttonState}
         disabled={!canContinue}
         onBack={handleBack}
         onContinue={handleContinue}
-        alternativeLabel={t.howEditor.sidePanel.generateExample}
+        alternativeLabel={t('howEditor.sidePanel.generateExample')}
         showAlternative={!hasConditions}
         onAlternative={generateExample}
       />

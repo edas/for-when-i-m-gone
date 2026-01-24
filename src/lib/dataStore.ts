@@ -116,6 +116,31 @@ function readInitialDataFromDOM(): StoredData {
 let storedData: StoredData = readInitialDataFromDOM();
 
 /**
+ * Subscription system for reactive updates
+ */
+type Listener = (data: StoredData) => void;
+const listeners = new Set<Listener>();
+
+/**
+ * Subscribe to data store changes
+ * @param listener Function called when data changes
+ * @returns Unsubscribe function
+ */
+export function subscribe(listener: Listener): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+/**
+ * Notify all listeners of data change
+ */
+function notifyListeners(data: StoredData): void {
+  listeners.forEach(listener => listener(data));
+}
+
+/**
  * Read the current stored data from memory
  */
 export function getStoredData(): StoredData {
@@ -137,6 +162,7 @@ export function updateStoredData(updater: (currentData: StoredData) => StoredDat
   const result = updateMutex.then((currentData): StoredData => {
     const newData = updater(currentData);
     storedData = newData;
+    notifyListeners(newData);
     return newData;
   });
   
@@ -246,4 +272,5 @@ export function isExportableDecryptData(data: ExportableStoredData): data is Exp
  */
 export function replaceWithDecryptedData(decryptedExportable: ExportableStoredData): void {
   storedData = fromExportable(decryptedExportable);
+  notifyListeners(storedData);
 }
