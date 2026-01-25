@@ -50,7 +50,7 @@ export function IntroMessageEditor({
   onContinue, 
   onBack 
 }: IntroMessageEditorProps) {
-  const updateStoredData = useDataStore((state) => state.updateStoredData);
+  const updateStoredData = useDataStore((state) => state.update);
   const { t, i18n } = useTranslation();
 
   // Get initial content - empty by default

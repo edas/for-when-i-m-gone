@@ -34,7 +34,7 @@ function getDefaultThreshold(count: number): number {
 }
 
 export function HowEditor({ recipientCount, initialData, aesKey, onContinue, onBack }: HowEditorProps) {
-  const updateStoredData = useDataStore((state) => state.updateStoredData);
+  const updateStoredData = useDataStore((state) => state.update);
   const { t } = useTranslation();
 
   const getDefaultConditions = useCallback((): JSONContent => {

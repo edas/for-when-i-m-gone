@@ -69,6 +69,8 @@ const resources = {
   },
 };
 
+export const detectedLanguage = detectLanguage();
+
 // Configure i18next
 i18n
   .use(LanguageDetector)
@@ -77,7 +79,7 @@ i18n
     resources,
     fallbackLng: 'en',
     supportedLngs: ['fr', 'en'],
-    lng: detectLanguage(), // Set initial language
+    lng: detectedLanguage, // Set initial language
     interpolation: {
       escapeValue: false, // React already escapes values
     },
@@ -91,7 +93,7 @@ i18n
 export default i18n;
 
 // Export helper functions for backward compatibility if needed
-export function detectLanguage(): Language {
+function detectLanguage(): Language {
   const browserLang = navigator.language.toLowerCase();
   if (browserLang.startsWith('fr')) {
     return 'fr';

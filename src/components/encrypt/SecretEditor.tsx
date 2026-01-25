@@ -21,7 +21,7 @@ interface SecretEditorProps {
 }
 
 export function SecretEditor({ initialValue, initialCheckboxState, onContinue, onBack }: SecretEditorProps) {
-  const updateStoredData = useDataStore((state) => state.updateStoredData);
+  const updateStoredData = useDataStore((state) => state.update);
   const { t } = useTranslation();
   const [secretText, setSecretText] = useState(initialValue ?? '');
 

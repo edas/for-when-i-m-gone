@@ -1,6 +1,5 @@
 import { useState, useCallback, ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { recordSecurityConfirmation } from '../lib/security';
 import { LanguageSelector } from './ui/LanguageSelector';
 import { Icon } from './ui/Icons';
 import styles from './SecurityWarning.module.css';
@@ -17,11 +16,6 @@ export function SecurityWarning({ initialChecked, onContinue }: SecurityWarningP
   const handleCheckboxChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
     setIsChecked(checked);
-    
-    // Record timestamp each time the checkbox is checked
-    if (checked) {
-      recordSecurityConfirmation();
-    }
   }, []);
 
   const handleContinue = useCallback(() => {

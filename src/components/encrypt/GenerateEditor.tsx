@@ -35,7 +35,7 @@ export function GenerateEditor({
   onContinue, 
   onBack 
 }: GenerateEditorProps) {
-  const updateStoredData = useDataStore((state) => state.updateStoredData);
+  const updateStoredData = useDataStore((state) => state.update);
   const { t } = useTranslation();
   
   const [recipients, setRecipients] = useState<Recipient[]>([]);

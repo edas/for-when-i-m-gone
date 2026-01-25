@@ -6,7 +6,7 @@ import styles from './LanguageSelector.module.css';
 
 export function LanguageSelector() {
   const { i18n } = useTranslation();
-  const updateStoredData = useDataStore((state) => state.updateStoredData);
+  const updateStoredData = useDataStore((state) => state.update);
 
   function handleLanguageSelect(event: ChangeEvent<HTMLSelectElement>): void {
     const lang = event.target.value as Language;

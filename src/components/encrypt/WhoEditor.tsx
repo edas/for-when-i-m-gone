@@ -35,7 +35,7 @@ interface WhoEditorProps {
 }
 
 export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorProps) {
-  const updateStoredData = useDataStore((state) => state.updateStoredData);
+  const updateStoredData = useDataStore((state) => state.update);
   const { t } = useTranslation();
   
   const getInitialExpandedId = (recipients: Recipient[]): string | null => {

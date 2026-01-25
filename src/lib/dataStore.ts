@@ -9,10 +9,7 @@ import type { Recipient } from './types/recipient';
 import { base64ToUint8Array, bufferToText, decryptBufferWithPassword, encryptBufferWithPassword, textToBuffer } from './crypto/aes';
 import { uint8ArrayToBase64 } from './crypto/aes';
 import { create } from 'zustand';
-
-interface SecurityData {
-  confirmedAt?: string; // ISO datetime with timezone
-}
+import { detectedLanguage } from './i18n';
 
 interface WhatData {
   content?: string;
@@ -54,7 +51,6 @@ export type StoredData = EncryptStoredData | DecryptStoredData | LockedStoredDat
 
 export type baseStoredData = {
   mode: AppMode;
-  security?: SecurityData;
   language?: string;
 }
 
@@ -74,16 +70,6 @@ export type ExportableEncryptStoredData = Omit<EncryptStoredData, 'generate'> & 
 export type DecryptStoredData = baseStoredData & {
   mode: 'decrypt';
 }
-
-/**
- * Determine the application mode from stored data
- * @returns 'decrypt' if mode is 'decrypt', 'encrypt' otherwise (default)
- */
-export function getAppMode(): AppMode {
-  return useDataStore.getState().storedData.mode;
-}
-
-
 
 const SCRIPT_ID = 'fwimg-data';
 
@@ -105,54 +91,34 @@ function readInitialDataFromDOM(): StoredData {
   
   try {
     const parsed = JSON.parse(scriptElement.textContent) as ExportableStoredData;
-    return fromExportable(parsed);
+    return {
+      language: detectedLanguage,
+      ...fromExportable(parsed)
+    };
   } catch (error) {
     throw new Error(`Failed to parse JSON from script element #${SCRIPT_ID}: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
-/**
- * Zustand store interface
- */
-interface DataStore {
-  storedData: StoredData;
-  updateStoredData: (updater: (current: StoredData) => StoredData) => StoredData;
-  replaceStoredData: (newData: StoredData) => void;
-}
+
+
+
 
 /**
  * Zustand store for reactive data management
  * Initialized from DOM at module load
  */
-export const useDataStore = create<DataStore>((set, get) => ({
-  storedData: readInitialDataFromDOM(),
-  
-  updateStoredData: (updater) => {
-    const currentData = get().storedData;
-    const newData = updater(currentData);
-    set({ storedData: newData });
-    return newData;
-  },
-  
-  replaceStoredData: (newData) => {
-    set({ storedData: newData });
-  },
-}));
-
-/**
- * Read the current stored data from memory (non-reactive)
- */
-export function getStoredData(): StoredData {
-  return useDataStore.getState().storedData;
+type Actions = {
+  setData(updater: (current: StoredData) => Partial<StoredData>, replace?: boolean): void;
+  getData(): StoredData;
 }
-
-/**
- * Update the stored data (non-reactive, for use outside React)
- * @param updater Function that receives current data and returns the complete new data
- */
-export function updateStoredData(updater: (currentData: StoredData) => StoredData): StoredData {
-  return useDataStore.getState().updateStoredData(updater);
-}
+export const useDataStore = create<StoredData & Actions>(
+  (set, get) => ({
+    ...readInitialDataFromDOM(),
+    setData: set,
+    getData: get,
+  })
+)
 
 export function toExportable(storedData: StoredData) : ExportableStoredData {
   if (isEncryptData(storedData)) {
@@ -208,7 +174,6 @@ export async function encryptExportableData(exportableData: ExportableStoredData
   const encryptedData = await encryptBufferWithPassword(exportableBuffer, password);
   return {
     mode: 'locked',
-    security: exportableData.security,
     language: exportableData.language,
     salt: uint8ArrayToBase64(encryptedData.salt),
     iv: uint8ArrayToBase64(encryptedData.iv),
@@ -248,13 +213,4 @@ export function isDecryptData(data: StoredData): data is StoredData & DecryptSto
 
 export function isExportableDecryptData(data: ExportableStoredData): data is ExportableStoredData & DecryptStoredData {
   return data.mode === 'decrypt';
-}
-
-/**
- * Replace the stored data with decrypted data and update internal state
- * Converts from exportable format (base64) to internal format (buffers)
- */
-export function replaceWithDecryptedData(decryptedExportable: ExportableStoredData): void {
-  const newData = fromExportable(decryptedExportable);
-  useDataStore.getState().replaceStoredData(newData);
 }
