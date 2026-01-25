@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EncryptStoreActions, EncryptStoredData, useEncryptDataStore } from '../../lib/dataStore';
+import { EncryptStoreActions, useEncryptDataStore } from '../../lib/dataStore';
 import { defaultSecretCheckboxState, SecretCheckboxState } from '../../lib/types/editorTypes';
 import { EditorLayout } from '../ui/EditorLayout';
 import { CheckboxItem } from '../ui/CheckboxItem';

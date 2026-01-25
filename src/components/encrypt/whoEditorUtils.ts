@@ -1,5 +1,22 @@
 import { TFunction } from 'i18next';
-import { type ContactType, type Recipient, createEmptyRecipient } from '../../lib/types/recipient';
+import { type ContactType, type ContactInfo, type Recipient } from '../../lib/types/recipient';
+
+export function createEmptyContact(): ContactInfo {
+  return { id: crypto.randomUUID(), type: 'phone', value: '', comment: '' };
+}
+
+export function createEmptyRecipient(): Recipient {
+  return {
+    id: crypto.randomUUID(),
+    name: '',
+    contacts: [
+      { ...createEmptyContact(), type: 'phone' },
+      { ...createEmptyContact(), type: 'email' },
+      { ...createEmptyContact(), type: 'address' },
+    ],
+    isPrivate: false,
+  };
+}
 
 export const CONTACT_TYPES: ContactType[] = [
   'phone', 'email', 'address', 'x', 'bluesky', 'mastodon',

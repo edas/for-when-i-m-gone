@@ -1,42 +1,19 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type ContactType, type Recipient } from '../../lib/types/recipient';
-import { type DragDropState } from '../../lib/dragAndDrop';
 import { RecipientCard } from '../ui/RecipientCard';
 import { Icon } from '../ui/Icons';
 import formControls from '../../styles/form-controls.module.css';
 import styles from './WhoEditor.module.css';
 import { DropZone } from './WhoEditorDropZone';
+import { useEncryptDataStore } from '../../lib/dataStore';
+import { useRecipientActions } from './useRecipients';
+import { useDragAndDrop } from './useDragAndDrop';
+import { Recipient } from '../../lib/types/recipient';
+import { CONTACT_TYPES } from './whoEditorUtils';
 
-interface RecipientsListProps {
-  recipients: Recipient[];
-  expandedRecipientId: string | null;
-  autoFocusRecipientId: string | null;
-  dragState: DragDropState;
-  contactTypeOptions: { value: ContactType; label: string }[];
-  canToggle: boolean;
-  recipientCardRefs: React.MutableRefObject<Record<string, HTMLDivElement>>;
-  onToggle: (id: string) => void;
-  onRemove: (id: string) => void;
-  onUpdate: (id: string, field: keyof Omit<Recipient, 'contacts'>, value: string | boolean) => void;
-  onAddContact: (recipientId: string) => void;
-  onRemoveContact: (recipientId: string, contactId: string) => void;
-  onUpdateContact: (recipientId: string, contactId: string, field: 'type' | 'value', value: string) => void;
-  onDragStart: (e: React.DragEvent, recipientId: string) => void;
-  onDragEnd: () => void;
-  onDragOver: (e: React.DragEvent, insertIndex: number) => void;
-  onDragLeave: () => void;
-  onDrop: (e: React.DragEvent, insertIndex: number) => void;
-  isDropZoneHidden: (zoneIndex: number) => boolean;
-  onAddRecipient: () => void;
-}
 
-export function RecipientsList({
-  recipients, expandedRecipientId, autoFocusRecipientId, dragState,
-  contactTypeOptions, canToggle, recipientCardRefs,
-  onToggle, onRemove, onUpdate, onAddContact, onRemoveContact, onUpdateContact,
-  onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop, isDropZoneHidden, onAddRecipient,
-}: RecipientsListProps) {
+
+export function RecipientsList() {
   const { t } = useTranslation();
   
   const translations = useMemo(() => ({
@@ -59,6 +36,46 @@ export function RecipientsList({
     },
   }), [t]);
 
+  const recipientCardRefs = useRef<Record<string, HTMLDivElement>>({});
+  const recipients: Recipient[] = useEncryptDataStore((state) => state.who?.recipients ?? []);
+  const [expandedRecipientId, setExpandedRecipientId] = useState<string | null>(null);
+  const [autoFocusRecipientId, setAutoFocusRecipientId] = useState<string | null>(null);
+  const expandedRecipient = recipients.find(recipient => recipient.id === expandedRecipientId);
+  const canToggle = expandedRecipient ? expandedRecipient.name.trim() !== '' : true;
+
+  const contactTypeOptions = useMemo(() => 
+    CONTACT_TYPES.map((type) => ({ value: type, label: t(`whoEditor.contactTypes.${type}`) }))
+  , [t]);
+  
+  const { 
+    setRecipients,
+    addNewRecipient,
+  } = useRecipientActions();
+
+  const {
+    dragState,
+    handleDragStart,
+    handleDragEnd,
+    handleDropZoneDragOver,
+    handleDropZoneDragLeave,
+    handleDropZoneDrop,
+    isDropZoneHidden,
+   } = useDragAndDrop(recipients, setRecipients);
+
+  useEffect(() => {
+    // on ouvre le destinataire incomplet (non nommé) ou en crée un s'il n'y en a pas
+    const rec = recipients.find(recipient => recipient.name.trim() == '')
+    if (rec) {
+      setExpandedRecipientId(rec.id)
+      setAutoFocusRecipientId(rec.id)
+    } else if (recipients.length == 0) {
+      console.log('create new recipient because there are no recipients');
+      const newRecipient = addNewRecipient()
+      setExpandedRecipientId(newRecipient.id)
+      setAutoFocusRecipientId(newRecipient.id)
+    }
+  }, []);
+  
   return (
     <div className={styles.recipientsList} role="list">
       {recipients.map((recipient, index) => (
@@ -67,9 +84,9 @@ export function RecipientsList({
             index={index}
             isActive={dragState.activeDropZone === index}
             isHidden={isDropZoneHidden(index)}
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}
+            onDragOver={ handleDropZoneDragOver}
+            onDragLeave={ handleDropZoneDragLeave}
+            onDrop={ handleDropZoneDrop}
           />
           
           <div ref={(el) => { if (el) recipientCardRefs.current[recipient.id] = el; }}>
@@ -81,14 +98,10 @@ export function RecipientsList({
               translations={translations}
               autoFocus={autoFocusRecipientId === recipient.id}
               toggleDisabled={!canToggle}
-              onToggle={() => onToggle(recipient.id)}
-              onRemove={() => onRemove(recipient.id)}
-              onUpdateField={(field, value) => onUpdate(recipient.id, field, value)}
-              onAddContact={() => onAddContact(recipient.id)}
-              onRemoveContact={(contactId) => onRemoveContact(recipient.id, contactId)}
-              onUpdateContact={(contactId, field, value) => onUpdateContact(recipient.id, contactId, field, value)}
-              onDragStart={(e) => onDragStart(e, recipient.id)}
-              onDragEnd={onDragEnd}
+              onDragStart={(e) => handleDragStart(e, recipient.id)}
+              onDragEnd={handleDragEnd}
+              onExpand={() => { setExpandedRecipientId(recipient.id); setAutoFocusRecipientId(null); }}
+              onCollapse={() => { setExpandedRecipientId(null); setAutoFocusRecipientId(null); }}
             />
           </div>
         </div>
@@ -98,14 +111,18 @@ export function RecipientsList({
         index={recipients.length}
         isActive={dragState.activeDropZone === recipients.length}
         isHidden={isDropZoneHidden(recipients.length)}
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={onDrop}
+        onDragOver={handleDropZoneDragOver}
+        onDragLeave={handleDropZoneDragLeave}
+        onDrop={handleDropZoneDrop}
       />
       
       <button 
         className={`${formControls.addButton} ${formControls.addButtonLarge}`} 
-        onClick={onAddRecipient}
+        onClick={() => {
+          const newRecipient = addNewRecipient()
+          setExpandedRecipientId(newRecipient.id)
+          setAutoFocusRecipientId(newRecipient.id)
+        }}
         disabled={!canToggle}
       >
         <Icon name="plus" size={20} />

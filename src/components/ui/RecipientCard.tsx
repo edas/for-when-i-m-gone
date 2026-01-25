@@ -1,9 +1,10 @@
-import { useEffect, useRef, KeyboardEvent, MouseEvent, DragEvent } from 'react';
+import { useEffect, useRef, type DragEvent } from 'react';
 import type { Recipient } from '../../lib/types/recipient';
 import { ContactRow } from './ContactRow';
 import { Icon } from './Icons';
 import formControls from '../../styles/form-controls.module.css';
 import styles from './RecipientCard.module.css';
+import { useRecipientActions } from '../encrypt/useRecipients';
 
 interface ContactTypeOption {
   value: string;
@@ -34,16 +35,12 @@ interface RecipientCardProps {
   dragging: boolean;
   contactTypeOptions: ContactTypeOption[];
   translations: Translations;
-  onToggle: () => void;
-  onRemove: () => void;
-  onUpdateField: (field: 'name' | 'isPrivate', value: string | boolean) => void;
-  onAddContact: () => void;
-  onRemoveContact: (contactId: string) => void;
-  onUpdateContact: (contactId: string, field: 'type' | 'value', value: string) => void;
   onDragStart: (e: DragEvent) => void;
   onDragEnd: () => void;
   autoFocus?: boolean;
   toggleDisabled?: boolean;
+  onExpand: () => void;
+  onCollapse: () => void;
 }
 
 function DragHandle() {
@@ -65,7 +62,6 @@ interface RecipientNameInputProps {
   placeholder: string;
   privateInfo: string;
   numberedInfo: string;
-  onUpdateField: (field: 'name' | 'isPrivate', value: string | boolean) => void;
 }
 
 function RecipientNameInput({
@@ -74,8 +70,8 @@ function RecipientNameInput({
   placeholder,
   privateInfo,
   numberedInfo,
-  onUpdateField,
 }: RecipientNameInputProps) {
+  const { updateRecipientName } = useRecipientActions();
   return (
     <div className={styles.nameInputWrapper}>
       <input
@@ -84,10 +80,8 @@ function RecipientNameInput({
         type="text"
         className={`${formControls.formInput} ${styles.recipientNameInput}`}
         value={recipient.name}
-        onChange={(e) => onUpdateField('name', e.target.value)}
+        onChange={(e) => updateRecipientName(recipient.id, e.target.value)}
         placeholder={placeholder}
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
       />
       {recipient.isPrivate ? (
         <div className={styles.privateInfoMessage}>
@@ -123,7 +117,6 @@ interface RecipientSummaryProps {
   expanded: boolean;
   nameInputRef: React.RefObject<HTMLInputElement>;
   translations: Translations;
-  onUpdateField: (field: 'name' | 'isPrivate', value: string | boolean) => void;
 }
 
 function RecipientSummary({
@@ -131,7 +124,6 @@ function RecipientSummary({
   expanded,
   nameInputRef,
   translations: t,
-  onUpdateField,
 }: RecipientSummaryProps) {
   return (
     <div className={styles.recipientSummary}>
@@ -142,7 +134,6 @@ function RecipientSummary({
           placeholder={t.placeholders.name}
           privateInfo={t.fields.privateInfo}
           numberedInfo={t.fields.numberedInfo}
-          onUpdateField={onUpdateField}
         />
       ) : (
         <RecipientNameDisplay
@@ -158,33 +149,22 @@ interface RecipientActionsProps {
   recipient: Recipient;
   expanded: boolean;
   translations: Translations;
-  onRemove: () => void;
-  onUpdateField: (field: 'name' | 'isPrivate', value: string | boolean) => void;
 }
 
 function RecipientActions({
   recipient,
   expanded,
   translations: t,
-  onRemove,
-  onUpdateField,
 }: RecipientActionsProps) {
-  function handleRemoveClick(e: MouseEvent): void {
-    e.stopPropagation();
-    onRemove();
-  }
-
-  function handlePrivateToggle(e: MouseEvent): void {
-    e.stopPropagation();
-    onUpdateField('isPrivate', !(recipient.isPrivate ?? false));
-  }
+  
+  const { removeRecipient, updateRecipientVisibility } = useRecipientActions();
 
   return (
     <div className={styles.recipientActions}>
       {expanded && (
         <button
           className={styles.privateToggleButton}
-          onClick={handlePrivateToggle}
+          onClick={() => updateRecipientVisibility(recipient.id, !recipient.isPrivate)}
           title={t.fields.notListedPublicly}
         >
           <Icon name={recipient.isPrivate ? 'eye-off' : 'eye'} size={18} />
@@ -193,7 +173,7 @@ function RecipientActions({
       {expanded && !recipient.number && (
         <button
           className={`${styles.removeButton} ${styles.large}`}
-          onClick={handleRemoveClick}
+          onClick={() => { removeRecipient(recipient.id) }}
           title={t.removeRecipient}
         >
           <Icon name="minus" size={16} />
@@ -210,19 +190,14 @@ interface RecipientDetailsProps {
   recipient: Recipient;
   contactTypeOptions: ContactTypeOption[];
   translations: Translations;
-  onAddContact: () => void;
-  onRemoveContact: (contactId: string) => void;
-  onUpdateContact: (contactId: string, field: 'type' | 'value', value: string) => void;
 }
 
 function RecipientDetails({
   recipient,
   contactTypeOptions,
   translations: t,
-  onAddContact,
-  onRemoveContact,
-  onUpdateContact,
 }: RecipientDetailsProps) {
+  const { addRecipientContact, removeRecipientContact, updateRecipientContact } = useRecipientActions();
   return (
     <div className={styles.recipientDetails}>
       <div className={styles.contactsSection}>
@@ -233,13 +208,13 @@ function RecipientDetails({
             contactTypeOptions={contactTypeOptions}
             placeholders={{ value: t.placeholders.contactValue }}
             removeTitle={t.removeContact}
-            onTypeChange={(type) => onUpdateContact(contact.id, 'type', type)}
-            onValueChange={(value) => onUpdateContact(contact.id, 'value', value)}
-            onRemove={() => onRemoveContact(contact.id)}
+            onTypeChange={(type) => updateRecipientContact(recipient.id, contact.id, 'type', type)}
+            onValueChange={(value) => updateRecipientContact(recipient.id, contact.id, 'value', value)}
+            onRemove={() => removeRecipientContact(recipient.id, contact.id)}
           />
         ))}
 
-        <button className={styles.addButton} onClick={onAddContact}>
+        <button className={styles.addButton} onClick={() => addRecipientContact(recipient.id)}>
           <Icon name="plus" size={16} />
           {t.addContact}
         </button>
@@ -254,16 +229,12 @@ export function RecipientCard({
   dragging,
   contactTypeOptions,
   translations: t,
-  onToggle,
-  onRemove,
-  onUpdateField,
-  onAddContact,
-  onRemoveContact,
-  onUpdateContact,
   onDragStart,
   onDragEnd,
   autoFocus = false,
   toggleDisabled = false,
+  onExpand,
+  onCollapse,
 }: RecipientCardProps) {
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -273,21 +244,7 @@ export function RecipientCard({
         nameInputRef.current?.focus();
       }, 100);
     }
-  }, [autoFocus, expanded]);
-
-  function handleKeydown(e: KeyboardEvent): void {
-    if (toggleDisabled) return;
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onToggle();
-    }
-  }
-  
-  function handleToggle(): void {
-    if (!toggleDisabled) {
-      onToggle();
-    }
-  }
+  }, [autoFocus, expanded, nameInputRef.current]);
 
   const cardClassNames = [
     styles.recipientCard,
@@ -299,6 +256,17 @@ export function RecipientCard({
     styles.recipientHeader,
     toggleDisabled && styles.toggleDisabled,
   ].filter(Boolean).join(' ');
+
+
+  function handleToggle() {
+    if (!toggleDisabled) {
+      if (expanded) {
+        onCollapse();
+      } else {
+        onExpand();
+      }
+    }
+  }
 
   return (
     <div
@@ -313,7 +281,6 @@ export function RecipientCard({
         role="button"
         tabIndex={toggleDisabled ? -1 : 0}
         onClick={handleToggle}
-        onKeyDown={handleKeydown}
       >
         <DragHandle />
         <RecipientSummary
@@ -321,14 +288,11 @@ export function RecipientCard({
           expanded={expanded}
           nameInputRef={nameInputRef}
           translations={t}
-          onUpdateField={onUpdateField}
         />
         <RecipientActions
           recipient={recipient}
           expanded={expanded}
           translations={t}
-          onRemove={onRemove}
-          onUpdateField={onUpdateField}
         />
       </div>
 
@@ -337,9 +301,6 @@ export function RecipientCard({
           recipient={recipient}
           contactTypeOptions={contactTypeOptions}
           translations={t}
-          onAddContact={onAddContact}
-          onRemoveContact={onRemoveContact}
-          onUpdateContact={onUpdateContact}
         />
       )}
     </div>

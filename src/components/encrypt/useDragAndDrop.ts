@@ -10,7 +10,7 @@ import {
 } from '../../lib/dragAndDrop';
 import { type Recipient } from '../../lib/types/recipient';
 
-export function useDragAndDrop(recipients: Recipient[], setRecipients: (updater: Recipient[] | ((prev: Recipient[]) => Recipient[])) => void) {
+export function useDragAndDrop(recipients: Recipient[], setRecipients: (recipients: Recipient[]) => void) {
   const [dragState, setDragState] = useState<DragDropState>({ draggedItemId: null, activeDropZone: null });
 
   const updateDragState = useCallback((state: Partial<DragDropState>) => {
