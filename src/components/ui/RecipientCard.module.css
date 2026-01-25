@@ -11,6 +11,18 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.recipientCard.expanded .recipientHeader {
+  align-items: flex-start;
+}
+
+.recipientCard.expanded .dragHandle {
+  margin-top: 0.250rem;
+}
+
+.recipientCard.expanded .recipientActions {
+  margin-top: 0.125rem;
+}
+
 .recipientCard.dragging {
   opacity: 0.5;
 }
