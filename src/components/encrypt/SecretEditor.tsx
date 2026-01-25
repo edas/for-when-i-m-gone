@@ -9,6 +9,7 @@ import { EssentialSection } from '../ui/EssentialSection';
 import { HelpSection } from '../ui/HelpSection';
 import formControls from '../../styles/form-controls.module.css';
 import styles from './SecretEditor.module.css';
+import { TFunction } from 'i18next';
 
 interface SecretEditorProps {
   onContinue: () => void;
@@ -50,9 +51,8 @@ export function SecretEditor({ onContinue, onBack }: SecretEditorProps) {
         placeholder={t('secretEditor.placeholder')}
       />
 
-      <HelpSection title={t('secretEditor.sidePanel.title')}>
-        {<HelpContent />}
-      </HelpSection>
+      
+      <HelpContent />
 
       <ActionButtons
         backLabel={t('common.back')}
@@ -61,7 +61,7 @@ export function SecretEditor({ onContinue, onBack }: SecretEditorProps) {
         disabled={false}
         onBack={onBack}
         onContinue={onContinue}
-        showAlternative={!isEmpty}
+        showAlternative={isEmpty}
         alternativeLabel={t('secretEditor.sidePanel.generateExample')}
         onAlternative={generateExample}
       />
@@ -71,34 +71,87 @@ export function SecretEditor({ onContinue, onBack }: SecretEditorProps) {
 
 export default SecretEditor;
 
+function getVariantAndTitle(content: string, essentials: boolean[], optional: boolean[], t: TFunction): { variant: 'error' | 'warning' | 'info' | 'success', title: string } {
+  const isEmpty = content.trim() === '';
+  const essentialCount = essentials.filter(Boolean).length;
+  const essentialTotal = essentials.length;
+  const allCheckedCount = essentialCount + optional.filter(Boolean).length;
+  const allTotal = essentialTotal + optional.length;
+  const allChecked = allCheckedCount === allTotal;
+  const allEssentialChecked = essentialCount === essentialTotal;
+
+  if (allChecked) {
+    return {
+      variant: 'success',
+      title: t('secretEditor.sidePanel.successTitle', { count: allCheckedCount, total: allTotal })
+    };
+  }
+  if (allEssentialChecked) {
+    return {
+      variant: 'info',
+      title: t('secretEditor.sidePanel.infoTitle', { count: allCheckedCount, total: allTotal })
+    };
+  }
+  if (isEmpty) {
+    return {
+      variant: 'error',
+      title: t('secretEditor.sidePanel.errorTitle')
+    };
+  }
+  return {
+    variant: 'warning',
+    title: t('secretEditor.sidePanel.warningTitle', { count: essentialCount, total: essentialTotal })
+  };
+}
 
 function HelpContent() {
   const { t } = useTranslation();
-  const secretCheckboxState = useEncryptDataStore((state) => state.what?.checkboxState ?? defaultSecretCheckboxState);
+  const content = useEncryptDataStore((state) => state.what?.content ?? '');
+  const checkboxState = useEncryptDataStore((state) => state.what?.checkboxState ?? defaultSecretCheckboxState);
   const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData);
+  
   const handleCheckboxChange = (key: string, checked: boolean) => {
     setData((current) => ({
       what: { ...current.what, checkboxState: { ...current.what?.checkboxState ?? defaultSecretCheckboxState, [key]: checked } }
     }));
   };
+
+  const essentials = [
+    checkboxState.emails,
+    checkboxState.phoneCodes,
+    checkboxState.cloudAccounts
+  ]
+  const optional = [
+    checkboxState.emails,
+    checkboxState.phoneCodes,
+    checkboxState.cloudAccounts,
+    checkboxState.computerLogins,
+    checkboxState.otherPasswords,
+    checkboxState.domainManager,
+    checkboxState.passwordManager,
+    checkboxState.backups,
+    checkboxState.crypto
+  ];
+  const { variant, title } = getVariantAndTitle(content, essentials, optional, t);
+
   return (
-    <>
+    <HelpSection title={title} variant={variant}>
       <EssentialSection note={t('secretEditor.sidePanel.essentialNote')}>
         <CheckboxItem
           label={t('secretEditor.sidePanel.checkboxes.emails')}
-          checked={secretCheckboxState.emails}
+          checked={checkboxState.emails}
           essential
           onChange={(checked) => handleCheckboxChange('emails', checked)}
         />
         <CheckboxItem
           label={t('secretEditor.sidePanel.checkboxes.phoneCodes')}
-          checked={secretCheckboxState.phoneCodes}
+          checked={checkboxState.phoneCodes}
           essential
           onChange={(checked) => handleCheckboxChange('phoneCodes', checked)}
         />
         <CheckboxItem
           label={t('secretEditor.sidePanel.checkboxes.cloudAccounts')}
-          checked={secretCheckboxState.cloudAccounts}
+          checked={checkboxState.cloudAccounts}
           essential
           onChange={(checked) => handleCheckboxChange('cloudAccounts', checked)}
         />
@@ -107,12 +160,12 @@ function HelpContent() {
       <div className={styles.regularSection}>
         <CheckboxItem
           label={t('secretEditor.sidePanel.checkboxes.computerLogins')}
-          checked={secretCheckboxState.computerLogins}
+          checked={checkboxState.computerLogins}
           onChange={(checked) => handleCheckboxChange('computerLogins', checked)}
         />
         <CheckboxItem
           label={t('secretEditor.sidePanel.checkboxes.otherPasswords')}
-          checked={secretCheckboxState.otherPasswords}
+          checked={checkboxState.otherPasswords}
           onChange={(checked) => handleCheckboxChange('otherPasswords', checked)}
         />
       </div>
@@ -121,25 +174,25 @@ function HelpContent() {
         <h3>{t('secretEditor.sidePanel.sectionOptional')}</h3>
         <CheckboxItem
           label={t('secretEditor.sidePanel.checkboxes.domainManager')}
-          checked={secretCheckboxState.domainManager}
+          checked={checkboxState.domainManager}
           onChange={(checked) => handleCheckboxChange('domainManager', checked)}
         />
         <CheckboxItem
           label={t('secretEditor.sidePanel.checkboxes.passwordManager')}
-          checked={secretCheckboxState.passwordManager}
+          checked={checkboxState.passwordManager}
           onChange={(checked) => handleCheckboxChange('passwordManager', checked)}
         />
         <CheckboxItem
           label={t('secretEditor.sidePanel.checkboxes.backups')}
-          checked={secretCheckboxState.backups}
+          checked={checkboxState.backups}
           onChange={(checked) => handleCheckboxChange('backups', checked)}
         />
         <CheckboxItem
           label={t('secretEditor.sidePanel.checkboxes.crypto')}
-          checked={secretCheckboxState.crypto}
+          checked={checkboxState.crypto}
           onChange={(checked) => handleCheckboxChange('crypto', checked)}
         />
       </div>
-    </>
+    </HelpSection>
   );
 }

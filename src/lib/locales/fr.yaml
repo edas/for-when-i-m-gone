@@ -1,5 +1,6 @@
 common:
   back: Retour
+  continue: Continuer
 
 steps:
   secret: Quoi
@@ -150,6 +151,10 @@ secretEditor:
       facteurs d'authentification.
     collapse: Replier
     expand: Aide-mémoire
+    errorTitle: Saisissez des secrets à transmettre
+    warningTitle: "Informations essentielles : {{count}}/{{total}}"
+    infoTitle: "Informations à vérifier : {{count}}/{{total}}"
+    successTitle: "Informations vérifiées : {{count}}/{{total}}"
     checkboxes:
       emails: Adresses email et mots de passe correspondants
       phoneCodes: Codes de déverrouillage des téléphones et codes PIN des cartes SIM
@@ -160,7 +165,7 @@ secretEditor:
       passwordManager: Serveur, identifiant et mot de passe du gestionnaire de mots de passe
       backups: Serveur, identifiant et mot de passe des sauvegardes
       crypto: Clés ou identifiants pour les crypto-monnaies
-    sectionOptional: S'il y en a
+    sectionOptional: Si cela vous concerne
     generateExample: Générer un exemple
     # exampleContent est chargé depuis examples/secret-example.fr.txt
   buttons:

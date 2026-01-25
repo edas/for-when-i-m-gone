@@ -1,5 +1,6 @@
 common:
   back: Back
+  continue: Continue
 
 steps:
   secret: What
@@ -149,6 +150,10 @@ secretEditor:
       to account recovery procedures and two-factor authentication.
     collapse: Collapse
     expand: Checklist
+    errorTitle: Enter secrets to transmit
+    warningTitle: "Essential information: {{count}}/{{total}}"
+    infoTitle: "Information to verify: {{count}}/{{total}}"
+    successTitle: "Information verified: {{count}}/{{total}}"
     checkboxes:
       emails: Email addresses and corresponding passwords
       phoneCodes: Phone unlock codes and SIM card PIN codes
