@@ -2,25 +2,19 @@ import { ReactNode, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import styles from './HelpSection.module.css';
 
-type HelpSectionVariant = 'error' | 'warning' | 'info' | 'success';
-
 interface HelpSectionProps {
   title: string;
   defaultOpen?: boolean;
-  variant?: HelpSectionVariant;
   children: ReactNode;
 }
 
-export function HelpSection({ title, defaultOpen = false, variant = 'info', children }: HelpSectionProps) {
+export function HelpSection({ title, defaultOpen = false, children }: HelpSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
-  const headerVariantClass = styles[`helpSectionHeader${variant.charAt(0).toUpperCase() + variant.slice(1)}`] || '';
-  const sectionVariantClass = variant !== 'info' ? styles[`helpSection${variant.charAt(0).toUpperCase() + variant.slice(1)}`] || '' : '';
-
   return (
-    <div className={`${styles.helpSection} ${isOpen ? styles.open : ''} ${sectionVariantClass}`}>
+    <div className={`${styles.helpSection} ${isOpen ? styles.open : ''}`}>
       <button 
-        className={`${styles.helpSectionHeader} ${headerVariantClass}`}
+        className={styles.helpSectionHeader}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >

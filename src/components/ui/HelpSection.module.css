@@ -8,19 +8,6 @@
   transition: border-bottom-color 0.2s ease;
 }
 
-/* Variantes de bordure basse pour le conteneur */
-.helpSectionError {
-  border-bottom-color: #3c0505;
-}
-
-.helpSectionWarning {
-  border-bottom-color: #754b02;
-}
-
-.helpSectionSuccess {
-  border-bottom-color: #053c05;
-}
-
 .helpSectionHeader {
   display: flex;
   align-items: center;
@@ -41,44 +28,6 @@
 .helpSectionHeader:hover {
   background: rgba(255, 255, 255, 0.05);
   color: #e2e8f0;
-}
-
-/* Variante Error (rouge) - Problème majeur */
-.helpSectionHeaderError {
-  background: #3c0505;
-  color: #ffffff;
-}
-
-.helpSectionHeaderError:hover {
-  background: #4c1515;
-  color: #ffffff;
-}
-
-/* Variante Warning (orange) - Avertissement */
-.helpSectionHeaderWarning {
-  background: #754b02;
-  color: #ffffff;
-}
-
-.helpSectionHeaderWarning:hover {
-  background: #855b12;
-  color: #ffffff;
-}
-
-/* Variante Info (informatif) - Par défaut */
-.helpSectionHeaderInfo {
-  color: #a0aec0;
-}
-
-/* Variante Success (vert) - Tout est coché */
-.helpSectionHeaderSuccess {
-  background: #053c05;
-  color: #ffffff;
-}
-
-.helpSectionHeaderSuccess:hover {
-  background: #154c15;
-  color: #ffffff;
 }
 
 .helpSectionChevron {

@@ -2,6 +2,8 @@ import { Icon } from './Icons';
 import { type ButtonState } from '../../lib/buttonState';
 import styles from './ActionButtons.module.css';
 
+type ButtonVariant = 'error' | 'warning' | 'info' | 'success';
+
 interface ActionButtonsProps {
   backLabel: string;
   continueLabel: string;
@@ -13,6 +15,7 @@ interface ActionButtonsProps {
   showAlternative?: boolean;
   onAlternative?: () => void;
   showContinue?: boolean;
+  variant?: ButtonVariant;
 }
 
 export function ActionButtons({ 
@@ -26,6 +29,7 @@ export function ActionButtons({
   showAlternative = false,
   onAlternative,
   showContinue = true,
+  variant,
 }: ActionButtonsProps) {
   const stateClassMap: Record<ButtonState, string> = {
     none: styles.stateNone,
@@ -33,6 +37,8 @@ export function ActionButtons({
     complete: styles.stateComplete,
   };
   const stateClass = stateClassMap[buttonState];
+  
+  const variantClass = variant ? styles[`continueButtonVariant${variant.charAt(0).toUpperCase() + variant.slice(1)}`] : '';
 
   return (
     <div className={styles.buttonContainer}>
@@ -49,7 +55,7 @@ export function ActionButtons({
             </button>
           ) : (
             <button
-              className={`${styles.continueButton} ${stateClass}`}
+              className={`${styles.continueButton} ${stateClass} ${variantClass}`}
               disabled={disabled}
               onClick={onContinue}
             >

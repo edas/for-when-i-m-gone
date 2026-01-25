@@ -22,6 +22,7 @@ export function SecretEditor({ onContinue, onBack }: SecretEditorProps) {
   const setData: EncryptStoreActions['setData'] = useEncryptDataStore(state => state.setData);
   const initialSecret = getData().what?.content ?? '';
   const [content, setContent] = useState(initialSecret);
+  const checkboxState = useEncryptDataStore((state) => state.what?.checkboxState ?? defaultSecretCheckboxState);
 
   const handleContentChange = useCallback((content: string) => {
     setData((current) => ({
@@ -40,6 +41,22 @@ export function SecretEditor({ onContinue, onBack }: SecretEditorProps) {
   }, [t, handleContentChange]);
 
   const isEmpty = content.trim() === '';
+  
+  // Calculer la variante pour le bouton
+  const essentials = [
+    checkboxState.emails,
+    checkboxState.phoneCodes,
+    checkboxState.cloudAccounts
+  ];
+  const optional = [
+    checkboxState.computerLogins,
+    checkboxState.otherPasswords,
+    checkboxState.domainManager,
+    checkboxState.passwordManager,
+    checkboxState.backups,
+    checkboxState.crypto
+  ];
+  const { variant, title } = getVariantAndTitle(content, essentials, optional, t);
 
   return (
     <EditorLayout title={t('secretEditor.title')}>
@@ -52,7 +69,7 @@ export function SecretEditor({ onContinue, onBack }: SecretEditorProps) {
       />
 
       
-      <HelpContent />
+      <HelpContent title={title}/>
 
       <ActionButtons
         backLabel={t('common.back')}
@@ -64,6 +81,7 @@ export function SecretEditor({ onContinue, onBack }: SecretEditorProps) {
         showAlternative={isEmpty}
         alternativeLabel={t('secretEditor.sidePanel.generateExample')}
         onAlternative={generateExample}
+        variant={variant}
       />
     </EditorLayout>
   );
@@ -104,9 +122,8 @@ function getVariantAndTitle(content: string, essentials: boolean[], optional: bo
   };
 }
 
-function HelpContent() {
+function HelpContent({ title }: { title: string }) {
   const { t } = useTranslation();
-  const content = useEncryptDataStore((state) => state.what?.content ?? '');
   const checkboxState = useEncryptDataStore((state) => state.what?.checkboxState ?? defaultSecretCheckboxState);
   const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData);
   
@@ -116,26 +133,9 @@ function HelpContent() {
     }));
   };
 
-  const essentials = [
-    checkboxState.emails,
-    checkboxState.phoneCodes,
-    checkboxState.cloudAccounts
-  ]
-  const optional = [
-    checkboxState.emails,
-    checkboxState.phoneCodes,
-    checkboxState.cloudAccounts,
-    checkboxState.computerLogins,
-    checkboxState.otherPasswords,
-    checkboxState.domainManager,
-    checkboxState.passwordManager,
-    checkboxState.backups,
-    checkboxState.crypto
-  ];
-  const { variant, title } = getVariantAndTitle(content, essentials, optional, t);
 
   return (
-    <HelpSection title={title} variant={variant}>
+    <HelpSection title={title}>
       <EssentialSection note={t('secretEditor.sidePanel.essentialNote')}>
         <CheckboxItem
           label={t('secretEditor.sidePanel.checkboxes.emails')}
