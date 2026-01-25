@@ -18,6 +18,7 @@ import { RichTextToolbar } from '../ui/RichTextToolbar';
 import { Icon } from '../ui/Icons';
 import '../../styles/tiptap-editor.css';
 import formControls from '../../styles/form-controls.module.css';
+import helpStyles from '../ui/HelpSection.module.css';
 import styles from './HowEditor.module.css';
 
 interface HowEditorProps {
@@ -218,6 +219,7 @@ export function HowEditor({ onContinue, onBack }: HowEditorProps) {
 
   const helpContent = (
     <>
+      <p className={helpStyles.panelIntro}>{t('howEditor.sidePanel.intro')}</p>
       <EssentialSection note={t('howEditor.sidePanel.essentialNote')}>
         <CheckboxItem
           checked={isValidThreshold && !isTooHigh}
@@ -259,8 +261,6 @@ export function HowEditor({ onContinue, onBack }: HowEditorProps) {
           readonly={!hasConditions}
         />
       </div>
-
-      <TipSection text={t('howEditor.sidePanel.tip')} />
     </>
   );
 
