@@ -29,7 +29,7 @@ export function SecretEditor({ onContinue, onBack }: SecretEditorProps) {
       what: { ...current.what, content: content }
     }));
     setContent(content);
-  }, [setData, setContent]);
+  }, []);
 
   const handleEditorChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
     handleContentChange(event.target.value);

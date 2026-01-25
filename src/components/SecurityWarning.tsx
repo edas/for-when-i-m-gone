@@ -2,6 +2,7 @@ import { useState, useCallback, ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from './ui/LanguageSelector';
 import { Icon } from './ui/Icons';
+import { ActionButton } from './ui/ActionButton';
 import styles from './SecurityWarning.module.css';
 
 interface SecurityWarningProps {
@@ -58,13 +59,12 @@ export function SecurityWarning({ initialChecked, onContinue }: SecurityWarningP
           </label>
         </div>
 
-        <button
-          className={styles.continueButton}
+        <ActionButton
           disabled={!isChecked}
           onClick={handleContinue}
         >
           {t('securityWarning.continueButton')}
-        </button>
+        </ActionButton>
       </div>
     </div>
   );
