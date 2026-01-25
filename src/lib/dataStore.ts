@@ -100,25 +100,36 @@ function readInitialDataFromDOM(): StoredData {
   }
 }
 
-
-
-
-
 /**
  * Zustand store for reactive data management
  * Initialized from DOM at module load
  */
-type Actions = {
+export type StoreActions = {
   setData(updater: (current: StoredData) => Partial<StoredData>, replace?: boolean): void;
   getData(): StoredData;
 }
-export const useDataStore = create<StoredData & Actions>(
+
+export type EncryptStoreActions = {
+  setData(updater: (current: EncryptStoredData) => Partial<EncryptStoredData>, replace?: boolean): void;
+  getData(): EncryptStoredData;
+}
+
+export const useDataStore = create<StoredData & StoreActions>(
   (set, get) => ({
     ...readInitialDataFromDOM(),
     setData: set,
     getData: get,
   })
 )
+
+export function useEncryptDataStore(selector: (data: EncryptStoredData & StoreActions) => any): any {
+  return useDataStore((state) => {
+    if (isEncryptData(state)) {
+      return selector(state);
+    } 
+    throw new Error('Invalid data store');
+  });
+}
 
 export function toExportable(storedData: StoredData) : ExportableStoredData {
   if (isEncryptData(storedData)) {

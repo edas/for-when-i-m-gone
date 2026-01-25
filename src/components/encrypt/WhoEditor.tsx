@@ -19,7 +19,7 @@ import { HelpSection } from '../ui/HelpSection';
 import { CheckboxItem } from '../ui/CheckboxItem';
 import { RecipientCard } from '../ui/RecipientCard';
 import { Icon } from '../ui/Icons';
-import '../../styles/form-controls.css';
+import formControls from '../../styles/form-controls.module.css';
 import styles from './WhoEditor.module.css';
 import {
   type ContactType,
@@ -265,7 +265,7 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
         <CheckboxItem checked={allHaveContact} label={t('whoEditor.sidePanel.checklist.allHaveContact')} readonly />
       </EssentialSection>
 
-      <div className="optional-section">
+      <div className={formControls.optionalSection}>
         <CheckboxItem checked={hasAtLeast5} label={t('whoEditor.sidePanel.checklist.atLeast5')} readonly />
         <CheckboxItem checked={allHaveAddress} label={t('whoEditor.sidePanel.checklist.allHaveAddress')} readonly />
         <CheckboxItem checked={allHaveEmail} label={t('whoEditor.sidePanel.checklist.allHaveEmail')} readonly />
@@ -347,7 +347,7 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
           </div>
           
           <button 
-            className="add-button large" 
+            className={`${formControls.addButton} ${formControls.addButtonLarge}`} 
             onClick={addRecipient}
             disabled={expandedRecipientId !== null && !expandedRecipientHasName}
           >

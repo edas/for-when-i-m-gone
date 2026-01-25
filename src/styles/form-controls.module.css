@@ -4,7 +4,7 @@
  */
 
 /* Text inputs */
-.form-input {
+.formInput {
   padding: 0.75rem 1rem;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -14,24 +14,24 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.form-input::placeholder {
+.formInput::placeholder {
   color: rgba(255, 255, 255, 0.4);
 }
 
-.form-input:focus {
+.formInput:focus {
   outline: none;
   border-color: rgba(96, 165, 250, 0.5);
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
 }
 
 /* Smaller variant */
-.form-input.small {
+.formInputSmall {
   padding: 0.6rem 0.75rem;
   font-size: 0.9rem;
 }
 
 /* Select dropdowns */
-.form-select {
+.formSelect {
   padding: 0.6rem 0.75rem;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -42,19 +42,19 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.form-select:focus {
+.formSelect:focus {
   outline: none;
   border-color: rgba(96, 165, 250, 0.5);
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
 }
 
-.form-select option {
+.formSelect option {
   background: #1a1a2e;
   color: #e2e8f0;
 }
 
 /* Textarea */
-.form-textarea {
+.formTextarea {
   flex: 1;
   min-height: 400px;
   padding: 1.5rem;
@@ -69,31 +69,31 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.form-textarea::placeholder {
+.formTextarea::placeholder {
   color: rgba(255, 255, 255, 0.4);
 }
 
-.form-textarea:focus {
+.formTextarea:focus {
   outline: none;
   border-color: rgba(96, 165, 250, 0.5);
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
 }
 
 /* Form field wrapper */
-.form-field {
+.formField {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-field label {
+.formField label {
   color: #a0aec0;
   font-size: 0.85rem;
   font-weight: 500;
 }
 
 /* Add button (dashed border style) */
-.add-button {
+.addButton {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -108,13 +108,13 @@
   transition: all 0.2s ease;
 }
 
-.add-button:hover {
+.addButton:hover {
   background: rgba(96, 165, 250, 0.15);
   border-color: rgba(96, 165, 250, 0.6);
 }
 
 /* Large add button */
-.add-button.large {
+.addButtonLarge {
   justify-content: center;
   padding: 1rem;
   width: 100%;
@@ -124,14 +124,14 @@
   font-weight: 500;
 }
 
-.add-button:disabled {
+.addButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
 }
 
 /* Remove button (red style) */
-.remove-button {
+.removeButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -146,32 +146,32 @@
   transition: all 0.2s ease;
 }
 
-.remove-button:hover {
+.removeButton:hover {
   background: rgba(239, 68, 68, 0.2);
   border-color: rgba(239, 68, 68, 0.5);
 }
 
-.remove-button.large {
+.removeButtonLarge {
   width: 32px;
   height: 32px;
   border-radius: 8px;
 }
 
 /* Section divider */
-.section-divider {
+.sectionDivider {
   height: 1px;
   background: rgba(255, 255, 255, 0.1);
   margin: 1.5rem 0;
 }
 
 /* Optional section */
-.optional-section {
+.optionalSection {
   margin-top: 1rem;
 }
 
 /* Responsive */
 @media (max-width: 600px) {
-  .form-textarea {
+  .formTextarea {
     min-height: 250px;
   }
 }

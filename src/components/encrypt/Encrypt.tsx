@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import styles from './Encrypt.module.css';
 import SecretEditor from './SecretEditor';
 import WhoEditor from './WhoEditor';
 import HowEditor from './HowEditor';
@@ -25,7 +24,7 @@ export function Encrypt({ onBack: backToParent }: EncryptProps) {
   if (step === 1) return (<WhoEditor onContinue={onContinue} onBack={onBack} />);
   if (step === 2) return (<HowEditor onContinue={onContinue} onBack={onBack} />);
   if (step === 3) return (<IntroMessageEditor onContinue={onContinue} onBack={onBack} />);
-  if (step === 4) return (<GenerateEditor onContinue={onContinue} onBack={onBack} />);
+  if (step === 4) return (<GenerateEditor onBack={onBack} />);
   throw new Error(`Unknown step: ${step}`);
 }
 

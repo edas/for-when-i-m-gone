@@ -1,191 +1,147 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { computeButtonState, getButtonText } from '../../lib/buttonState';
-import { useDataStore } from '../../lib/dataStore';
-import { type SecretCheckboxState } from '../../lib/types/editorTypes';
+import { EncryptStoreActions, useEncryptDataStore } from '../../lib/dataStore';
+import { defaultSecretCheckboxState } from '../../lib/types/editorTypes';
 import { EditorLayout } from '../ui/EditorLayout';
 import { CheckboxItem } from '../ui/CheckboxItem';
 import { ActionButtons } from '../ui/ActionButtons';
 import { EssentialSection } from '../ui/EssentialSection';
 import { HelpSection } from '../ui/HelpSection';
-import { GenerateExampleButton } from '../ui/GenerateExampleButton';
-import { Icon } from '../ui/Icons';
-import '../../styles/form-controls.css';
+import formControls from '../../styles/form-controls.module.css';
 import styles from './SecretEditor.module.css';
 
 interface SecretEditorProps {
-  initialValue?: string;
-  initialCheckboxState?: SecretCheckboxState;
-  onContinue: (secret: string, checkboxState: SecretCheckboxState) => void;
-  onBack: (secret: string, checkboxState: SecretCheckboxState) => void;
+  onContinue: () => void;
+  onBack: () => void;
 }
 
-export function SecretEditor({ initialValue, initialCheckboxState, onContinue, onBack }: SecretEditorProps) {
-  const updateStoredData = useDataStore((state) => state.update);
+export function SecretEditor({ onContinue, onBack }: SecretEditorProps) {
   const { t } = useTranslation();
-  const [secretText, setSecretText] = useState(initialValue ?? '');
+  const {getData, setData}:EncryptStoreActions = useEncryptDataStore((state) => {
+    const {getData, setData} = state;
+    return {getData, setData}
+  });
+  const initialSecret = getData().what?.content ?? '';
+  const [content, setContent] = useState(initialSecret);
 
-  // Checkbox states
-  const [checkEmails, setCheckEmails] = useState(initialCheckboxState?.emails ?? false);
-  const [checkPhoneCodes, setCheckPhoneCodes] = useState(initialCheckboxState?.phoneCodes ?? false);
-  const [checkCloudAccounts, setCheckCloudAccounts] = useState(initialCheckboxState?.cloudAccounts ?? false);
-  const [checkComputerLogins, setCheckComputerLogins] = useState(initialCheckboxState?.computerLogins ?? false);
-  const [checkOtherPasswords, setCheckOtherPasswords] = useState(initialCheckboxState?.otherPasswords ?? false);
-  const [checkDomainManager, setCheckDomainManager] = useState(initialCheckboxState?.domainManager ?? false);
-  const [checkPasswordManager, setCheckPasswordManager] = useState(initialCheckboxState?.passwordManager ?? false);
-  const [checkBackups, setCheckBackups] = useState(initialCheckboxState?.backups ?? false);
-  const [checkCrypto, setCheckCrypto] = useState(initialCheckboxState?.crypto ?? false);
+  const handleContentChange = useCallback((content: string) => {
+    setData((current) => ({
+      what: { ...current.what, content: content }
+    }));
+    setContent(content);
+  }, [setData, setContent]);
 
-  const hasContent = useMemo(() => secretText.trim().length > 0, [secretText]);
-  const isEmpty = useMemo(() => secretText.trim().length === 0, [secretText]);
-  const essentialsChecked = useMemo(() => checkEmails && checkPhoneCodes && checkCloudAccounts, [checkEmails, checkPhoneCodes, checkCloudAccounts]);
-  const anyChecked = useMemo(() => 
-    checkEmails || checkPhoneCodes || checkCloudAccounts ||
-    checkComputerLogins || checkOtherPasswords ||
-    checkDomainManager || checkPasswordManager || checkBackups || checkCrypto,
-    [checkEmails, checkPhoneCodes, checkCloudAccounts, checkComputerLogins, checkOtherPasswords, checkDomainManager, checkPasswordManager, checkBackups, checkCrypto]
-  );
-
-  const buttonState = useMemo(() => computeButtonState(hasContent, anyChecked, essentialsChecked), [hasContent, anyChecked, essentialsChecked]);
-  const buttonTexts = useMemo(() => ({
-    continueWithoutConfirm: t('secretEditor.buttons.continueWithoutConfirm'),
-    continueWithoutEssentials: t('secretEditor.buttons.continueWithoutEssentials'),
-    continue: t('secretEditor.buttons.continue'),
-  }), [t]);
-  const buttonText = useMemo(() => hasContent ? getButtonText(buttonState, buttonTexts) : buttonTexts.continue, [hasContent, buttonState, buttonTexts]);
-
-  const getCurrentCheckboxState = useCallback((): SecretCheckboxState => ({
-    emails: checkEmails,
-    phoneCodes: checkPhoneCodes,
-    cloudAccounts: checkCloudAccounts,
-    computerLogins: checkComputerLogins,
-    otherPasswords: checkOtherPasswords,
-    domainManager: checkDomainManager,
-    passwordManager: checkPasswordManager,
-    backups: checkBackups,
-    crypto: checkCrypto,
-  }), [checkEmails, checkPhoneCodes, checkCloudAccounts, checkComputerLogins, checkOtherPasswords, checkDomainManager, checkPasswordManager, checkBackups, checkCrypto]);
-
-  const handleContinue = useCallback(() => {
-    if (hasContent) onContinue(secretText, getCurrentCheckboxState());
-  }, [hasContent, secretText, getCurrentCheckboxState, onContinue]);
-
-  const handleBack = useCallback(() => {
-    onBack(secretText, getCurrentCheckboxState());
-  }, [secretText, getCurrentCheckboxState, onBack]);
-
+  const handleEditorChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    handleContentChange(event.target.value);
+  }, [handleContentChange]);
+  
   const generateExample = useCallback(() => {
     const example = t('secretEditor.sidePanel.exampleContent');
-    setSecretText(prev => prev.trim() ? prev + '\n\n\n' + example : example);
-  }, [t]);
+    handleContentChange(example);
+  }, [t, handleContentChange]);
 
-  // Auto-save
-  useEffect(() => {
-    updateStoredData((currentData) => ({
-      ...currentData,
-      what: { content: secretText, checkboxState: getCurrentCheckboxState() }
-    }));
-  }, [secretText, getCurrentCheckboxState, updateStoredData]);
-
-  const helpContent = (
-    <>
-      <EssentialSection note={t('secretEditor.sidePanel.essentialNote')}>
-        <CheckboxItem
-          checked={checkEmails}
-          onChange={setCheckEmails}
-          label={t('secretEditor.sidePanel.checkboxes.emails')}
-          essential
-        />
-        <CheckboxItem
-          checked={checkPhoneCodes}
-          onChange={setCheckPhoneCodes}
-          label={t('secretEditor.sidePanel.checkboxes.phoneCodes')}
-          essential
-        />
-        <CheckboxItem
-          checked={checkCloudAccounts}
-          onChange={setCheckCloudAccounts}
-          label={t('secretEditor.sidePanel.checkboxes.cloudAccounts')}
-          essential
-        />
-      </EssentialSection>
-
-      <div className="regular-section">
-        <CheckboxItem
-          checked={checkComputerLogins}
-          onChange={setCheckComputerLogins}
-          label={t('secretEditor.sidePanel.checkboxes.computerLogins')}
-        />
-        <CheckboxItem
-          checked={checkOtherPasswords}
-          onChange={setCheckOtherPasswords}
-          label={t('secretEditor.sidePanel.checkboxes.otherPasswords')}
-        />
-      </div>
-
-      <div className="optional-section">
-        <h3>{t('secretEditor.sidePanel.sectionOptional')}</h3>
-        <CheckboxItem
-          checked={checkDomainManager}
-          onChange={setCheckDomainManager}
-          label={t('secretEditor.sidePanel.checkboxes.domainManager')}
-        />
-        <CheckboxItem
-          checked={checkPasswordManager}
-          onChange={setCheckPasswordManager}
-          label={t('secretEditor.sidePanel.checkboxes.passwordManager')}
-        />
-        <CheckboxItem
-          checked={checkBackups}
-          onChange={setCheckBackups}
-          label={t('secretEditor.sidePanel.checkboxes.backups')}
-        />
-        <CheckboxItem
-          checked={checkCrypto}
-          onChange={setCheckCrypto}
-          label={t('secretEditor.sidePanel.checkboxes.crypto')}
-        />
-      </div>
-    </>
-  );
+  const isEmpty = content.trim() === '';
 
   return (
     <EditorLayout title={t('secretEditor.title')}>
       <textarea
+        value={content}
+        onChange={handleEditorChange}
         autoComplete="off"
-        className="form-textarea"
-        value={secretText}
-        onChange={(e) => setSecretText(e.target.value)}
+        className={formControls.formTextarea}
         placeholder={t('secretEditor.placeholder')}
       />
 
       <HelpSection title={t('secretEditor.sidePanel.title')}>
-        {helpContent}
+        {<HelpContent />}
       </HelpSection>
 
-      {isEmpty ? (
-        <div className={styles.buttonContainer}>
-          <button className={styles.backButton} onClick={handleBack}>
-            <Icon name="arrow-left" size={18} />
-            {t('common.back')}
-          </button>
-          <GenerateExampleButton
-            label={t('secretEditor.sidePanel.generateExample')}
-            onClick={generateExample}
-          />
-        </div>
-      ) : (
-        <ActionButtons
-          backLabel={t('common.back')}
-          continueLabel={buttonText}
-          buttonState={buttonState}
-          disabled={!hasContent}
-          onBack={handleBack}
-          onContinue={handleContinue}
-        />
-      )}
+      <ActionButtons
+        backLabel={t('common.back')}
+        continueLabel={t('common.continue')}
+        buttonState={isEmpty ? "none" : "complete"}
+        disabled={false}
+        onBack={onBack}
+        onContinue={onContinue}
+        showAlternative={!isEmpty}
+        alternativeLabel={t('secretEditor.sidePanel.generateExample')}
+        onAlternative={generateExample}
+      />
     </EditorLayout>
   );
 }
 
 export default SecretEditor;
+
+
+function HelpContent() {
+  const { t } = useTranslation();
+  const secretCheckboxState = useEncryptDataStore((state) => state.what?.checkboxState ?? defaultSecretCheckboxState);
+  const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData);
+  const handleCheckboxChange = (key: string, checked: boolean) => {
+    setData((current) => ({
+      what: { ...current.what, checkboxState: { ...current.what?.checkboxState ?? defaultSecretCheckboxState, [key]: checked } }
+    }));
+  };
+  return (
+    <>
+      <EssentialSection note={t('secretEditor.sidePanel.essentialNote')}>
+        <CheckboxItem
+          label={t('secretEditor.sidePanel.checkboxes.emails')}
+          checked={secretCheckboxState.emails}
+          essential
+          onChange={(checked) => handleCheckboxChange('emails', checked)}
+        />
+        <CheckboxItem
+          label={t('secretEditor.sidePanel.checkboxes.phoneCodes')}
+          checked={secretCheckboxState.phoneCodes}
+          essential
+          onChange={(checked) => handleCheckboxChange('phoneCodes', checked)}
+        />
+        <CheckboxItem
+          label={t('secretEditor.sidePanel.checkboxes.cloudAccounts')}
+          checked={secretCheckboxState.cloudAccounts}
+          essential
+          onChange={(checked) => handleCheckboxChange('cloudAccounts', checked)}
+        />
+      </EssentialSection>
+
+      <div className={styles.regularSection}>
+        <CheckboxItem
+          label={t('secretEditor.sidePanel.checkboxes.computerLogins')}
+          checked={secretCheckboxState.computerLogins}
+          onChange={(checked) => handleCheckboxChange('computerLogins', checked)}
+        />
+        <CheckboxItem
+          label={t('secretEditor.sidePanel.checkboxes.otherPasswords')}
+          checked={secretCheckboxState.otherPasswords}
+          onChange={(checked) => handleCheckboxChange('otherPasswords', checked)}
+        />
+      </div>
+
+      <div className={formControls.optionalSection}>
+        <h3>{t('secretEditor.sidePanel.sectionOptional')}</h3>
+        <CheckboxItem
+          label={t('secretEditor.sidePanel.checkboxes.domainManager')}
+          checked={secretCheckboxState.domainManager}
+          onChange={(checked) => handleCheckboxChange('domainManager', checked)}
+        />
+        <CheckboxItem
+          label={t('secretEditor.sidePanel.checkboxes.passwordManager')}
+          checked={secretCheckboxState.passwordManager}
+          onChange={(checked) => handleCheckboxChange('passwordManager', checked)}
+        />
+        <CheckboxItem
+          label={t('secretEditor.sidePanel.checkboxes.backups')}
+          checked={secretCheckboxState.backups}
+          onChange={(checked) => handleCheckboxChange('backups', checked)}
+        />
+        <CheckboxItem
+          label={t('secretEditor.sidePanel.checkboxes.crypto')}
+          checked={secretCheckboxState.crypto}
+          onChange={(checked) => handleCheckboxChange('crypto', checked)}
+        />
+      </div>
+    </>
+  );
+}

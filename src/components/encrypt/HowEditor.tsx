@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { Editor, JSONContent } from '@tiptap/core';
 import { useTranslation } from 'react-i18next';
-import { useDataStore } from '../../lib/dataStore';
+import { EncryptStoreActions, useEncryptDataStore } from '../../lib/dataStore';
 import { computeButtonStateCustom, getButtonText } from '../../lib/buttonState';
 import { type HowData } from '../../lib/types/editorTypes';
 import { parseHtmlToJson } from '../../lib/htmlParser';
@@ -17,12 +17,10 @@ import { TipSection } from '../ui/TipSection';
 import { RichTextToolbar } from '../ui/RichTextToolbar';
 import { Icon } from '../ui/Icons';
 import '../../styles/tiptap-editor.css';
+import formControls from '../../styles/form-controls.module.css';
 import styles from './HowEditor.module.css';
 
 interface HowEditorProps {
-  recipientCount: number;
-  initialData?: Partial<HowData>;
-  aesKey?: Uint8Array;
   onContinue: (data: HowData) => void;
   onBack: (data: HowData) => void;
 }
@@ -33,29 +31,44 @@ function getDefaultThreshold(count: number): number {
   return 4;
 }
 
-export function HowEditor({ recipientCount, initialData, aesKey, onContinue, onBack }: HowEditorProps) {
-  const updateStoredData = useDataStore((state) => state.update);
+export function HowEditor({ onContinue, onBack }: HowEditorProps) {
   const { t } = useTranslation();
+  const { getData, setData }: EncryptStoreActions = useEncryptDataStore((state) => {
+    const { getData, setData } = state;
+    return { getData, setData };
+  });
+  
+  // Récupérer les données depuis le store (réactif)
+  const recipientCount = useEncryptDataStore((state) => state.who?.recipients?.length ?? 0);
+  const aesKey = useEncryptDataStore((state) => state.generate?.aesKey);
+  
+  // Récupérer les données initiales une seule fois pour l'initialisation des états
+  const storedDataForInit = getData();
 
   const getDefaultConditions = useCallback((): JSONContent => {
     return parseHtmlToJson(t('howEditor.sidePanel.exampleContent'));
   }, [t]);
 
   // State
-  const [inputValue, setInputValue] = useState(() => 
-    initialData?.threshold !== undefined 
-      ? String(initialData.threshold) 
-      : String(getDefaultThreshold(recipientCount))
-  );
+  const [inputValue, setInputValue] = useState(() => {
+    const initData = storedDataForInit.how;
+    const initRecipientCount = storedDataForInit.who?.recipients?.length ?? 0;
+    return initData?.threshold !== undefined 
+      ? String(initData.threshold) 
+      : String(getDefaultThreshold(initRecipientCount));
+  });
   const [conditionsJson, setConditionsJson] = useState<JSONContent | null>(() => 
-    initialData?.conditions ?? null
+    storedDataForInit.how?.conditions ?? null
   );
-  const [isConditionsUnmodified, setIsConditionsUnmodified] = useState(() => 
-    initialData?.isConditionsUnmodified ?? !initialData?.conditions
-  );
-  const [hasNoOpenConditions, setHasNoOpenConditions] = useState(() => 
-    isConditionsUnmodified ? true : (initialData?.hasNoOpenConditions ?? false)
-  );
+  const [isConditionsUnmodified, setIsConditionsUnmodified] = useState(() => {
+    const initData = storedDataForInit.how;
+    return initData?.isConditionsUnmodified ?? !initData?.conditions;
+  });
+  const [hasNoOpenConditions, setHasNoOpenConditions] = useState(() => {
+    const initData = storedDataForInit.how;
+    const initIsUnmodified = initData?.isConditionsUnmodified ?? !initData?.conditions;
+    return initIsUnmodified ? true : (initData?.hasNoOpenConditions ?? false);
+  });
   const [editorVersion, setEditorVersion] = useState(0);
   
   const editorRef = useRef<HTMLDivElement>(null);
@@ -194,11 +207,10 @@ export function HowEditor({ recipientCount, initialData, aesKey, onContinue, onB
 
   // Auto-save
   useEffect(() => {
-    updateStoredData((currentData) => ({
-      ...currentData,
+    setData((_current) => ({
       how: getCurrentData()
     }));
-  }, [getCurrentData, updateStoredData]);
+  }, [getCurrentData, setData]);
 
   const toolbarLabels = useMemo(() => ({
     bold: t('howEditor.toolbar.bold'),
@@ -230,7 +242,7 @@ export function HowEditor({ recipientCount, initialData, aesKey, onContinue, onB
         />
       </EssentialSection>
 
-      <div className="optional-section">
+      <div className={formControls.optionalSection}>
         <CheckboxItem
           checked={isAtLeast3}
           label={t('howEditor.sidePanel.checklist.atLeast3')}

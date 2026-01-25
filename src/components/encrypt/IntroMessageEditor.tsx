@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { Editor, JSONContent } from '@tiptap/core';
 import { useTranslation } from 'react-i18next';
 import { computeButtonState, getButtonText } from '../../lib/buttonState';
-import { useDataStore } from '../../lib/dataStore';
+import { EncryptStoreActions, useEncryptDataStore } from '../../lib/dataStore';
 import { type IntroCheckboxState } from '../../lib/types/editorTypes';
 import { 
   RecipientsBlock, 
@@ -21,40 +21,40 @@ import {
   computeInitialCheckboxState,
   type CheckboxSyncState,
 } from '../../lib/checkboxSync';
-import type { Recipient } from '../../lib/types/recipient';
 import { EditorLayout } from '../ui/EditorLayout';
 import { CheckboxItem } from '../ui/CheckboxItem';
 import { ActionButtons } from '../ui/ActionButtons';
 import { EssentialSection } from '../ui/EssentialSection';
 import { HelpSection } from '../ui/HelpSection';
 import { RichTextToolbar } from '../ui/RichTextToolbar';
+import formControls from '../../styles/form-controls.module.css';
 import '../../styles/tiptap-editor.css';
 import styles from './IntroMessageEditor.module.css';
 
 interface IntroMessageEditorProps {
-  initialValue?: JSONContent | null;
-  initialCheckboxState?: IntroCheckboxState;
-  threshold: number;
-  conditions?: JSONContent | null;
-  recipients?: Recipient[];
   onContinue: (message: JSONContent | null, checkboxState: IntroCheckboxState) => void;
   onBack: (message: JSONContent | null, checkboxState: IntroCheckboxState) => void;
 }
 
 export function IntroMessageEditor({ 
-  initialValue, 
-  initialCheckboxState, 
-  threshold, 
-  conditions, 
-  recipients, 
   onContinue, 
   onBack 
 }: IntroMessageEditorProps) {
-  const updateStoredData = useDataStore((state) => state.update);
   const { t, i18n } = useTranslation();
+  const { getData, setData }: EncryptStoreActions = useEncryptDataStore((state) => {
+    const { getData, setData } = state;
+    return { getData, setData };
+  });
 
-  // Get initial content - empty by default
-  const initialContent = initialValue ?? null;
+  // Récupérer les données depuis le store (réactif)
+  const recipients = useEncryptDataStore((state) => state.who?.recipients ?? []);
+  const conditions = useEncryptDataStore((state) => state.how?.conditions ?? null);
+  const threshold = useEncryptDataStore((state) => state.how?.threshold ?? 2);
+
+  // Récupérer les données initiales une seule fois pour l'initialisation des états
+  const storedDataForInit = getData();
+  const initialContent = storedDataForInit.intro?.message ?? null;
+  const initialCheckboxState = storedDataForInit.intro?.checkboxState;
 
   // Initialize checkbox states based on content detection or saved state
   const getInitialCheckboxStates = useCallback((content: JSONContent | null, saved?: IntroCheckboxState) => {
@@ -262,11 +262,10 @@ export function IntroMessageEditor({
 
   // Auto-save
   useEffect(() => {
-    updateStoredData((currentData) => ({
-      ...currentData,
+    setData((_current) => ({
       intro: { message: messageJson, checkboxState: getCurrentCheckboxState() }
     }));
-  }, [messageJson, getCurrentCheckboxState, updateStoredData]);
+  }, [messageJson, getCurrentCheckboxState, setData]);
 
   const helpContent = (
     <>
@@ -314,7 +313,7 @@ export function IntroMessageEditor({
         />
       </EssentialSection>
 
-      <div className="optional-section">
+      <div className={formControls.optionalSection}>
         <CheckboxItem
           checked={checkDirectives}
           onChange={setCheckDirectives}

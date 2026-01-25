@@ -2,6 +2,7 @@ import { useEffect, useRef, KeyboardEvent, MouseEvent, DragEvent } from 'react';
 import type { Recipient } from '../../lib/types/recipient';
 import { ContactRow } from './ContactRow';
 import { Icon } from './Icons';
+import formControls from '../../styles/form-controls.module.css';
 import styles from './RecipientCard.module.css';
 
 interface ContactTypeOption {
@@ -137,7 +138,7 @@ export function RecipientCard({
                 ref={nameInputRef}
                 id={`name-${recipient.id}`}
                 type="text"
-                className={`form-input ${styles.recipientNameInput}`}
+                className={`${formControls.formInput} ${styles.recipientNameInput}`}
                 value={recipient.name}
                 onChange={(e) => onUpdateField('name', e.target.value)}
                 placeholder={t.placeholders.name}
