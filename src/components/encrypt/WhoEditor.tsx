@@ -39,11 +39,7 @@ const CONTACT_TYPES: ContactType[] = [
 function computeDerivedState(recipients: Recipient[]) {
   // Filter out hidden recipients (isPrivate === true) for contact checks
   const visibleRecipients = recipients.filter(r => !r.isPrivate);
-  
   const unnamedCount = recipients.filter(r => !r.name.trim()).length;
-  const noContactsCount = recipients.filter(r => 
-    !r.contacts.length || r.contacts.every(c => !c.value.trim())
-  ).length;
   
   const hasAtLeast2 = recipients.length >= 2;
   const hasAtLeast3 = recipients.length >= 3;
@@ -53,7 +49,6 @@ function computeDerivedState(recipients: Recipient[]) {
   const allHaveContact = visibleRecipients.length > 0 && visibleRecipients.every(r => 
     r.contacts.length > 0 && r.contacts.some(c => c.value.trim())
   );
-  const allEssentialsChecked = hasAtLeast3 && allNamed && allHaveContact;
   
   // Only check visible recipients for contact types
   const allHaveAddress = visibleRecipients.length > 0 && visibleRecipients.every(r => 
@@ -67,9 +62,9 @@ function computeDerivedState(recipients: Recipient[]) {
   );
 
   return {
-    unnamedCount, noContactsCount,
+    unnamedCount,
     hasAtLeast2, hasAtLeast3, hasAtLeast5,
-    allNamed, allHaveContact, allEssentialsChecked,
+    allNamed, allHaveContact,
     allHaveAddress, allHaveEmail, allHavePhone,
   };
 }
@@ -309,7 +304,7 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
           onAddRecipient={addRecipient}
         />
 
-        <HelpContent derived={derived} recipientCount={recipients.length} title={title} />
+        <HelpContent derived={derived} title={title} />
 
         <ActionButtons
           backLabel={t('common.back')}
@@ -461,13 +456,12 @@ function DropZone({ index, isActive, isHidden, onDragOver, onDragLeave, onDrop }
 
 interface HelpContentProps {
   derived: ReturnType<typeof computeDerivedState>;
-  recipientCount: number;
   title: string;
 }
 
-function HelpContent({ derived, recipientCount, title }: HelpContentProps) {
+function HelpContent({ derived, title }: HelpContentProps) {
   const { t } = useTranslation();
-  const { unnamedCount, noContactsCount, hasAtLeast3, hasAtLeast5, allNamed, allHaveContact, allHaveAddress, allHaveEmail, allHavePhone } = derived;
+  const { hasAtLeast3, hasAtLeast5, allNamed, allHaveContact, allHaveAddress, allHaveEmail, allHavePhone } = derived;
 
   return (
     <HelpSection title={title}>     

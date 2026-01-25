@@ -33,12 +33,8 @@ function getDefaultThreshold(count: number): number {
 
 export function HowEditor({ onContinue, onBack }: HowEditorProps) {
   const { t } = useTranslation();
-  const { getData, setData }: EncryptStoreActions = useEncryptDataStore((state) => {
-    const { getData, setData } = state;
-    return { getData, setData };
-  });
-  
-  // Récupérer les données depuis le store (réactif)
+  const getData: EncryptStoreActions['getData'] = useEncryptDataStore((state) => state.getData);
+  const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData);
   const recipientCount = useEncryptDataStore((state) => state.who?.recipients?.length ?? 0);
   const aesKey = useEncryptDataStore((state) => state.generate?.aesKey);
   
