@@ -75,8 +75,6 @@ whoEditor:
   addContact: Ajouter une coordonnée
   removeContact: Retirer cette coordonnée
   buttons:
-    continueWithoutConfirm: Continuer sans confirmation
-    continueWithoutEssentials: Continuer sans les essentiels
     continue: Continuer
   fields:
     name: Qui est-ce ?
@@ -111,7 +109,7 @@ whoEditor:
     errorTitle: Saisissez au moins deux destinataires
     unnamedTitle: Saisissez un nom pour le destinataire
     warningTitle: "Critères essentiels : {{count}}/{{total}}"
-    infoTitle: "Critères à vérifier : {{count}}/{{total}}"
+    infoTitle: "Critères vérifiés : {{count}}/{{total}}"
     successTitle: "Critères vérifiés : {{count}}/{{total}}"
     recipientCount: personne(s) enregistrée(s)
     warnings:
@@ -233,12 +231,12 @@ howEditor:
   threshold:
     title: Quorum requis
     subtitle: Combien de personnes doivent se réunir pour reconstituer le secret ?
-    outOf: sur {count} destinataires
+    outOf: sur {{count}} destinataires
     errorOne: >-
       Si une seule personne suffit, transmettez simplement votre secret en clair, 
       sans utiliser ce programme.
   conditions:
-    title: Conditions d'ouverture du secret
+    title: Comment et sous quelles conditions doivent-elles le faire ?
     placeholder: "Décrivez dans quels cas le secret doit être ouvert, et dans quels cas il ne doit PAS l'être.\n\nEx : En cas de décès ou d'incapacité prolongée, mais PAS en cas de simple voyage ou d'hospitalisation temporaire..."
   toolbar:
     bold: Gras
@@ -253,6 +251,12 @@ howEditor:
     intro: >-
       Définissez clairement les règles d'accès à votre secret pour éviter 
       les malentendus et les abus.
+    errorTitle: Définissez des conditions d'accès valides
+    quorumTooHighTitle: Le quorum doit être inférieur au nombre de destinataires
+    missingConditionsTitle: Définissez vos conditions d'ouverture
+    warningTitle: "Critères essentiels : {{count}}/{{total}}"
+    infoTitle: "Critères à vérifier : {{count}}/{{total}}"
+    successTitle: "Critères vérifiés : {{count}}/{{total}}"
     essentialNote: >-
       Ces éléments sont essentiels pour garantir que votre secret 
       sera ouvert dans les bonnes circonstances.

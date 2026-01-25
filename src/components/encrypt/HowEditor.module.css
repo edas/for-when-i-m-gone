@@ -7,7 +7,7 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  padding: 2rem 1.5rem 0rem 1.5rem;
+  padding: 2rem 0 0 0;
   overflow-y: auto;
 }
 
@@ -192,19 +192,6 @@
   min-height: 0;
 }
 
-.conditionLabel {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #e2e8f0;
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-.conditionLabel svg {
-  flex-shrink: 0;
-  color: #60a5fa;
-}
 
 .editorWrapper {
   flex: 1;
@@ -225,7 +212,7 @@
 
 @media (max-width: 600px) {
   .howContent {
-    padding: 1.5rem 1rem;
+    padding: 1.5rem 0 0 0;
     gap: 1.5rem;
   }
 

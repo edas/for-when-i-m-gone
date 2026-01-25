@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EssentialSection } from '../../ui/EssentialSection';
 import { HelpSection } from '../../ui/HelpSection';
@@ -13,6 +13,7 @@ interface HowEditorHelpContentProps {
   hasNoOpenConditions: boolean;
   onHasNoOpenConditionsChange: (value: boolean) => void;
   recipientCount: number;
+  onVariantChange?: (variant: 'error' | 'warning' | 'info' | 'success') => void;
 }
 
 export function HowEditorHelpContent({
@@ -21,6 +22,7 @@ export function HowEditorHelpContent({
   hasNoOpenConditions,
   onHasNoOpenConditionsChange,
   recipientCount,
+  onVariantChange,
 }: HowEditorHelpContentProps) {
   const { t } = useTranslation();
   
@@ -35,10 +37,19 @@ export function HowEditorHelpContent({
 
   const essentials = [isValidThreshold && !isTooHigh, isLowerThanRecipientCount, hasConditions];
   const optional = [isAtLeast3, isAtMost5, hasNoOpenConditions];
-  const { title } = useMemo(
-    () => getVariantAndTitle(canContinue, essentials, optional, t),
-    [canContinue, essentials, optional, t]
+  const essentialsStrikethrough = useMemo(() => [false, recipientCount <= 2, false], [recipientCount]);
+  const optionalStrikethrough = useMemo(() => [recipientCount <= 2, false, false], [recipientCount]);
+  const { variant, title } = useMemo(
+    () => getVariantAndTitle(canContinue, essentials, optional, hasConditions, essentialsStrikethrough, optionalStrikethrough, isTooHigh, t),
+    [canContinue, essentials, optional, hasConditions, essentialsStrikethrough, optionalStrikethrough, isTooHigh, t]
   );
+
+  // Notify parent of variant change
+  useEffect(() => {
+    if (onVariantChange) {
+      onVariantChange(variant);
+    }
+  }, [variant, onVariantChange]);
 
   return (
     <HelpSection title={title}>

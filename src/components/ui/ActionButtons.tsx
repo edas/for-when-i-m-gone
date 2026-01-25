@@ -61,8 +61,6 @@ export function ActionButtons({
             >
               {buttonState === 'none' ? (
                 <Icon name="info" />
-              ) : buttonState === 'partial' ? (
-                <Icon name="layers" />
               ) : (
                 <Icon name="check" />
               )}

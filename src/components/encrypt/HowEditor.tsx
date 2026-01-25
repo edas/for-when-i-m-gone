@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EncryptStoreActions, useEncryptDataStore } from '../../lib/dataStore';
-import { computeButtonStateCustom, getButtonText } from '../../lib/buttonState';
+import { computeButtonStateCustom } from '../../lib/buttonState';
 import { EditorLayout } from '../ui/EditorLayout';
 import { ActionButtons } from '../ui/ActionButtons';
 import { RichTextToolbar } from '../ui/RichTextToolbar';
@@ -56,16 +56,15 @@ export function HowEditor({ onContinue, onBack }: HowEditorProps) {
   // Check if AES key is already generated (read-only mode)
   const isAesKeyGenerated = aesKey instanceof Uint8Array;
 
+  // Variant for button
+  const [variant, setVariant] = useState<'error' | 'warning' | 'info' | 'success'>('error');
+
   // Button state
   const buttonState = useMemo(
     () => computeButtonStateCustom(derived.canContinue, derived.allEssentialsChecked),
     [derived.canContinue, derived.allEssentialsChecked]
   );
-  const buttonTexts = useMemo(() => ({
-    continueWithoutEssentials: t('howEditor.buttons.continueWithoutEssentials'),
-    continue: t('howEditor.buttons.continue'),
-  }), [t]);
-  const buttonText = useMemo(() => getButtonText(buttonState, buttonTexts), [buttonState, buttonTexts]);
+  const buttonText = t('howEditor.buttons.continue');
 
   // Handlers
   const handleContinue = useCallback(() => {
@@ -158,8 +157,7 @@ export function HowEditor({ onContinue, onBack }: HowEditorProps) {
 
         {/* Conditions Section */}
         <section className={styles.conditionsSection}>
-          <label className={styles.conditionLabel}>
-            <Icon name="info" size={20} />
+          <label className={styles.sectionSubtitle}>
             {t('howEditor.conditions.title')}
           </label>
           
@@ -181,6 +179,7 @@ export function HowEditor({ onContinue, onBack }: HowEditorProps) {
         hasNoOpenConditions={editor.hasNoOpenConditions}
         onHasNoOpenConditionsChange={editor.setHasNoOpenConditions}
         recipientCount={recipientCount}
+        onVariantChange={setVariant}
       />
 
       <ActionButtons
@@ -193,6 +192,7 @@ export function HowEditor({ onContinue, onBack }: HowEditorProps) {
         alternativeLabel={t('howEditor.sidePanel.generateExample')}
         showAlternative={!editor.hasConditions}
         onAlternative={editor.generateExample}
+        variant={variant}
       />
     </EditorLayout>
   );

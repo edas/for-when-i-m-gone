@@ -157,7 +157,7 @@ secretEditor:
     expand: Checklist
     errorTitle: Enter secrets to transmit
     warningTitle: "Essential information: {{count}}/{{total}}"
-    infoTitle: "Information to verify: {{count}}/{{total}}"
+    infoTitle: "Information verified: {{count}}/{{total}}"
     successTitle: "Information verified: {{count}}/{{total}}"
     checkboxes:
       emails: Email addresses and corresponding passwords
@@ -232,12 +232,12 @@ howEditor:
   threshold:
     title: Required quorum
     subtitle: How many people must gather to reconstruct the secret?
-    outOf: out of {count} recipients
+    outOf: out of {{count}} recipients
     errorOne: >-
       If only one person is sufficient, simply transmit your secret in plain text, 
       without using this program.
   conditions:
-    title: Conditions for opening the secret
+    title: How and under what conditions should they do it?
     placeholder: "Describe when the secret should be opened, and when it should NOT be opened.\n\nE.g.: In case of death or prolonged incapacity, but NOT in case of simple travel or temporary hospitalization..."
   toolbar:
     bold: Bold
@@ -252,6 +252,12 @@ howEditor:
     intro: >-
       Clearly define the rules for accessing your secret to prevent 
       misunderstandings and abuse.
+    errorTitle: Define valid access conditions
+    quorumTooHighTitle: The quorum must be lower than the number of recipients
+    missingConditionsTitle: Define your opening conditions
+    warningTitle: "Essential criteria: {{count}}/{{total}}"
+    infoTitle: "Criteria to verify: {{count}}/{{total}}"
+    successTitle: "Criteria verified: {{count}}/{{total}}"
     essentialNote: >-
       These elements are essential to ensure your secret 
       will be opened under the right circumstances.

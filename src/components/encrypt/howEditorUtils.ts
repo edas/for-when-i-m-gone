@@ -70,8 +70,24 @@ export function getVariantAndTitle(
   canContinue: boolean,
   essentials: boolean[],
   optional: boolean[],
+  hasConditions: boolean,
+  essentialsStrikethrough: boolean[],
+  optionalStrikethrough: boolean[],
+  isTooHigh: boolean,
   t: TFunction
 ): { variant: 'error' | 'warning' | 'info' | 'success'; title: string } {
+  if (isTooHigh) {
+    return {
+      variant: 'error',
+      title: t('howEditor.sidePanel.quorumTooHighTitle'),
+    };
+  }
+  if (canContinue && !hasConditions) {
+    return {
+      variant: 'error',
+      title: t('howEditor.sidePanel.missingConditionsTitle'),
+    };
+  }
   if (!canContinue) {
     return {
       variant: 'error',
@@ -79,12 +95,23 @@ export function getVariantAndTitle(
     };
   }
 
+  // For determining satisfaction, only count non-strikethrough criteria
+  const activeEssentials = essentials.filter((_, index) => !essentialsStrikethrough[index]);
+  const activeOptional = optional.filter((_, index) => !optionalStrikethrough[index]);
+  const activeEssentialCount = activeEssentials.filter(Boolean).length;
+  const activeEssentialTotal = activeEssentials.length;
+  const activeOptionalCount = activeOptional.filter(Boolean).length;
+  const activeOptionalTotal = activeOptional.length;
+  const activeAllCheckedCount = activeEssentialCount + activeOptionalCount;
+  const activeAllTotal = activeEssentialTotal + activeOptionalTotal;
+  const allChecked = activeAllCheckedCount === activeAllTotal && activeAllTotal > 0;
+  const allEssentialChecked = activeEssentialCount === activeEssentialTotal && activeEssentialTotal > 0;
+
+  // For display in title, count all criteria (including strikethrough)
   const essentialCount = essentials.filter(Boolean).length;
   const essentialTotal = essentials.length;
   const allCheckedCount = essentialCount + optional.filter(Boolean).length;
   const allTotal = essentialTotal + optional.length;
-  const allChecked = allCheckedCount === allTotal;
-  const allEssentialChecked = essentialCount === essentialTotal;
 
   if (allChecked) {
     return {
