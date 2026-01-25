@@ -4,7 +4,7 @@ import WhoEditor from './WhoEditor';
 import HowEditor from './HowEditor';
 import IntroMessageEditor from './IntroMessageEditor';
 import GenerateEditor from './GenerateEditor';
-import { EncryptStepHeader } from './EncryptStepHeader';
+import { EncryptStepHeader } from './header/EncryptStepHeader';
 
 interface EncryptProps {
   onBack: () => void;

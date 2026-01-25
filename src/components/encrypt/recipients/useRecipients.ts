@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-import { type Recipient } from '../../lib/types/recipient';
-import { createEmptyContact, createEmptyRecipient } from './whoEditorUtils';
-import { EncryptStoreActions, useEncryptDataStore } from '../../lib/dataStore';
+import { type Recipient } from '../../../lib/types/recipient';
+import { createEmptyContact, createEmptyRecipient } from '../whoEditorUtils';
+import { EncryptStoreActions, useEncryptDataStore } from '../../../lib/dataStore';
 
 export function useRecipientActions() {
   const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData) ;

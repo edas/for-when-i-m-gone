@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RecipientCard } from '../ui/RecipientCard';
-import { Icon } from '../ui/Icons';
-import formControls from '../../styles/form-controls.module.css';
-import styles from './WhoEditor.module.css';
+import { RecipientCard } from './RecipientCard';
+import { Icon } from '../../ui/Icons';
+import formControls from '../../../styles/form-controls.module.css';
+import styles from '../WhoEditor.module.css';
 import { DropZone } from './WhoEditorDropZone';
-import { useEncryptDataStore } from '../../lib/dataStore';
+import { useEncryptDataStore } from '../../../lib/dataStore';
 import { useRecipientActions } from './useRecipients';
 import { useDragAndDrop } from './useDragAndDrop';
-import { Recipient } from '../../lib/types/recipient';
-import { CONTACT_TYPES } from './whoEditorUtils';
+import { Recipient } from '../../../lib/types/recipient';
+import { CONTACT_TYPES } from '../whoEditorUtils';
+
+const noRecipients: Recipient[] = []
 
 export function RecipientsList() {
   const { t } = useTranslation();
@@ -35,7 +37,7 @@ export function RecipientsList() {
   }), [t]);
 
   const recipientCardRefs = useRef<Record<string, HTMLDivElement>>({});
-  const recipients: Recipient[] = useEncryptDataStore((state) => state.who?.recipients ?? []);
+  const recipients: Recipient[] = useEncryptDataStore((state) => state.who?.recipients ?? noRecipients);
   const [expandedRecipientId, setExpandedRecipientId] = useState<string | null>(null);
   const [autoFocusRecipientId, setAutoFocusRecipientId] = useState<string | null>(null);
   const expandedRecipient = recipients.find(recipient => recipient.id === expandedRecipientId);

@@ -1,4 +1,4 @@
-import styles from './WhoEditor.module.css';
+import styles from '../WhoEditor.module.css';
 
 interface DropZoneProps {
   index: number;

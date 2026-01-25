@@ -1,10 +1,10 @@
 import { useEffect, useRef, type DragEvent } from 'react';
-import type { Recipient } from '../../lib/types/recipient';
+import type { Recipient } from '../../../lib/types/recipient';
 import { ContactRow } from './ContactRow';
-import { Icon } from './Icons';
-import formControls from '../../styles/form-controls.module.css';
+import { Icon } from '../../ui/Icons';
+import formControls from '../../../styles/form-controls.module.css';
 import styles from './RecipientCard.module.css';
-import { useRecipientActions } from '../encrypt/useRecipients';
+import { useRecipientActions } from './useRecipients';
 
 interface ContactTypeOption {
   value: string;

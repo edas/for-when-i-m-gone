@@ -1,6 +1,6 @@
-import type { ContactInfo } from '../../lib/types/recipient';
-import { Icon } from './Icons';
-import formControls from '../../styles/form-controls.module.css';
+import type { ContactInfo } from '../../../lib/types/recipient';
+import { Icon } from '../../ui/Icons';
+import formControls from '../../../styles/form-controls.module.css';
 import styles from './ContactRow.module.css';
 
 interface ContactTypeOption {

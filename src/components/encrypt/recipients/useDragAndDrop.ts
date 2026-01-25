@@ -7,8 +7,8 @@ import {
   handleDrop as dndDrop,
   isDropZoneHidden as dndIsHidden,
   type DragDropState,
-} from '../../lib/dragAndDrop';
-import { type Recipient } from '../../lib/types/recipient';
+} from '../../../lib/dragAndDrop';
+import { type Recipient } from '../../../lib/types/recipient';
 
 export function useDragAndDrop(recipients: Recipient[], setRecipients: (recipients: Recipient[]) => void) {
   const [dragState, setDragState] = useState<DragDropState>({ draggedItemId: null, activeDropZone: null });

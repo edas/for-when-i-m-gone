@@ -6,8 +6,10 @@ import { ActionButtons } from '../ui/ActionButtons';
 import styles from './WhoEditor.module.css';
 import { type Recipient } from '../../lib/types/recipient';
 import { computeDerivedState, getVariantAndTitle } from './whoEditorUtils';
-import { RecipientsList } from './WhoEditorRecipientsList';
-import { WhoEditorHelpContent } from './WhoEditorHelpContent';
+import { RecipientsList } from './recipients/WhoEditorRecipientsList';
+import { WhoEditorHelpContent } from './recipients/WhoEditorHelpContent';
+
+const noRecipients: Recipient[] = []
 
 interface WhoEditorProps {
   onContinue: (recipients: Recipient[]) => void;
@@ -18,7 +20,7 @@ export function WhoEditor({ onContinue, onBack }: WhoEditorProps) {
   const { t } = useTranslation();
 
   // Derived states
-  const recipients = useEncryptDataStore((state) => state.who?.recipients ?? []);
+  const recipients = useEncryptDataStore((state) => state.who?.recipients ?? noRecipients);
   const derived = useMemo(() => computeDerivedState(recipients), [recipients]);
   const essentials = [derived.hasAtLeast3, derived.allNamed, derived.allHaveContact];
   const optional = [derived.hasAtLeast5, derived.allHaveAddress, derived.allHaveEmail, derived.allHavePhone];
