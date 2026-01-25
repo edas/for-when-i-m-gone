@@ -102,7 +102,7 @@ export function HowEditor({ onContinue, onBack }: HowEditorProps) {
       <div className={styles.howContent}>
         {/* Threshold Section */}
         <section className={styles.thresholdSection}>
-          <h2 className={styles.sectionTitle}>{t('howEditor.threshold.title')}</h2>
+          
           <p className={styles.sectionSubtitle}>{t('howEditor.threshold.subtitle')}</p>
           
           <div className={styles.thresholdContent}>
