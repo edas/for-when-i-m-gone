@@ -6,7 +6,6 @@ import { EncryptStoreActions, useEncryptDataStore } from '../../lib/dataStore';
 export function useRecipientActions() {
   const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData) ;
   const addNewRecipient = useCallback(() => {
-    console.log('addNewRecipient');
     const newRecipient = createEmptyRecipient();
     setData((prev) => ({ who: { ...prev.who, recipients: [...prev.who?.recipients ?? [], newRecipient] } }));
     return newRecipient;

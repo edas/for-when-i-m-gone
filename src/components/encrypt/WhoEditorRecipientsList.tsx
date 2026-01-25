@@ -11,8 +11,6 @@ import { useDragAndDrop } from './useDragAndDrop';
 import { Recipient } from '../../lib/types/recipient';
 import { CONTACT_TYPES } from './whoEditorUtils';
 
-
-
 export function RecipientsList() {
   const { t } = useTranslation();
   
@@ -62,14 +60,17 @@ export function RecipientsList() {
     isDropZoneHidden,
    } = useDragAndDrop(recipients, setRecipients);
 
+  const hasInitializedRef = useRef(false);
   useEffect(() => {
+    // Évite double exécution en React Strict Mode
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
     // on ouvre le destinataire incomplet (non nommé) ou en crée un s'il n'y en a pas
     const rec = recipients.find(recipient => recipient.name.trim() == '')
     if (rec) {
       setExpandedRecipientId(rec.id)
       setAutoFocusRecipientId(rec.id)
     } else if (recipients.length == 0) {
-      console.log('create new recipient because there are no recipients');
       const newRecipient = addNewRecipient()
       setExpandedRecipientId(newRecipient.id)
       setAutoFocusRecipientId(newRecipient.id)
