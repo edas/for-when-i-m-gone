@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EncryptStoreActions, useEncryptDataStore } from '../../lib/dataStore';
-import { defaultSecretCheckboxState } from '../../lib/types/editorTypes';
+import { EncryptStoreActions, EncryptStoredData, useEncryptDataStore } from '../../lib/dataStore';
+import { defaultSecretCheckboxState, SecretCheckboxState } from '../../lib/types/editorTypes';
 import { EditorLayout } from '../ui/EditorLayout';
 import { CheckboxItem } from '../ui/CheckboxItem';
 import { ActionButtons } from '../ui/ActionButtons';
@@ -133,66 +133,38 @@ function HelpContent({ title }: { title: string }) {
     }));
   };
 
-
   return (
     <HelpSection title={title}>
       <EssentialSection note={t('secretEditor.sidePanel.essentialNote')}>
-        <CheckboxItem
-          label={t('secretEditor.sidePanel.checkboxes.emails')}
-          checked={checkboxState.emails}
-          essential
-          onChange={(checked) => handleCheckboxChange('emails', checked)}
-        />
-        <CheckboxItem
-          label={t('secretEditor.sidePanel.checkboxes.phoneCodes')}
-          checked={checkboxState.phoneCodes}
-          essential
-          onChange={(checked) => handleCheckboxChange('phoneCodes', checked)}
-        />
-        <CheckboxItem
-          label={t('secretEditor.sidePanel.checkboxes.cloudAccounts')}
-          checked={checkboxState.cloudAccounts}
-          essential
-          onChange={(checked) => handleCheckboxChange('cloudAccounts', checked)}
-        />
+        <CheckBox name="emails" state={checkboxState.emails} essential={true} handleCheckboxChange={handleCheckboxChange} />
+        <CheckBox name="phoneCodes" state={checkboxState.phoneCodes} essential={true} handleCheckboxChange={handleCheckboxChange} />
+        <CheckBox name="cloudAccounts" state={checkboxState.cloudAccounts} essential={true} handleCheckboxChange={handleCheckboxChange} />
       </EssentialSection>
 
       <div className={styles.regularSection}>
-        <CheckboxItem
-          label={t('secretEditor.sidePanel.checkboxes.computerLogins')}
-          checked={checkboxState.computerLogins}
-          onChange={(checked) => handleCheckboxChange('computerLogins', checked)}
-        />
-        <CheckboxItem
-          label={t('secretEditor.sidePanel.checkboxes.otherPasswords')}
-          checked={checkboxState.otherPasswords}
-          onChange={(checked) => handleCheckboxChange('otherPasswords', checked)}
-        />
+        <CheckBox name="computerLogins" state={checkboxState.computerLogins} essential={false} handleCheckboxChange={handleCheckboxChange} />
+        <CheckBox name="otherPasswords" state={checkboxState.otherPasswords} essential={false} handleCheckboxChange={handleCheckboxChange} />
       </div>
 
       <div className={formControls.optionalSection}>
         <h3>{t('secretEditor.sidePanel.sectionOptional')}</h3>
-        <CheckboxItem
-          label={t('secretEditor.sidePanel.checkboxes.domainManager')}
-          checked={checkboxState.domainManager}
-          onChange={(checked) => handleCheckboxChange('domainManager', checked)}
-        />
-        <CheckboxItem
-          label={t('secretEditor.sidePanel.checkboxes.passwordManager')}
-          checked={checkboxState.passwordManager}
-          onChange={(checked) => handleCheckboxChange('passwordManager', checked)}
-        />
-        <CheckboxItem
-          label={t('secretEditor.sidePanel.checkboxes.backups')}
-          checked={checkboxState.backups}
-          onChange={(checked) => handleCheckboxChange('backups', checked)}
-        />
-        <CheckboxItem
-          label={t('secretEditor.sidePanel.checkboxes.crypto')}
-          checked={checkboxState.crypto}
-          onChange={(checked) => handleCheckboxChange('crypto', checked)}
-        />
+        <CheckBox name="domainManager" state={checkboxState.domainManager} essential={false} handleCheckboxChange={handleCheckboxChange} />
+        <CheckBox name="passwordManager" state={checkboxState.passwordManager} essential={false} handleCheckboxChange={handleCheckboxChange} />
+        <CheckBox name="backups" state={checkboxState.backups} essential={false} handleCheckboxChange={handleCheckboxChange} />
+        <CheckBox name="crypto" state={checkboxState.crypto} essential={false} handleCheckboxChange={handleCheckboxChange} />
       </div>
     </HelpSection>
+  );
+}
+
+function CheckBox({ name, state, essential, handleCheckboxChange }: { name: keyof SecretCheckboxState, state: SecretCheckboxState, essential: boolean, handleCheckboxChange: (name: keyof SecretCheckboxState, checked: boolean) => void }) {
+  const { t } = useTranslation();
+  return (
+    <CheckboxItem
+      label={t(`secretEditor.sidePanel.checkboxes.${name}`)}
+      checked={state[name]}
+      essential={essential}
+      onChange={(checked) => handleCheckboxChange(name, checked)}
+    />
   );
 }
