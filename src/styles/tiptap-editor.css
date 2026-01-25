@@ -12,6 +12,7 @@
   border-radius: 0 0 12px 12px;
   overflow-y: auto;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  text-rendering: optimizeLegibility;
 }
 
 .tiptap-editor:focus-within {
@@ -30,9 +31,12 @@
   font-family: 'Georgia', 'Times New Roman', serif;
   font-size: 1.15rem;
   line-height: 1.7;
-  color: #e2e8f0;
+  color: #b4bac2;
   outline: none;
   min-height: 100%;
+}
+.tiptap-editor .tiptap-content strong {
+  color: #e2e8f0;
 }
 
 .tiptap-editor.compact .tiptap-content {
