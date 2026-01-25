@@ -149,6 +149,7 @@
   border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 8px;
   color: #60a5fa;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
