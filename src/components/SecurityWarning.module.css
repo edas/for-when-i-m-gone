@@ -1,16 +1,3 @@
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
 .warningContainer {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -66,86 +53,6 @@
   line-height: 1.6;
 }
 
-.checkboxContainer {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 2rem;
-  text-align: left;
-}
-
-.checkboxLabel {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  cursor: pointer;
-  position: relative;
-}
-
-.checkboxLabel input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-.checkmark {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.checkboxLabel:hover .checkmark {
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.checkboxLabel input:checked ~ .checkmark {
-  background: #10b981;
-  border-color: #10b981;
-}
-
-.checkmark::after {
-  content: '';
-  position: absolute;
-  display: none;
-  left: 7px;
-  top: 3px;
-  width: 6px;
-  height: 12px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-.checkboxLabel input:checked ~ .checkmark::after {
-  display: block;
-}
-
-.labelText {
-  color: #e2e8f0;
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-.labelText a {
-  color: #60a5fa;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.labelText a:hover {
-  color: #93c5fd;
-  text-decoration: underline;
-}
-
 
 /* Responsive styles for mobile */
 @media (max-width: 480px) {
@@ -169,10 +76,4 @@
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
   }
-
-  .checkboxContainer {
-    padding: 1rem 1.25rem;
-    margin-bottom: 1.5rem;
-  }
-
 }

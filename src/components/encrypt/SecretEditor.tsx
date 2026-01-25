@@ -17,10 +17,8 @@ interface SecretEditorProps {
 
 export function SecretEditor({ onContinue, onBack }: SecretEditorProps) {
   const { t } = useTranslation();
-  const {getData, setData}:EncryptStoreActions = useEncryptDataStore((state) => {
-    const {getData, setData} = state;
-    return {getData, setData}
-  });
+  const getData: EncryptStoreActions['getData'] = useEncryptDataStore(state => state.getData);
+  const setData: EncryptStoreActions['setData'] = useEncryptDataStore(state => state.setData);
   const initialSecret = getData().what?.content ?? '';
   const [content, setContent] = useState(initialSecret);
 

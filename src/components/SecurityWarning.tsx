@@ -1,8 +1,10 @@
-import { useState, useCallback, ChangeEvent } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from './ui/LanguageSelector';
 import { Icon } from './ui/Icons';
 import { ActionButton } from './ui/ActionButton';
+import { Overlay } from './ui/Overlay';
+import { SecurityCheckbox } from './ui/SecurityCheckbox';
 import styles from './SecurityWarning.module.css';
 
 interface SecurityWarningProps {
@@ -14,8 +16,7 @@ export function SecurityWarning({ initialChecked, onContinue }: SecurityWarningP
   const [isChecked, setIsChecked] = useState(initialChecked ?? false);
   const { t } = useTranslation();
 
-  const handleCheckboxChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    const checked = event.target.checked;
+  const handleCheckboxChange = useCallback((checked: boolean) => {
     setIsChecked(checked);
   }, []);
 
@@ -26,7 +27,7 @@ export function SecurityWarning({ initialChecked, onContinue }: SecurityWarningP
   }, [isChecked, onContinue]);
 
   return (
-    <div className={styles.overlay}>
+    <Overlay>
       <LanguageSelector />
 
       <div className={styles.warningContainer}>
@@ -37,27 +38,17 @@ export function SecurityWarning({ initialChecked, onContinue }: SecurityWarningP
         <h1>{t('securityWarning.title')}</h1>
         <p className={styles.subtitle}>{t('securityWarning.subtitle')}</p>
 
-        <div className={styles.checkboxContainer}>
-          <label className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={isChecked}
-              onChange={handleCheckboxChange}
-            />
-            <span className={styles.checkmark}></span>
-            <span className={styles.labelText}>
-              {t('securityWarning.checkboxLabel')}
-              <a
-                href="https://github.com/edas/for-when-i-m-gone"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t('securityWarning.checkboxLabelLink')}
-              </a>
-              {t('securityWarning.checkboxLabelEnd')}
-            </span>
-          </label>
-        </div>
+        <SecurityCheckbox checked={isChecked} onChange={handleCheckboxChange}>
+          {t('securityWarning.checkboxLabel')}
+          <a
+            href="https://github.com/edas/for-when-i-m-gone"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t('securityWarning.checkboxLabelLink')}
+          </a>
+          {t('securityWarning.checkboxLabelEnd')}
+        </SecurityCheckbox>
 
         <ActionButton
           disabled={!isChecked}
@@ -66,7 +57,7 @@ export function SecurityWarning({ initialChecked, onContinue }: SecurityWarningP
           {t('securityWarning.continueButton')}
         </ActionButton>
       </div>
-    </div>
+    </Overlay>
   );
 }
 

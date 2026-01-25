@@ -5,11 +5,17 @@ import { Locked } from './components/locked/Locked';
 import { Encrypt } from './components/encrypt/Encrypt';
 import { useDataStore } from './lib/dataStore';
 import { Decrypt } from './components/decrypt/Decrypt';
+import styles from './App.module.css';
 
 
 
 export function App() {
-  
+  return (<div className={styles.appContainer}>
+    <AppContent />
+  </div>)
+}
+
+function AppContent() {
   const [step, setStep] = useState(0);
   const onContinue = useCallback(() => setStep(step => step + 1), []);
   const onBack = useCallback(() => setStep(step => step - 1), []);
@@ -25,13 +31,31 @@ export function App() {
 
   const appMode = useDataStore(state => state.mode);
   
-  if (step === 0) return (<SecurityWarning onContinue={onContinue} />);
-  if (step === 1) {
-    if (appMode === 'locked') return (<Locked onBack={onBack} />);
-    if (appMode === 'encrypt') return (<Encrypt onBack={onBack} />);
-    if (appMode === 'decrypt') return (<Decrypt onBack={onBack} />);
+  if (step === 0) {
+    return (
+        <SecurityWarning onContinue={onContinue} />
+    );
+  }
+  
+  else if (step === 1) {
+    if (appMode === 'locked') {
+      return (
+          <Locked onBack={onBack} />
+      );
+    }
+    else if (appMode === 'encrypt') {
+      return (
+          <Encrypt onBack={onBack} />
+      );
+    }
+    else if (appMode === 'decrypt') {
+      return (
+          <Decrypt onBack={onBack} />
+      );
+    }
     throw new Error(`Unknown app mode: ${appMode}`);
   }
+  
   throw new Error(`Unknown step: ${step}`);
 }
 
