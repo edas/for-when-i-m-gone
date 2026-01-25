@@ -4,6 +4,7 @@ import WhoEditor from './WhoEditor';
 import HowEditor from './HowEditor';
 import IntroMessageEditor from './IntroMessageEditor';
 import GenerateEditor from './GenerateEditor';
+import { EncryptStepHeader } from './EncryptStepHeader';
 
 interface EncryptProps {
   onBack: () => void;
@@ -18,14 +19,19 @@ export function Encrypt({ onBack: backToParent }: EncryptProps) {
     } else {
       setStep(step => step - 1);
     }
-  }, [step]);
+  }, [step, backToParent]);
 
-  if (step === 0) return (<SecretEditor onContinue={onContinue} onBack={onBack} />);
-  if (step === 1) return (<WhoEditor onContinue={onContinue} onBack={onBack} />);
-  if (step === 2) return (<HowEditor onContinue={onContinue} onBack={onBack} />);
-  if (step === 3) return (<IntroMessageEditor onContinue={onContinue} onBack={onBack} />);
-  if (step === 4) return (<GenerateEditor onBack={onBack} />);
-  throw new Error(`Unknown step: ${step}`);
+  return (
+    <>
+      <EncryptStepHeader currentStep={step} />
+      {step === 0 && <SecretEditor onContinue={onContinue} onBack={onBack} />}
+      {step === 1 && <WhoEditor onContinue={onContinue} onBack={onBack} />}
+      {step === 2 && <HowEditor onContinue={onContinue} onBack={onBack} />}
+      {step === 3 && <IntroMessageEditor onContinue={onContinue} onBack={onBack} />}
+      {step === 4 && <GenerateEditor onBack={onBack} />}
+      {step > 4 && (() => { throw new Error(`Unknown step: ${step}`); })()}
+    </>
+  );
 }
 
 export default Encrypt;

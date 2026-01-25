@@ -22,15 +22,17 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
       
       if (!scrollContainer || !stepContainer) return;
       
-      const stepElements = stepContainer.querySelectorAll<HTMLDivElement>(`.${styles.step}`);
-      const currentStepElement = stepElements[stepIndex] as HTMLDivElement | undefined;
+      // Trouver le stepWrapper qui contient l'étape courante
+      const stepWrappers = stepContainer.querySelectorAll<HTMLDivElement>(`.${styles.stepWrapper}`);
+      const currentStepWrapper = stepWrappers[stepIndex] as HTMLDivElement | undefined;
       
-      if (!currentStepElement) return;
+      if (!currentStepWrapper) return;
 
       const containerRect = scrollContainer.getBoundingClientRect();
-      const stepRect = currentStepElement.getBoundingClientRect();
+      const stepRect = currentStepWrapper.getBoundingClientRect();
       
-      const stepLeftInContainer = currentStepElement.offsetLeft;
+      // Calculer la position pour centrer l'étape courante
+      const stepLeftInContainer = currentStepWrapper.offsetLeft;
       const scrollLeft = stepLeftInContainer - (containerRect.width / 2) + (stepRect.width / 2);
       
       scrollContainer.scrollTo({
@@ -50,30 +52,44 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
   return (
     <div className={styles.stepIndicatorWrapper} ref={scrollContainerRef}>
       <div className={styles.stepIndicator} ref={stepContainerRef}>
-        {steps.map((step, index) => (
-          <div key={step.key}>
-            <div
-              className={`${styles.step} ${
-                index < currentStep ? styles.completed : 
-                index === currentStep ? styles.current : styles.upcoming
+        {steps.map((step, index) => {
+          const isPrevious = index === currentStep - 1;
+          const isCurrent = index === currentStep;
+          const isNext = index === currentStep + 1;
+          
+          return (
+            <div 
+              key={step.key}
+              className={`${styles.stepWrapper} ${
+                isPrevious ? styles.stepPrevious : 
+                isCurrent ? styles.stepCurrent : 
+                isNext ? styles.stepNext : 
+                styles.stepOther
               }`}
             >
-              <div className={styles.stepCircle}>
-                {index < currentStep ? (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                ) : (
-                  <span>{index + 1}</span>
-                )}
+              <div
+                className={`${styles.step} ${
+                  index < currentStep ? styles.completed : 
+                  index === currentStep ? styles.current : styles.upcoming
+                }`}
+              >
+                <div className={styles.stepCircle}>
+                  {index < currentStep ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  ) : (
+                    <span>{index + 1}</span>
+                  )}
+                </div>
+                <span className={styles.stepLabel}>{step.label}</span>
               </div>
-              <span className={styles.stepLabel}>{step.label}</span>
+              {index < steps.length - 1 && (
+                <div className={`${styles.stepLine} ${index < currentStep ? styles.completed : ''}`}></div>
+              )}
             </div>
-            {index < steps.length - 1 && (
-              <div className={`${styles.stepLine} ${index < currentStep ? styles.completed : ''}`}></div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

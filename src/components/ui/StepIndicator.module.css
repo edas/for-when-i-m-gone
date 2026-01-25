@@ -1,6 +1,4 @@
 .stepIndicatorWrapper {
-  background: rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: thin;
@@ -34,6 +32,11 @@
 }
 
 .stepIndicator > div {
+  display: flex;
+  align-items: center;
+}
+
+.stepWrapper {
   display: flex;
   align-items: center;
 }
@@ -116,7 +119,7 @@
   background: #10b981;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 800px) {
   .stepIndicator {
     padding: 0.75rem 1rem;
     justify-content: flex-start;
