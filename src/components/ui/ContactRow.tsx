@@ -1,6 +1,7 @@
 import type { ContactInfo } from '../../lib/types/recipient';
 import { Icon } from './Icons';
 import formControls from '../../styles/form-controls.module.css';
+import styles from './ContactRow.module.css';
 
 interface ContactTypeOption {
   value: string;
@@ -27,9 +28,9 @@ export function ContactRow({
   onRemove,
 }: ContactRowProps) {
   return (
-    <div className="contact-row">
+    <div className={styles.contactRow}>
       <select
-        className={`${formControls.formSelect} contact-type`}
+        className={`${formControls.formSelect} ${styles.contactType}`}
         value={contact.type}
         onChange={(e) => onTypeChange(e.target.value)}
       >
@@ -40,14 +41,14 @@ export function ContactRow({
         ))}
       </select>
       <input
-        className={`${formControls.formInput} contact-value`}
+        className={`${formControls.formInput} ${styles.contactValue}`}
         type="text"
         value={contact.value}
         onChange={(e) => onValueChange(e.target.value)}
         placeholder={placeholders.value}
       />
       <button
-        className={formControls.removeButton}
+        className={`${formControls.removeButton} ${styles.removeButton}`}
         onClick={onRemove}
         title={removeTitle}
       >

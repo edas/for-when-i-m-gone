@@ -29,7 +29,6 @@
 .sectionSubtitle {
   color: #a0aec0;
   margin: 0;
-  font-size: 0.95rem;
 }
 
 .thresholdContent {
@@ -136,7 +135,6 @@
 
 .recipientInfo {
   color: #a0aec0;
-  font-size: 0.9rem;
 }
 
 .errorMessage {
@@ -154,7 +152,6 @@
 
 .errorMessage p {
   margin: 0;
-  font-size: 0.9rem;
   line-height: 1.5;
 }
 
@@ -184,7 +181,6 @@
 }
 
 .quorumWarningInline .warningText {
-  font-size: 0.85rem;
   color: #fdba74;
   line-height: 1.5;
   margin: 0;

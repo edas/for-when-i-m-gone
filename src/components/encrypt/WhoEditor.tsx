@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDataStore } from '../../lib/dataStore';
-import { computeButtonStateCustom, getButtonText } from '../../lib/buttonState';
+import { TFunction } from 'i18next';
+import { EncryptStoreActions, useEncryptDataStore } from '../../lib/dataStore';
 import {
   handleDragStart as dndDragStart,
   handleDragEnd as dndDragEnd,
@@ -13,7 +13,6 @@ import {
 } from '../../lib/dragAndDrop';
 import { EditorLayout } from '../ui/EditorLayout';
 import { ActionButtons } from '../ui/ActionButtons';
-import { TipSection } from '../ui/TipSection';
 import { EssentialSection } from '../ui/EssentialSection';
 import { HelpSection } from '../ui/HelpSection';
 import { CheckboxItem } from '../ui/CheckboxItem';
@@ -27,7 +26,122 @@ import {
   createEmptyContact,
   createEmptyRecipient,
 } from '../../lib/types/recipient';
+import helpStyles from '../ui/HelpSection.module.css';
 
+// Constants
+const CONTACT_TYPES: ContactType[] = [
+  'phone', 'email', 'address', 'x', 'bluesky', 'mastodon',
+  'facebook', 'telegram', 'whatsapp', 'signal',
+  'instagram', 'snapchat', 'linkedin', 'web', 'other',
+];
+
+// Pure functions for derived state
+function computeDerivedState(recipients: Recipient[]) {
+  // Filter out hidden recipients (isPrivate === true) for contact checks
+  const visibleRecipients = recipients.filter(r => !r.isPrivate);
+  
+  const unnamedCount = recipients.filter(r => !r.name.trim()).length;
+  const noContactsCount = recipients.filter(r => 
+    !r.contacts.length || r.contacts.every(c => !c.value.trim())
+  ).length;
+  
+  const hasAtLeast2 = recipients.length >= 2;
+  const hasAtLeast3 = recipients.length >= 3;
+  const hasAtLeast5 = recipients.length >= 5;
+  const allNamed = recipients.length > 0 && !unnamedCount;
+  // Only check visible recipients for contact info
+  const allHaveContact = visibleRecipients.length > 0 && visibleRecipients.every(r => 
+    r.contacts.length > 0 && r.contacts.some(c => c.value.trim())
+  );
+  const allEssentialsChecked = hasAtLeast3 && allNamed && allHaveContact;
+  
+  // Only check visible recipients for contact types
+  const allHaveAddress = visibleRecipients.length > 0 && visibleRecipients.every(r => 
+    r.contacts.some(c => c.type === 'address' && c.value.trim())
+  );
+  const allHaveEmail = visibleRecipients.length > 0 && visibleRecipients.every(r => 
+    r.contacts.some(c => c.type === 'email' && c.value.trim())
+  );
+  const allHavePhone = visibleRecipients.length > 0 && visibleRecipients.every(r => 
+    r.contacts.some(c => c.type === 'phone' && c.value.trim())
+  );
+
+  return {
+    unnamedCount, noContactsCount,
+    hasAtLeast2, hasAtLeast3, hasAtLeast5,
+    allNamed, allHaveContact, allEssentialsChecked,
+    allHaveAddress, allHaveEmail, allHavePhone,
+  };
+}
+
+function getInitialExpandedId(recipients: Recipient[]): string | null {
+  const unnamedRecipient = recipients.find(r => !r.name.trim());
+  if (unnamedRecipient) return unnamedRecipient.id;
+  if (recipients.length > 1) return null;
+  return recipients[0]?.id ?? null;
+}
+
+function getInitialState(initialRecipients?: Recipient[]) {
+  if (initialRecipients?.length) {
+    return {
+      recipients: [...initialRecipients],
+      expandedId: getInitialExpandedId(initialRecipients),
+    };
+  }
+  const defaultRecipient = createEmptyRecipient();
+  return {
+    recipients: [defaultRecipient],
+    expandedId: defaultRecipient.id,
+  };
+}
+
+function getVariantAndTitle(
+  hasAtLeast2: boolean,
+  unnamedCount: number,
+  essentials: boolean[],
+  optional: boolean[],
+  t: TFunction
+): { variant: 'error' | 'warning' | 'info' | 'success', title: string } {
+  if (unnamedCount > 0) {
+    return {
+      variant: 'error',
+      title: t('whoEditor.sidePanel.unnamedTitle')
+    };
+  }
+  
+  if (!hasAtLeast2) {
+    return {
+      variant: 'error',
+      title: t('whoEditor.sidePanel.errorTitle')
+    };
+  }
+
+  const essentialCount = essentials.filter(Boolean).length;
+  const essentialTotal = essentials.length;
+  const allCheckedCount = essentialCount + optional.filter(Boolean).length;
+  const allTotal = essentialTotal + optional.length;
+  const allChecked = allCheckedCount === allTotal;
+  const allEssentialChecked = essentialCount === essentialTotal;
+
+  if (allChecked) {
+    return {
+      variant: 'success',
+      title: t('whoEditor.sidePanel.successTitle', { count: allCheckedCount, total: allTotal })
+    };
+  }
+  if (allEssentialChecked) {
+    return {
+      variant: 'info',
+      title: t('whoEditor.sidePanel.infoTitle', { count: allCheckedCount, total: allTotal })
+    };
+  }
+  return {
+    variant: 'warning',
+    title: t('whoEditor.sidePanel.warningTitle', { count: essentialCount, total: essentialTotal })
+  };
+}
+
+// Props
 interface WhoEditorProps {
   initialRecipients?: Recipient[];
   onContinue: (recipients: Recipient[]) => void;
@@ -35,33 +149,10 @@ interface WhoEditorProps {
 }
 
 export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorProps) {
-  const updateStoredData = useDataStore((state) => state.update);
+  const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData);
   const { t } = useTranslation();
   
-  const getInitialExpandedId = (recipients: Recipient[]): string | null => {
-    const unnamedRecipient = recipients.find(r => !r.name.trim());
-    if (unnamedRecipient) return unnamedRecipient.id;
-    if (recipients.length > 1) return null;
-    return recipients[0]?.id ?? null;
-  };
-
-  // Fonction d'initialisation qui crée le recipient par défaut une seule fois
-  const getInitialState = () => {
-    if (initialRecipients?.length) {
-      return {
-        recipients: [...initialRecipients],
-        expandedId: getInitialExpandedId(initialRecipients),
-      };
-    }
-    // Créer le recipient par défaut une seule fois
-    const defaultRecipient = createEmptyRecipient();
-    return {
-      recipients: [defaultRecipient],
-      expandedId: defaultRecipient.id, // Toujours étendre le recipient par défaut
-    };
-  };
-
-  const initialState = getInitialState();
+  const [initialState] = useState(() => getInitialState(initialRecipients));
   const [recipients, setRecipients] = useState<Recipient[]>(initialState.recipients);
   const [expandedRecipientId, setExpandedRecipientId] = useState<string | null>(initialState.expandedId);
   const [autoFocusRecipientId, setAutoFocusRecipientId] = useState<string | null>(null);
@@ -70,59 +161,31 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
   const recipientCardRefs = useRef<Record<string, HTMLDivElement>>({});
 
   // Derived states
-  const hasAtLeast2 = useMemo(() => recipients.length >= 2, [recipients]);
-  const hasAtLeast3 = useMemo(() => recipients.length >= 3, [recipients]);
-  const hasAtLeast5 = useMemo(() => recipients.length >= 5, [recipients]);
-  const unnamedCount = useMemo(() => recipients.filter(r => !r.name.trim()).length, [recipients]);
-  const noContactsCount = useMemo(() => recipients.filter(r => 
-    !r.contacts.length || r.contacts.every(c => !c.value.trim())
-  ).length, [recipients]);
-  const allNamed = useMemo(() => recipients.length > 0 && !unnamedCount, [recipients, unnamedCount]);
-  const allHaveContact = useMemo(() => recipients.length > 0 && !noContactsCount, [recipients, noContactsCount]);
-  const allEssentialsChecked = useMemo(() => hasAtLeast3 && allNamed && allHaveContact, [hasAtLeast3, allNamed, allHaveContact]);
-  const allHaveAddress = useMemo(() => recipients.length > 0 && recipients.every(r => 
-    r.contacts.some(c => c.type === 'address' && c.value.trim())
-  ), [recipients]);
-  const allHaveEmail = useMemo(() => recipients.length > 0 && recipients.every(r => 
-    r.contacts.some(c => c.type === 'email' && c.value.trim())
-  ), [recipients]);
-  const allHavePhone = useMemo(() => recipients.length > 0 && recipients.every(r => 
-    r.contacts.some(c => c.type === 'phone' && c.value.trim())
-  ), [recipients]);
+  const derived = useMemo(() => computeDerivedState(recipients), [recipients]);
   
   const expandedRecipientHasName = useMemo(() => 
     expandedRecipientId !== null && 
     recipients.find(r => r.id === expandedRecipientId)?.name.trim() !== ''
   , [expandedRecipientId, recipients]);
 
-  const buttonState = useMemo(() => computeButtonStateCustom(hasAtLeast2, allEssentialsChecked), [hasAtLeast2, allEssentialsChecked]);
-  const buttonTexts = useMemo(() => ({
-    continueWithoutEssentials: t('whoEditor.buttons.continueWithoutEssentials'),
-    continue: t('whoEditor.buttons.continue'),
-  }), [t]);
-  const buttonText = useMemo(() => getButtonText(buttonState, buttonTexts), [buttonState, buttonTexts]);
+  // Calculate variant and title for help section
+  const essentials = [derived.hasAtLeast3, derived.allNamed, derived.allHaveContact];
+  const optional = [derived.hasAtLeast5, derived.allHaveAddress, derived.allHaveEmail, derived.allHavePhone];
+  const { variant, title } = getVariantAndTitle(derived.hasAtLeast2, derived.unnamedCount, essentials, optional, t);
 
-  const CONTACT_TYPES: ContactType[] = [
-    'phone', 'email', 'address', 'x', 'bluesky', 'mastodon',
-    'facebook', 'telegram', 'whatsapp', 'signal',
-    'instagram', 'snapchat', 'linkedin', 'web', 'other',
-  ];
   const contactTypeOptions = useMemo(() => 
     CONTACT_TYPES.map((type) => ({ value: type, label: t(`whoEditor.contactTypes.${type}`) }))
   , [t]);
 
   // Recipient management
-  const addRecipient = useCallback(async () => {
+  const addRecipient = useCallback(() => {
     const newRecipient = createEmptyRecipient();
     setRecipients(prev => [...prev, newRecipient]);
     setExpandedRecipientId(newRecipient.id);
     setAutoFocusRecipientId(newRecipient.id);
     
     setTimeout(() => {
-      const newCardElement = recipientCardRefs.current[newRecipient.id];
-      if (newCardElement) {
-        newCardElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
+      recipientCardRefs.current[newRecipient.id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       setTimeout(() => setAutoFocusRecipientId(null), 200);
     }, 150);
   }, []);
@@ -130,9 +193,8 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
   const removeRecipient = useCallback((id: string) => {
     setRecipients(prev => {
       const recipient = prev.find(r => r.id === id);
-      if (recipient && typeof recipient.number === 'number' && recipient.number > 0) {
-        return prev;
-      }
+      if (recipient && typeof recipient.number === 'number' && recipient.number > 0) return prev;
+      
       const index = prev.findIndex(r => r.id === id);
       const filtered = prev.filter(r => r.id !== id);
       delete recipientCardRefs.current[id];
@@ -145,12 +207,7 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
   }, [expandedRecipientId]);
 
   const toggleExpanded = useCallback((id: string) => {
-    if (expandedRecipientId !== null && expandedRecipientId !== id && !expandedRecipientHasName) {
-      return;
-    }
-    if (expandedRecipientId === id && !expandedRecipientHasName) {
-      return;
-    }
+    if (!expandedRecipientHasName && expandedRecipientId !== null) return;
     setExpandedRecipientId(prev => prev === id ? null : id);
   }, [expandedRecipientId, expandedRecipientHasName]);
 
@@ -178,15 +235,7 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
     ));
   }, []);
 
-  const handleContinue = useCallback(() => {
-    if (hasAtLeast2) onContinue(recipients);
-  }, [hasAtLeast2, recipients, onContinue]);
-
-  const handleBack = useCallback(() => {
-    onBack(recipients);
-  }, [recipients, onBack]);
-
-  // Drag and drop handlers
+  // Drag and drop
   const updateDragState = useCallback((state: Partial<DragDropState>) => {
     setDragState(prev => ({ ...prev, ...state }));
   }, []);
@@ -195,39 +244,32 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
     dndDragStart(e as unknown as DragEvent, recipientId, updateDragState);
   }, [updateDragState]);
 
-  const handleDragEnd = useCallback(() => {
-    dndDragEnd(updateDragState);
-  }, [updateDragState]);
+  const handleDragEnd = useCallback(() => dndDragEnd(updateDragState), [updateDragState]);
 
   const handleDropZoneDragOver = useCallback((e: React.DragEvent, insertIndex: number) => {
     dndDragOver(e as unknown as DragEvent, insertIndex, dragState.draggedItemId, updateDragState);
   }, [dragState.draggedItemId, updateDragState]);
 
-  const handleDropZoneDragLeave = useCallback(() => {
-    dndDragLeave(updateDragState);
-  }, [updateDragState]);
+  const handleDropZoneDragLeave = useCallback(() => dndDragLeave(updateDragState), [updateDragState]);
 
   const handleDropZoneDrop = useCallback((e: React.DragEvent, insertIndex: number) => {
     const result = dndDrop(e as unknown as DragEvent, insertIndex, recipients, dragState.draggedItemId, updateDragState);
     if (result) setRecipients(result);
   }, [recipients, dragState.draggedItemId, updateDragState]);
 
-  const isDropZoneHidden = useCallback((zoneIndex: number) => {
-    return dndIsHidden(zoneIndex, recipients, dragState.draggedItemId);
-  }, [recipients, dragState.draggedItemId]);
+  const isDropZoneHidden = useCallback((zoneIndex: number) => 
+    dndIsHidden(zoneIndex, recipients, dragState.draggedItemId)
+  , [recipients, dragState.draggedItemId]);
 
   // Auto-save
   useEffect(() => {
-    updateStoredData((currentData) => ({
-      ...currentData,
-      who: { recipients }
-    }));
-  }, [recipients, updateStoredData]);
+    setData(() => ({ who: { recipients } }));
+  }, [recipients, setData]);
 
   // Auto focus on first visit
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (expandedRecipientId !== null && recipients.length > 0) {
+      if (expandedRecipientId !== null) {
         const expandedRecipient = recipients.find(r => r.id === expandedRecipientId);
         if (expandedRecipient && !expandedRecipient.name.trim()) {
           setAutoFocusRecipientId(expandedRecipient.id);
@@ -238,47 +280,87 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
     return () => clearTimeout(timer);
   }, []);
 
-  const helpContent = (
-    <>
-      <p className="panel-intro">{t('whoEditor.sidePanel.intro')}</p>
-      
-      <div className={styles.recipientCount}>
-        <span className={styles.countNumber}>{recipients.length}</span>
-        <div className={styles.countDetails}>
-          <span className={styles.countLabel}>{t('whoEditor.sidePanel.recipientCount')}</span>
-          {unnamedCount > 0 && (
-            <span className={styles.countWarnings}>
-              {t(unnamedCount > 1 ? 'whoEditor.sidePanel.warnings.unnamedPlural' : 'whoEditor.sidePanel.warnings.unnamed', { count: unnamedCount })}
-            </span>
-          )}
-          {noContactsCount > 0 && (
-            <span className={styles.countWarnings}>
-              {t(unnamedCount > 0 ? 'whoEditor.sidePanel.warnings.noContactsAnd' : 'whoEditor.sidePanel.warnings.noContacts', { count: noContactsCount })}
-            </span>
-          )}
-        </div>
+  const canToggle = expandedRecipientId === null || expandedRecipientHasName;
+
+  return (
+    <EditorLayout title={t('whoEditor.title')}>
+      <p className={styles.description}>{t('whoEditor.description')}</p>
+      <div className={styles.contentWrapper}>
+        <RecipientsList
+          recipients={recipients}
+          expandedRecipientId={expandedRecipientId}
+          autoFocusRecipientId={autoFocusRecipientId}
+          dragState={dragState}
+          contactTypeOptions={contactTypeOptions}
+          canToggle={canToggle}
+          recipientCardRefs={recipientCardRefs}
+          onToggle={toggleExpanded}
+          onRemove={removeRecipient}
+          onUpdate={updateRecipient}
+          onAddContact={addContact}
+          onRemoveContact={removeContact}
+          onUpdateContact={updateContact}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragOver={handleDropZoneDragOver}
+          onDragLeave={handleDropZoneDragLeave}
+          onDrop={handleDropZoneDrop}
+          isDropZoneHidden={isDropZoneHidden}
+          onAddRecipient={addRecipient}
+        />
+
+        <HelpContent derived={derived} recipientCount={recipients.length} title={title} />
+
+        <ActionButtons
+          backLabel={t('common.back')}
+          continueLabel={t('common.continue')}
+          buttonState={derived.hasAtLeast2 ? "complete" : "none"}
+          disabled={!derived.hasAtLeast2 || !canToggle}
+          onBack={() => onBack(recipients)}
+          onContinue={() => derived.hasAtLeast2 && onContinue(recipients)}
+          variant={variant}
+        />
       </div>
-
-      <EssentialSection note={t('whoEditor.sidePanel.essentialNote')}>
-        <CheckboxItem checked={hasAtLeast3} label={t('whoEditor.sidePanel.checklist.atLeast3')} readonly />
-        <CheckboxItem checked={allNamed} label={t('whoEditor.sidePanel.checklist.allNamed')} readonly />
-        <CheckboxItem checked={allHaveContact} label={t('whoEditor.sidePanel.checklist.allHaveContact')} readonly />
-      </EssentialSection>
-
-      <div className={formControls.optionalSection}>
-        <CheckboxItem checked={hasAtLeast5} label={t('whoEditor.sidePanel.checklist.atLeast5')} readonly />
-        <CheckboxItem checked={allHaveAddress} label={t('whoEditor.sidePanel.checklist.allHaveAddress')} readonly />
-        <CheckboxItem checked={allHaveEmail} label={t('whoEditor.sidePanel.checklist.allHaveEmail')} readonly />
-        <CheckboxItem checked={allHavePhone} label={t('whoEditor.sidePanel.checklist.allHavePhone')} readonly />
-      </div>
-
-      <TipSection text={t('whoEditor.sidePanel.tip')} />
-      <TipSection text={t('whoEditor.sidePanel.tip2')} />
-    </>
+    </EditorLayout>
   );
+}
 
-  // Create translations object for RecipientCard
-  const recipientCardTranslations = useMemo(() => ({
+export default WhoEditor;
+
+// Sub-components
+
+interface RecipientsListProps {
+  recipients: Recipient[];
+  expandedRecipientId: string | null;
+  autoFocusRecipientId: string | null;
+  dragState: DragDropState;
+  contactTypeOptions: { value: ContactType; label: string }[];
+  canToggle: boolean;
+  recipientCardRefs: React.MutableRefObject<Record<string, HTMLDivElement>>;
+  onToggle: (id: string) => void;
+  onRemove: (id: string) => void;
+  onUpdate: (id: string, field: keyof Omit<Recipient, 'contacts'>, value: string | boolean) => void;
+  onAddContact: (recipientId: string) => void;
+  onRemoveContact: (recipientId: string, contactId: string) => void;
+  onUpdateContact: (recipientId: string, contactId: string, field: 'type' | 'value', value: string) => void;
+  onDragStart: (e: React.DragEvent, recipientId: string) => void;
+  onDragEnd: () => void;
+  onDragOver: (e: React.DragEvent, insertIndex: number) => void;
+  onDragLeave: () => void;
+  onDrop: (e: React.DragEvent, insertIndex: number) => void;
+  isDropZoneHidden: (zoneIndex: number) => boolean;
+  onAddRecipient: () => void;
+}
+
+function RecipientsList({
+  recipients, expandedRecipientId, autoFocusRecipientId, dragState,
+  contactTypeOptions, canToggle, recipientCardRefs,
+  onToggle, onRemove, onUpdate, onAddContact, onRemoveContact, onUpdateContact,
+  onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop, isDropZoneHidden, onAddRecipient,
+}: RecipientsListProps) {
+  const { t } = useTranslation();
+  
+  const translations = useMemo(() => ({
     newRecipient: t('whoEditor.newRecipient'),
     addRecipient: t('whoEditor.addRecipient'),
     removeRecipient: t('whoEditor.removeRecipient'),
@@ -299,78 +381,111 @@ export function WhoEditor({ initialRecipients, onContinue, onBack }: WhoEditorPr
   }), [t]);
 
   return (
-    <EditorLayout title={t('whoEditor.title')}>
-      <div className={styles.contentWrapper}>
-        <div className={styles.recipientsList} role="list">
-          {recipients.map((recipient, index) => (
-            <div key={recipient.id}>
-              <div 
-                className={`${styles.dropZone} ${dragState.activeDropZone === index ? styles.active : ''} ${isDropZoneHidden(index) ? styles.hidden : ''}`}
-                role="presentation"
-                onDragOver={(e) => handleDropZoneDragOver(e, index)}
-                onDragLeave={handleDropZoneDragLeave}
-                onDrop={(e) => handleDropZoneDrop(e, index)}
-              >
-                <div className={styles.dropZoneIndicator}></div>
-              </div>
-              
-              <div ref={(el) => { if (el) recipientCardRefs.current[recipient.id] = el; }}>
-                <RecipientCard
-                  recipient={recipient}
-                  expanded={expandedRecipientId === recipient.id}
-                  dragging={dragState.draggedItemId === recipient.id}
-                  contactTypeOptions={contactTypeOptions}
-                  translations={recipientCardTranslations}
-                  autoFocus={autoFocusRecipientId === recipient.id}
-                  toggleDisabled={expandedRecipientId !== null && !expandedRecipientHasName}
-                  onToggle={() => toggleExpanded(recipient.id)}
-                  onRemove={() => removeRecipient(recipient.id)}
-                  onUpdateField={(field, value) => updateRecipient(recipient.id, field, value)}
-                  onAddContact={() => addContact(recipient.id)}
-                  onRemoveContact={(contactId) => removeContact(recipient.id, contactId)}
-                  onUpdateContact={(contactId, field, value) => updateContact(recipient.id, contactId, field, value)}
-                  onDragStart={(e) => handleDragStart(e, recipient.id)}
-                  onDragEnd={handleDragEnd}
-                />
-              </div>
-            </div>
-          ))}
+    <div className={styles.recipientsList} role="list">
+      {recipients.map((recipient, index) => (
+        <div key={recipient.id}>
+          <DropZone
+            index={index}
+            isActive={dragState.activeDropZone === index}
+            isHidden={isDropZoneHidden(index)}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+          />
           
-          <div 
-            className={`${styles.dropZone} ${dragState.activeDropZone === recipients.length ? styles.active : ''} ${isDropZoneHidden(recipients.length) ? styles.hidden : ''}`}
-            role="presentation"
-            onDragOver={(e) => handleDropZoneDragOver(e, recipients.length)}
-            onDragLeave={handleDropZoneDragLeave}
-            onDrop={(e) => handleDropZoneDrop(e, recipients.length)}
-          >
-            <div className={styles.dropZoneIndicator}></div>
+          <div ref={(el) => { if (el) recipientCardRefs.current[recipient.id] = el; }}>
+            <RecipientCard
+              recipient={recipient}
+              expanded={expandedRecipientId === recipient.id}
+              dragging={dragState.draggedItemId === recipient.id}
+              contactTypeOptions={contactTypeOptions}
+              translations={translations}
+              autoFocus={autoFocusRecipientId === recipient.id}
+              toggleDisabled={!canToggle}
+              onToggle={() => onToggle(recipient.id)}
+              onRemove={() => onRemove(recipient.id)}
+              onUpdateField={(field, value) => onUpdate(recipient.id, field, value)}
+              onAddContact={() => onAddContact(recipient.id)}
+              onRemoveContact={(contactId) => onRemoveContact(recipient.id, contactId)}
+              onUpdateContact={(contactId, field, value) => onUpdateContact(recipient.id, contactId, field, value)}
+              onDragStart={(e) => onDragStart(e, recipient.id)}
+              onDragEnd={onDragEnd}
+            />
           </div>
-          
-          <button 
-            className={`${formControls.addButton} ${formControls.addButtonLarge}`} 
-            onClick={addRecipient}
-            disabled={expandedRecipientId !== null && !expandedRecipientHasName}
-          >
-            <Icon name="plus" size={20} />
-            {t('whoEditor.addRecipient')}
-          </button>
         </div>
-
-        <HelpSection title={t('whoEditor.sidePanel.title')}>
-          {helpContent}
-        </HelpSection>
-
-        <ActionButtons
-          backLabel={t('common.back')}
-          continueLabel={buttonText}
-          buttonState={buttonState}
-          disabled={!hasAtLeast2 || (expandedRecipientId !== null && !expandedRecipientHasName)}
-          onBack={handleBack}
-          onContinue={handleContinue}
-        />
-      </div>
-    </EditorLayout>
+      ))}
+      
+      <DropZone
+        index={recipients.length}
+        isActive={dragState.activeDropZone === recipients.length}
+        isHidden={isDropZoneHidden(recipients.length)}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+      />
+      
+      <button 
+        className={`${formControls.addButton} ${formControls.addButtonLarge}`} 
+        onClick={onAddRecipient}
+        disabled={!canToggle}
+      >
+        <Icon name="plus" size={20} />
+        {t('whoEditor.addRecipient')}
+      </button>
+    </div>
   );
 }
 
-export default WhoEditor;
+interface DropZoneProps {
+  index: number;
+  isActive: boolean;
+  isHidden: boolean;
+  onDragOver: (e: React.DragEvent, index: number) => void;
+  onDragLeave: () => void;
+  onDrop: (e: React.DragEvent, index: number) => void;
+}
+
+function DropZone({ index, isActive, isHidden, onDragOver, onDragLeave, onDrop }: DropZoneProps) {
+  return (
+    <div 
+      className={`${styles.dropZone} ${isActive ? styles.active : ''} ${isHidden ? styles.hidden : ''}`}
+      role="presentation"
+      onDragOver={(e) => onDragOver(e, index)}
+      onDragLeave={onDragLeave}
+      onDrop={(e) => onDrop(e, index)}
+    >
+      <div className={styles.dropZoneIndicator}></div>
+    </div>
+  );
+}
+
+interface HelpContentProps {
+  derived: ReturnType<typeof computeDerivedState>;
+  recipientCount: number;
+  title: string;
+}
+
+function HelpContent({ derived, recipientCount, title }: HelpContentProps) {
+  const { t } = useTranslation();
+  const { unnamedCount, noContactsCount, hasAtLeast3, hasAtLeast5, allNamed, allHaveContact, allHaveAddress, allHaveEmail, allHavePhone } = derived;
+
+  return (
+    <HelpSection title={title}>     
+      <EssentialSection note={t('whoEditor.sidePanel.essentialNote')}>
+        <CheckboxItem checked={hasAtLeast3} label={t('whoEditor.sidePanel.checklist.atLeast3')} readonly />
+        <CheckboxItem checked={allNamed} label={t('whoEditor.sidePanel.checklist.allNamed')} readonly />
+        <CheckboxItem checked={allHaveContact} label={t('whoEditor.sidePanel.checklist.allHaveContact')} readonly />
+      </EssentialSection>
+
+      <div className={formControls.optionalSection}>
+        <CheckboxItem checked={hasAtLeast5} label={t('whoEditor.sidePanel.checklist.atLeast5')} readonly />
+        <CheckboxItem checked={allHaveAddress} label={t('whoEditor.sidePanel.checklist.allHaveAddress')} readonly />
+        <CheckboxItem checked={allHaveEmail} label={t('whoEditor.sidePanel.checklist.allHaveEmail')} readonly />
+        <CheckboxItem checked={allHavePhone} label={t('whoEditor.sidePanel.checklist.allHavePhone')} readonly />
+
+        <p className={helpStyles.panelIntro}>{t('whoEditor.sidePanel.tip2')}</p> 
+        <p className={helpStyles.panelIntro}>{t('whoEditor.sidePanel.tip')}</p> 
+      </div>
+    </HelpSection>
+  );
+}

@@ -60,7 +60,6 @@
 
 .checkboxItem .labelText {
   color: #e2e8f0;
-  font-size: 0.9rem;
   line-height: 1.4;
 }
 
@@ -72,13 +71,11 @@
 
 .checkboxItem .labelTitle {
   color: #e2e8f0;
-  font-size: 0.9rem;
   line-height: 1.4;
 }
 
 .checkboxItem .labelDescription {
   color: #8892a0;
-  font-size: 0.8rem;
   line-height: 1.4;
 }
 

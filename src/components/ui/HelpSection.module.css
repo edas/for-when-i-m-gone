@@ -20,9 +20,9 @@
   color: #a0aec0;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-  font-size: 0.95rem;
   font-weight: 500;
   text-align: left;
+  font-size: 1rem;
 }
 
 .helpSectionHeader:hover {
@@ -68,7 +68,6 @@
 }
 
 .helpSectionContent h3 {
-  font-size: 0.85rem;
   font-weight: 600;
   color: #a0aec0;
   letter-spacing: 0.05em;
@@ -77,7 +76,6 @@
 }
 
 .helpSectionContent .panelIntro {
-  font-size: 0.9rem;
   color: #a0aec0;
   line-height: 1.5;
   margin-bottom: 1.25rem;
@@ -118,12 +116,10 @@
 }
 
 .helpSectionContent .countLabel {
-  font-size: 0.9rem;
   color: #e2e8f0;
 }
 
 .helpSectionContent .countWarnings {
-  font-size: 0.8rem;
   color: #f6ad55;
 }
 
@@ -135,7 +131,6 @@
 
   .helpSectionHeader {
     padding: 0.875rem 1rem;
-    font-size: 0.9rem;
   }
 
   .helpSectionContent {

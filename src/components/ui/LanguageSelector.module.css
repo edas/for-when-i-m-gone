@@ -12,7 +12,6 @@
   }
 
   .languageSelector select {
-    font-size: 0.85rem;
     padding: 0.4rem 0.8rem;
   }
 }
@@ -23,9 +22,9 @@
   color: #e0e0e0;
   padding: 0.5rem 1rem;
   border-radius: 6px;
-  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 1rem;
 }
 
 .languageSelector select:hover {

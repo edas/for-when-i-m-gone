@@ -2,6 +2,13 @@
  * WhoEditor styles
  */
 
+.description {
+  color: #a0aec0;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  padding: 0 0.25rem;
+}
+
 .contentWrapper {
   display: flex;
   flex-direction: column;
@@ -72,12 +79,10 @@
 
 .countLabel {
   color: #a0aec0;
-  font-size: 0.95rem;
 }
 
 .countWarnings {
   color: #f59e0b;
-  font-size: 0.8rem;
 }
 
 @media (max-width: 600px) {

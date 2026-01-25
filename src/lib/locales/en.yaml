@@ -65,6 +65,10 @@ decryptEditor:
 
 whoEditor:
   title: Who will receive this secret?
+  description: >-
+    Each of these people will receive a part of the secret. 
+    They will need to gather together to reconstruct it.
+    This information will help them know who to contact and how.
   newRecipient: Unnamed person
   addRecipient: Add a person
   removeRecipient: Remove this person
@@ -102,12 +106,13 @@ whoEditor:
     other: Other
   sidePanel:
     title: The recipients
-    intro: >-
-      Each of these people will receive a part of the secret. 
-      They will need to gather together to reconstruct it.
-      This information will help them know who to contact and how.
     collapse: Collapse
     expand: Tips
+    errorTitle: Enter at least two recipients
+    unnamedTitle: Enter a name for the recipient
+    warningTitle: "Essential criteria: {{count}}/{{total}}"
+    infoTitle: "Criteria to verify: {{count}}/{{total}}"
+    successTitle: "Criteria verified: {{count}}/{{total}}"
     recipientCount: person(s) registered
     warnings:
       unnamed: "including {count} unnamed"
@@ -119,7 +124,7 @@ whoEditor:
       can find each other and access your secret.
     checklist:
       atLeast3: At least 3 people
-      allNamed: All have a name to be contacted
+      allNamed: All have a name to be identified
       allHaveContact: All have at least one contact info
       atLeast5: At least 5 people
       allHaveAddress: All have a postal address

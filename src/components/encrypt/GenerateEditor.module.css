@@ -88,7 +88,7 @@
 .shareRecipientNumber {
   font-weight: 500;
   color: #718096;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .copyButton {
@@ -98,7 +98,7 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 1rem;
   transition: background-color 0.2s;
 }
 
@@ -112,7 +112,7 @@
 
 .shareValue {
   font-family: 'Courier New', monospace;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #1a202c;
   background-color: white;
   padding: 0.75rem;

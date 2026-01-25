@@ -11,7 +11,6 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem 0.75rem;
-  font-size: 0.9rem;
   font-weight: 400;
   background: none;
   border: none;
@@ -20,6 +19,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
+  font-size: 1rem;
 }
 
 .backButton:hover {

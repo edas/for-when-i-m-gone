@@ -65,6 +65,10 @@ decryptEditor:
 
 whoEditor:
   title: À qui destinez-vous ce secret ?
+  description: >-
+    Ces personnes recevront chacune une partie du secret. 
+    Elles devront se réunir pour le reconstituer. 
+    Ces renseignements leur permettront de savoir qui contacter et comment.
   newRecipient: Personne non-nommée
   addRecipient: Ajouter une personne
   removeRecipient: Retirer cette personne
@@ -102,12 +106,13 @@ whoEditor:
     other: Autre
   sidePanel:
     title: Les destinataires
-    intro: >-
-      Ces personnes recevront chacune une partie du secret. 
-      Elles devront se réunir pour le reconstituer. 
-      Ces renseignements leur permettront de savoir qui contacter et comment.
     collapse: Replier
     expand: Conseils
+    errorTitle: Saisissez au moins deux destinataires
+    unnamedTitle: Saisissez un nom pour le destinataire
+    warningTitle: "Critères essentiels : {{count}}/{{total}}"
+    infoTitle: "Critères à vérifier : {{count}}/{{total}}"
+    successTitle: "Critères vérifiés : {{count}}/{{total}}"
     recipientCount: personne(s) enregistrée(s)
     warnings:
       unnamed: "dont {count} non nommée"
@@ -119,7 +124,7 @@ whoEditor:
       pourront se retrouver et accéder à votre secret.
     checklist:
       atLeast3: Au moins 3 personnes
-      allNamed: Toutes ont un nom pour être contactées
+      allNamed: Toutes ont un nom pour être identifiées
       allHaveContact: Toutes ont au moins une coordonnée
       atLeast5: Au moins 5 personnes
       allHaveAddress: Toutes ont une adresse postale
