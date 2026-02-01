@@ -19,7 +19,7 @@ import type { Language } from '../i18n';
 /**
  * Contact type labels for rendering recipients
  */
-interface ContactTypeLabels {
+export interface ContactTypeLabels {
   phone: string;
   email: string;
   address: string;
