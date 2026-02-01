@@ -1,0 +1,110 @@
+.thresholdContent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.inputSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.numberInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.numberButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.numberButton svg {
+  display: block !important;
+  width: 24px !important;
+  height: 24px !important;
+  flex-shrink: 0;
+  color: inherit;
+  stroke: currentColor !important;
+  fill: none !important;
+}
+
+.numberButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.numberButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.numberButton:disabled svg {
+  opacity: 1;
+  stroke: currentColor;
+}
+
+.numberInput {
+  width: 80px;
+  height: 60px;
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #ffffff;
+  outline: none;
+  transition: all 0.3s ease;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.numberInput::-webkit-outer-spin-button,
+.numberInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.numberInput:focus {
+  border-color: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+.numberInput.error {
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.numberInput.optimal {
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+.recipientInfo {
+  color: #a0aec0;
+}
+
+.errorMessage p {
+  margin: 0;
+  line-height: 1.5;
+}

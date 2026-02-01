@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import type { Editor, JSONContent } from '@tiptap/core';
+import type { JSONContent } from '@tiptap/core';
+import { useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 import { useTranslation } from 'react-i18next';
 import { EncryptStoreActions, useEncryptDataStore } from '../../../lib/dataStore';
 import { parseHtmlToJson } from '../../../lib/htmlParser';
-import { createTiptapEditor } from '../../../lib/tiptap/createEditor';
 import { hasJsonContent } from '../../../lib/tiptap/utils';
 import { generateExampleInEditor } from '../../../lib/tiptap/editorHelpers';
 
@@ -27,9 +28,7 @@ export function useConditionsEditor() {
   );
   const [editorVersion, setEditorVersion] = useState(0);
   
-  // Refs for TipTap
-  const editorRef = useRef<HTMLDivElement>(null);
-  const editorInstanceRef = useRef<Editor | null>(null);
+  // Ref for tracking programmatic updates
   const programmaticUpdateRef = useRef(false);
 
   const hasConditions = useMemo(() => hasJsonContent(conditionsJson), [conditionsJson]);
@@ -57,37 +56,39 @@ export function useConditionsEditor() {
     }
   }, [hasConditions, hasNoOpenConditions]);
 
-  // Initialize TipTap editor
-  useEffect(() => {
-    if (editorRef.current && !editorInstanceRef.current) {
-      const editor = createTiptapEditor({
-        element: editorRef.current,
-        content: conditionsJson,
-        placeholder: t('howEditor.conditions.placeholder'),
-        contentClass: 'tiptap-content',
-        enableHeadings: false,
-        onUpdate: (json) => {
-          setConditionsJson(json);
-          setEditorVersion(v => v + 1);
-          if (programmaticUpdateRef.current) return;
-          if (isConditionsUnmodified) {
-            setIsConditionsUnmodified(false);
-            setHasNoOpenConditions(false);
-          }
-        },
-      });
-      
-      editorInstanceRef.current = editor;
-    }
-
-    return () => {
-      editorInstanceRef.current?.destroy();
-      editorInstanceRef.current = null;
-    };
-  }, [t]); // Re-run if language changes
+  // Initialize TipTap editor with useEditor hook
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        blockquote: false,
+        code: false,
+        codeBlock: false,
+        hardBreak: false,
+        horizontalRule: false,
+        strike: false,
+        heading: false,
+      }),
+    ],
+    content: storedConditions ?? undefined,
+    editorProps: {
+      attributes: {
+        class: 'tiptap-content',
+        'data-placeholder': t('howEditor.conditions.placeholder'),
+      },
+    },
+    onUpdate: ({ editor: e }) => {
+      const json = e.getJSON();
+      setConditionsJson(json);
+      setEditorVersion(v => v + 1);
+      if (programmaticUpdateRef.current) return;
+      if (isConditionsUnmodified) {
+        setIsConditionsUnmodified(false);
+        setHasNoOpenConditions(false);
+      }
+    },
+  });
 
   const generateExample = useCallback(() => {
-    const editor = editorInstanceRef.current;
     if (!editor) return;
     const exampleContent = getDefaultConditions();
 
@@ -106,15 +107,14 @@ export function useConditionsEditor() {
     requestAnimationFrame(() => { 
       programmaticUpdateRef.current = false; 
     });
-  }, [getDefaultConditions, hasConditions]);
+  }, [editor, getDefaultConditions, hasConditions]);
 
   const updateHasNoOpenConditions = useCallback((value: boolean) => {
     setHasNoOpenConditions(value);
   }, []);
 
   return {
-    editorRef,
-    editorInstanceRef,
+    editor,
     hasConditions,
     isConditionsUnmodified,
     hasNoOpenConditions,

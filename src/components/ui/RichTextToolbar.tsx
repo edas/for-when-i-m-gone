@@ -2,6 +2,7 @@ import type { Editor } from '@tiptap/core';
 import { hasRecipientsBlock, hasConditionsBlock } from '../../lib/tiptap/extensions';
 import { Icon, type IconName } from './Icons';
 import styles from './RichTextToolbar.module.css';
+import { useMemo } from 'react';
 
 interface BaseLabels {
   bold: string;
@@ -41,12 +42,17 @@ interface ToolbarButton {
 
 export function RichTextToolbar({ 
   editor, 
-  labels, 
-  compact = false, 
-  editorVersion = 0,
+  compact = false,
 }: RichTextToolbarProps) {
-  // Trigger re-render on editorVersion change
-  void editorVersion;
+
+  const { t } = useTranslation();
+  const labels = useMemo(() => ({
+    bold: t('howEditor.toolbar.bold'),
+    italic: t('howEditor.toolbar.italic'),
+    underline: t('howEditor.toolbar.underline'),
+    bulletList: t('howEditor.toolbar.bulletList'),
+    numberedList: t('howEditor.toolbar.numberedList'),
+  }), [t]);
   
   const recipientsBlockExists = hasRecipientsBlock(editor);
   const conditionsBlockExists = hasConditionsBlock(editor);
