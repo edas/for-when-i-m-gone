@@ -1,0 +1,60 @@
+.editorWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px 10px 0 0;
+}
+
+.toolbarGroup {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.toolbarDivider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  height: 20px;
+  margin: 0 0.25rem;
+}
+
+.toolbarBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #a0aec0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+}
+
+.toolbarBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.toolbarBtn:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.toolbarBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+

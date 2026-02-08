@@ -29,6 +29,7 @@ export function useHowState(editor: Editor) {
   const isTooHigh = isValidNumber && threshold > recipientCount;
   const isLessThan2 = isValidNumber && threshold < 2;
   const isPerfectThreshold = isValidNumber && !isLessThan2 && !isTooHigh && threshold >= 3 && threshold <= 5;
+  const isAcceptableThreshold = isValidNumber && !isLessThan2 && !isTooHigh;
 
   const essentials = [
     { 
@@ -82,7 +83,6 @@ export function useHowState(editor: Editor) {
   const essentialCheckable = essentials.length;
   const totalCheckable = essentials.length + optionals.length;
 
-
   let variant: 'error' | 'warning' | 'info' | 'success' = 'error';
   let title: string;
   if (!isValidNumber) {
@@ -119,5 +119,6 @@ export function useHowState(editor: Editor) {
     essentials,
     variant,
     title,
+    canContinue: isAcceptableThreshold && hasConditions,
   };
 }

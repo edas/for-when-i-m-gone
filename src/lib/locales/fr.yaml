@@ -252,7 +252,10 @@ howEditor:
       Définissez clairement les règles d'accès à votre secret pour éviter 
       les malentendus et les abus.
     errorTitle: Définissez des conditions d'accès valides
-    quorumTooHighTitle: Le quorum doit être inférieur au nombre de destinataires
+    notValidNumber: Saisissez un nombre de quorum valide
+    oneRecipient: Le quorum doit être d'au moins 2
+    lessThan2: Le quorum doit être d'au moins 2
+    quorumTooHighTitle: Le quorum ne peut pas être supérieur au nombre de destinataires
     missingConditionsTitle: Définissez vos conditions d'ouverture
     warningTitle: "Critères essentiels : {{count}}/{{total}}"
     infoTitle: "Critères à vérifier : {{count}}/{{total}}"

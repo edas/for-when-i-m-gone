@@ -1,5 +1,6 @@
 .contactRow {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   align-items: center;
@@ -17,4 +18,25 @@
 
 .removeButton {
   flex-shrink: 0;
+}
+
+/* Sur petits écrans, le champ de valeur passe à la ligne suivante */
+@media (max-width: 600px) {
+  .contactValue {
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    order: 3;
+  }
+  
+  .contactType {
+    flex: 1;
+    min-width: 0;
+    order: 1;
+  }
+  
+  .removeButton {
+    order: 2;
+  }
 }

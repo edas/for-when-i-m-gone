@@ -3,6 +3,7 @@ import { hasRecipientsBlock, hasConditionsBlock } from '../../lib/tiptap/extensi
 import { Icon, type IconName } from './Icons';
 import styles from './RichTextToolbar.module.css';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface BaseLabels {
   bold: string;

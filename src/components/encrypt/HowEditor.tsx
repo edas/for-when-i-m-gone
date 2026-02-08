@@ -22,7 +22,7 @@ export function HowEditor({ onContinue, onBack }: HowEditorProps) {
   
   const content = useEncryptDataStore((state) => state.how?.conditions ?? null);
   const editor = useConditionEditor(content);
-  const { hasConditions, variant } = useHowState(editor);
+  const { hasConditions, variant, canContinue } = useHowState(editor);
   const generateExample = useCallback(() => {
     if (!editor) return ;
     const exampleContent = parseHtmlToJson(t('howEditor.sidePanel.exampleContent'));
@@ -44,7 +44,7 @@ export function HowEditor({ onContinue, onBack }: HowEditorProps) {
         backLabel={t('common.back')}
         continueLabel={t('howEditor.buttons.continue')}
         buttonState={"complete"}
-        disabled={false}
+        disabled={!canContinue}
         onBack={onBack}
         onContinue={onContinue}
         alternativeLabel={t('howEditor.sidePanel.generateExample')}

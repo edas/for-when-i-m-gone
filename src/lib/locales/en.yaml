@@ -253,7 +253,10 @@ howEditor:
       Clearly define the rules for accessing your secret to prevent 
       misunderstandings and abuse.
     errorTitle: Define valid access conditions
-    quorumTooHighTitle: The quorum must be lower than the number of recipients
+    notValidNumber: Enter a valid quorum number
+    oneRecipient: The quorum must be at least 2
+    lessThan2: The quorum must be at least 2
+    quorumTooHighTitle: The quorum must not be higher than the number of recipients
     missingConditionsTitle: Define your opening conditions
     warningTitle: "Essential criteria: {{count}}/{{total}}"
     infoTitle: "Criteria to verify: {{count}}/{{total}}"

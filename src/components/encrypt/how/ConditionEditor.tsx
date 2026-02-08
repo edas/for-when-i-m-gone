@@ -1,10 +1,9 @@
 import howStyles from '../HowEditor.module.css';
+import styles from './ConditionEditor.module.css';
 import { useTranslation } from 'react-i18next';
 import { Editor, EditorContent } from '@tiptap/react';
-import styles from './ConditionEditor.module.css';
-import { useConditionEditor } from './useConditionEditor';
-import { useEncryptDataStore } from '@/lib/dataStore';
 import Icon, { IconName } from '@/components/ui/Icons';
+
 
 export function ConditionEditor({ editor }: { editor: Editor }) {
   const { t } = useTranslation();
@@ -46,7 +45,7 @@ export function RichTextToolbar({ editor }: { editor: Editor }) {
   ];
 
   return (
-    <div className={`${styles.toolbar} ${styles.compact}`}>
+    <div className={`${styles.toolbar}`}>
       <ButtonGroup buttons={styleButtons} editor={editor} />
       <div className={styles.toolbarDivider}></div>
       <ButtonGroup buttons={listButtons} editor={editor} />

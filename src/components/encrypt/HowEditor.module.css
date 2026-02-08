@@ -30,62 +30,10 @@
   margin: 0;
 }
 
-.errorMessage {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  max-width: 450px;
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  border-radius: 10px;
-  color: #fca5a5;
-  align-self: center;
-}
-
-.quorumWarningInline {
-  display: flex;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: rgba(251, 146, 60, 0.1);
-  border: 1px solid rgba(251, 146, 60, 0.25);
-  border-radius: 10px;
-  flex: 1;
-  min-width: 250px;
-  max-width: 400px;
-  align-self: flex-start;
-}
-
-.quorumWarningInline .warningIcon {
-  flex-shrink: 0;
-  color: #fb923c;
-  display: flex;
-  align-items: center;
-}
-
-.quorumWarningInline .warningIcon svg {
-  display: block;
-  color: inherit;
-}
-
-.quorumWarningInline .warningText {
-  color: #fdba74;
-  line-height: 1.5;
-  margin: 0;
-}
-
 .conditionsSection {
   flex: 1;
   gap: 0.75rem;
   min-height: 0;
-}
-
-
-.editorWrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 180px;
 }
 
 .optionalSection {
@@ -102,34 +50,5 @@
   .howContent {
     padding: 1.5rem 0 0 0;
     gap: 1.5rem;
-  }
-
-  .sectionTitle {
-    font-size: 1.25rem;
-  }
-
-  .thresholdContent {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .quorumWarningInline {
-    max-width: 100%;
-    align-self: stretch;
-  }
-
-  .numberInput {
-    width: 70px;
-    height: 50px;
-    font-size: 1.75rem;
-  }
-
-  .numberButton {
-    width: 40px;
-    height: 40px;
-  }
-
-  .editorWrapper {
-    min-height: 150px;
   }
 }
