@@ -24,7 +24,7 @@ interface FullLabels extends BaseLabels {
 
 interface RichTextToolbarProps {
   editor: Editor | null;
-  labels: BaseLabels | FullLabels;
+  labels?: BaseLabels | FullLabels;
   compact?: boolean;
   editorVersion?: number;
   threshold?: number;

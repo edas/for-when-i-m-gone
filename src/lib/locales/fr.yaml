@@ -219,6 +219,9 @@ introEditor:
       directives:
         title: Directives d'utilisation
         description: Instructions sur ce qu'il faut faire avec les informations contenues dans le secret
+    warningTitle: "Éléments essentiels : {{count}}/{{total}}"
+    infoTitle: "Éléments à vérifier : {{count}}/{{total}}"
+    successTitle: "Éléments vérifiés : {{count}}/{{total}}"
     generateExample: Générer un exemple
     # exampleContent est chargé depuis examples/intro-example.fr.html
   buttons:

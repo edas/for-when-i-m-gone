@@ -220,6 +220,9 @@ introEditor:
       directives:
         title: Usage directives
         description: Instructions on what to do with the information contained in the secret
+    warningTitle: "Essential elements: {{count}}/{{total}}"
+    infoTitle: "Elements to verify: {{count}}/{{total}}"
+    successTitle: "Elements verified: {{count}}/{{total}}"
     generateExample: Generate an example
     # exampleContent is loaded from examples/intro-example.en.html
   buttons:
