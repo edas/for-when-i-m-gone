@@ -23,6 +23,7 @@ export function HowEditorHelpContent({ editor,
       <EssentialSection note={t('howEditor.sidePanel.essentialNote')}>
       {essentials.map(({label, value, strikethrough, setter, description}) => (
         <CheckboxItem
+          key={label}
           checked={value}
           label={label}
           description={description}
@@ -35,6 +36,7 @@ export function HowEditorHelpContent({ editor,
       <div className={formControls.optionalSection}>
         {optionals.map(({label, value, strikethrough, setter, description}) => (
           <CheckboxItem
+            key={label}
             checked={value}
             label={label}
             description={description}
