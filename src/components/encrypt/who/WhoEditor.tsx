@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useEncryptDataStore } from '../../../lib/dataStore';
-import { EditorLayout } from '../../ui/EditorLayout';
-import { ActionButtons } from '../../ui/ActionButtons';
+import { useEncryptDataStore } from '@/lib/dataStore';
+import { EditorLayout } from '@/components/ui/EditorLayout';
+import { ActionButtons } from '@/components/ui/ActionButtons';
 import styles from './WhoEditor.module.css';
-import { type Recipient } from '../../../lib/types/recipient';
+import { type Recipient } from '@/lib/types/recipient';
 import { computeDerivedState, getVariantAndTitle } from './whoEditorUtils';
 import { RecipientsList } from './WhoEditorRecipientsList';
 import { WhoEditorHelpContent } from './WhoEditorHelpContent';

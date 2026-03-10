@@ -1,5 +1,5 @@
 import { Node, mergeAttributes, type Editor } from '@tiptap/core';
-import type { ContactInfo, ContactType, Recipient } from '../../types/recipient';
+import type { ContactInfo, ContactType, Recipient } from '@/lib/types/recipient';
 import { hasNodeTypeInEditor } from '../extensions';
 import styles from '../extensions.module.css';
 

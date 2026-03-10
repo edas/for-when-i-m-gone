@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { EssentialSection } from '../../ui/EssentialSection';
-import { HelpSection } from '../../ui/HelpSection';
-import { CheckboxItem } from '../../ui/CheckboxItem';
-import formControls from '../../../styles/form-controls.module.css';
-import helpStyles from '../../ui/HelpSection.module.css';
+import { EssentialSection } from '@/components/ui/EssentialSection';
+import { HelpSection } from '@/components/ui/HelpSection';
+import { CheckboxItem } from '@/components/ui/CheckboxItem';
+import formControls from '@/styles/form-controls.module.css';
+import helpStyles from '@/components/ui/HelpSection.module.css';
 import { computeDerivedState } from './whoEditorUtils';
-import { type Recipient } from '../../../lib/types/recipient';
+import { type Recipient } from '@/lib/types/recipient';
 
 interface WhoEditorHelpContentProps {
   recipients: Recipient[];

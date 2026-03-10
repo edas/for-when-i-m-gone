@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EditorLayout } from '../../ui/EditorLayout';
-import { ActionButtons } from '../../ui/ActionButtons';
+import { EditorLayout } from '@/components/ui/EditorLayout';
+import { ActionButtons } from '@/components/ui/ActionButtons';
 import { HowEditorHelpContent } from './HowEditorHelpContent';
 import styles from './HowEditor.module.css';
 import { Threshold } from './Threshold';

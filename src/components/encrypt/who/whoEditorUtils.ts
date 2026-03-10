@@ -1,5 +1,5 @@
 import { TFunction } from 'i18next';
-import { type ContactType, type ContactInfo, type Recipient } from '../../../lib/types/recipient';
+import { type ContactType, type ContactInfo, type Recipient } from '@/lib/types/recipient';
 
 export function createEmptyContact(): ContactInfo {
   return { id: crypto.randomUUID(), type: 'phone', value: '', comment: '' };

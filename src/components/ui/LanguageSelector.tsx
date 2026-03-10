@@ -1,7 +1,7 @@
 import { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { availableLanguages, type Language } from '../../lib/i18n';
-import { useDataStore, type StoredData } from '../../lib/dataStore';
+import { availableLanguages, type Language } from '@/lib/i18n';
+import { useDataStore, type StoredData } from '@/lib/dataStore';
 import styles from './LanguageSelector.module.css';
 
 export function LanguageSelector() {

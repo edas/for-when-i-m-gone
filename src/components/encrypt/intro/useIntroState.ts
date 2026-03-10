@@ -2,14 +2,14 @@ import { useTranslation } from 'react-i18next';
 import { useCallback, useEffect, useRef } from 'react';
 import type { Editor } from '@tiptap/core';
 import { useEditorState } from '@tiptap/react';
-import { useEncryptDataStore, type EncryptStoreActions } from '../../../lib/dataStore';
+import { useEncryptDataStore, type EncryptStoreActions } from '@/lib/dataStore';
 import {
   defaultIntroCheckboxState,
   type IntroCheckboxState,
-} from '../../../lib/types/editorTypes';
-import { createCheckboxSyncState, syncCheckboxWithNode } from '../../../lib/checkboxSync';
-import { hasJsonContent } from '../../../lib/tiptap/utils';
-import { hasNodeTypeInJSON } from '../../../lib/tiptap/extensions';
+} from '@/lib/types/editorTypes';
+import { createCheckboxSyncState, syncCheckboxWithNode } from '@/lib/checkboxSync';
+import { hasJsonContent } from '@/lib/tiptap/utils';
+import { hasNodeTypeInJSON } from '@/lib/tiptap/extensions';
 import { INTRO_NODE_TYPES } from './introEditorUtils';
 
 interface ChecklistItem {

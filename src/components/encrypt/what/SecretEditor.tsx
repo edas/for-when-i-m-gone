@@ -1,13 +1,13 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EncryptStoreActions, useEncryptDataStore } from '../../../lib/dataStore';
-import { defaultSecretCheckboxState, SecretCheckboxState } from '../../../lib/types/editorTypes';
-import { EditorLayout } from '../../ui/EditorLayout';
-import { CheckboxItem } from '../../ui/CheckboxItem';
-import { ActionButtons } from '../../ui/ActionButtons';
-import { EssentialSection } from '../../ui/EssentialSection';
-import { HelpSection } from '../../ui/HelpSection';
-import formControls from '../../../styles/form-controls.module.css';
+import { EncryptStoreActions, useEncryptDataStore } from '@/lib/dataStore';
+import { defaultSecretCheckboxState, SecretCheckboxState } from '@/lib/types/editorTypes';
+import { EditorLayout } from '@/components/ui/EditorLayout';
+import { CheckboxItem } from '@/components/ui/CheckboxItem';
+import { ActionButtons } from '@/components/ui/ActionButtons';
+import { EssentialSection } from '@/components/ui/EssentialSection';
+import { HelpSection } from '@/components/ui/HelpSection';
+import formControls from '@/styles/form-controls.module.css';
 import styles from './SecretEditor.module.css';
 import { TFunction } from 'i18next';
 

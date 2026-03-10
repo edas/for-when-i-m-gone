@@ -1,5 +1,5 @@
 import { Icon } from './Icons';
-import { type ButtonState } from '../../lib/buttonState';
+import { type ButtonState } from '@/lib/buttonState';
 import styles from './ActionButtons.module.css';
 
 type ButtonVariant = 'error' | 'warning' | 'info' | 'success';

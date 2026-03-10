@@ -2,16 +2,16 @@ import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEditorState } from '@tiptap/react';
 import type { JSONContent } from '@tiptap/core';
-import { EditorLayout } from '../../ui/EditorLayout';
-import { ActionButtons } from '../../ui/ActionButtons';
+import { EditorLayout } from '@/components/ui/EditorLayout';
+import { ActionButtons } from '@/components/ui/ActionButtons';
 import { useIntroEditor } from './useIntroEditor';
 import { useIntroState } from './useIntroState';
 import { IntroEditor } from './IntroEditor';
 import { IntroEditorHelpContent } from './IntroEditorHelpContent';
 import styles from './IntroMessageEditor.module.css';
-import { useEncryptDataStore, type EncryptStoreActions } from '../../../lib/dataStore';
-import { defaultIntroCheckboxState } from '../../../lib/types/editorTypes';
-import { generateExampleInEditor } from '../../../lib/tiptap/editorHelpers';
+import { useEncryptDataStore, type EncryptStoreActions } from '@/lib/dataStore';
+import { defaultIntroCheckboxState } from '@/lib/types/editorTypes';
+import { generateExampleInEditor } from '@/lib/tiptap/editorHelpers';
 
 interface IntroMessageEditorProps {
   onContinue: () => void;

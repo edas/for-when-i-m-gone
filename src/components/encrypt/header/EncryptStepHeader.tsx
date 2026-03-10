@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { StepIndicator } from '../../ui/StepIndicator';
+import { StepIndicator } from '@/components/ui/StepIndicator';
 import styles from './EncryptStepHeader.module.css';
 
 interface EncryptStepHeaderProps {
