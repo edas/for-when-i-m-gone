@@ -29,6 +29,7 @@ export function HowEditorHelpContent({ editor,
           description={description}
           strikethrough={strikethrough}
           readonly={!setter}
+          onChange={setter ?? undefined}
         />
       ))}
       </EssentialSection>
@@ -42,6 +43,7 @@ export function HowEditorHelpContent({ editor,
             description={description}
             strikethrough={strikethrough}
             readonly={!setter}
+            onChange={setter ?? undefined}
           />
         ))}
       </div>
