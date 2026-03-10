@@ -2,7 +2,7 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { useTranslation } from 'react-i18next';
 import { useEncryptDataStore } from '../../../lib/dataStore';
-import { getContactTypeLabels } from '../introEditorUtils';
+import { getContactTypeLabels } from './introEditorUtils';
 import { DateTimeInline } from '../../../lib/tiptap/extensions/datetime';
 import { createQuorumInline } from '../../../lib/tiptap/extensions/quorum';
 import { createConditionsBlock } from '../../../lib/tiptap/extensions/conditions';

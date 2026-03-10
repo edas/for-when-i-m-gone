@@ -1,4 +1,4 @@
-import howStyles from '../HowEditor.module.css';
+import howStyles from './HowEditor.module.css';
 import styles from './ConditionEditor.module.css';
 import { useTranslation } from 'react-i18next';
 import { Editor, EditorContent } from '@tiptap/react';

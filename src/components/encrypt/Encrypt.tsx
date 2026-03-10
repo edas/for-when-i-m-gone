@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
-import { SecretEditor } from './SecretEditor';
-import { WhoEditor } from './WhoEditor';
-import { HowEditor } from './HowEditor';
-import { IntroMessageEditor } from './IntroMessageEditor';
-import { GenerateEditor } from './GenerateEditor';
+import { SecretEditor } from './what/SecretEditor';
+import { WhoEditor } from './who/WhoEditor';
+import { HowEditor } from './how/HowEditor';
+import { IntroMessageEditor } from './intro/IntroMessageEditor';
+import { GenerateEditor } from './how/GenerateEditor';
 import { EncryptStepHeader } from './header/EncryptStepHeader';
 
 interface EncryptProps {

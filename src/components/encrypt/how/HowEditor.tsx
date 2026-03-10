@@ -1,17 +1,16 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EditorLayout } from '../ui/EditorLayout';
-import { ActionButtons } from '../ui/ActionButtons';
-import { HowEditorHelpContent } from './how/HowEditorHelpContent';
-// import '../../styles/tiptap-editor.css';
+import { EditorLayout } from '../../ui/EditorLayout';
+import { ActionButtons } from '../../ui/ActionButtons';
+import { HowEditorHelpContent } from './HowEditorHelpContent';
 import styles from './HowEditor.module.css';
-import { Threshold } from './how/Threshold';
-import { ConditionEditor } from './how/ConditionEditor';
+import { Threshold } from './Threshold';
+import { ConditionEditor } from './ConditionEditor';
 import { useEncryptDataStore } from '@/lib/dataStore';
-import { useConditionEditor } from './how/useConditionEditor';
+import { useConditionEditor } from './useConditionEditor';
 import { parseHtmlToJson } from '@/lib/htmlParser';
-import { useHowState } from './how/useHowState';
-import { useHowActions } from './how/useHowActions';
+import { useHowState } from './useHowState';
+import { useHowActions } from './useHowActions';
 
 interface HowEditorProps {
   onContinue: () => void;

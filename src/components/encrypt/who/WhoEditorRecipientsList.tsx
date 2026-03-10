@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { RecipientCard } from './RecipientCard';
 import { Icon } from '../../ui/Icons';
 import formControls from '../../../styles/form-controls.module.css';
-import styles from '../WhoEditor.module.css';
+import styles from './WhoEditor.module.css';
 import { DropZone } from './WhoEditorDropZone';
 import { useEncryptDataStore } from '../../../lib/dataStore';
 import { useRecipientActions } from './useRecipients';
 import { useDragAndDrop } from './useDragAndDrop';
 import { Recipient } from '../../../lib/types/recipient';
-import { CONTACT_TYPES } from '../whoEditorUtils';
+import { CONTACT_TYPES } from './whoEditorUtils';
 
 const noRecipients: Recipient[] = []
 

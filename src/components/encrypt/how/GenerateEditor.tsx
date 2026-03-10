@@ -1,19 +1,19 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { computeButtonState, getButtonText } from '../../lib/buttonState';
-import { useEncryptDataStore, type EncryptStoreActions } from '../../lib/dataStore';
+import { computeButtonState, getButtonText } from '../../../lib/buttonState';
+import { useEncryptDataStore, type EncryptStoreActions } from '../../../lib/dataStore';
 import { 
   generateAES256Key, 
   exportKeyToUint8Array,
   importKeyFromUint8Array,
   encryptBuffer, 
   textToBuffer,
-} from '../../lib/crypto/aes';
+} from '../../../lib/crypto/aes';
 import { splitBuffer } from 'ssss-js';
-import { EditorLayout } from '../ui/EditorLayout';
-import { ActionButtons } from '../ui/ActionButtons';
-import { HelpSection } from '../ui/HelpSection';
-import type { Recipient } from '../../lib/types/recipient';
+import { EditorLayout } from '../../ui/EditorLayout';
+import { ActionButtons } from '../../ui/ActionButtons';
+import { HelpSection } from '../../ui/HelpSection';
+import type { Recipient } from '../../../lib/types/recipient';
 import styles from './GenerateEditor.module.css';
 
 interface GenerateEditorProps {

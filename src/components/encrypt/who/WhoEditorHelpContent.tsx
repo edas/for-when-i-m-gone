@@ -4,7 +4,7 @@ import { HelpSection } from '../../ui/HelpSection';
 import { CheckboxItem } from '../../ui/CheckboxItem';
 import formControls from '../../../styles/form-controls.module.css';
 import helpStyles from '../../ui/HelpSection.module.css';
-import { computeDerivedState } from '../whoEditorUtils';
+import { computeDerivedState } from './whoEditorUtils';
 import { type Recipient } from '../../../lib/types/recipient';
 
 interface WhoEditorHelpContentProps {

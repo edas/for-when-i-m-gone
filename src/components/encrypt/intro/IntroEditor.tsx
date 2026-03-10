@@ -1,7 +1,7 @@
 import { EditorContent } from '@tiptap/react';
 import type { Editor } from '@tiptap/core';
 import tiptap from '@/components/ui/TipTapEditor.module.css';
-import introStyles from '../IntroMessageEditor.module.css';
+import introStyles from './IntroMessageEditor.module.css';
 import { RichTextToolbar, type ToolbarButton } from '@/components/ui/RichTextToolbar';
 import { useTranslation } from 'react-i18next';
 import { hasConditionsBlock } from '@/lib/tiptap/extensions/conditions';

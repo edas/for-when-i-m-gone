@@ -7,7 +7,7 @@ import { defaultIntroCheckboxState } from '../../../lib/types/editorTypes';
 import { createCheckboxSyncState, syncCheckboxWithNode } from '../../../lib/checkboxSync';
 import { hasJsonContent } from '../../../lib/tiptap/utils';
 import { hasNodeTypeInJSON } from '../../../lib/tiptap/extensions';
-import { INTRO_NODE_TYPES } from '../introEditorUtils';
+import { INTRO_NODE_TYPES } from './introEditorUtils';
 
 interface ChecklistItem {
   label: string;

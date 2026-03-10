@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { type Recipient } from '../../../lib/types/recipient';
-import { createEmptyContact, createEmptyRecipient } from '../whoEditorUtils';
+import { createEmptyContact, createEmptyRecipient } from './whoEditorUtils';
 import { EncryptStoreActions, useEncryptDataStore } from '../../../lib/dataStore';
 
 export function useRecipientActions() {

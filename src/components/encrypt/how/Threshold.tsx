@@ -1,5 +1,5 @@
 import styles from './Threshold.module.css';
-import howStyles from '../HowEditor.module.css';
+import howStyles from './HowEditor.module.css';
 import { Icon } from '@/components/ui/Icons';
 import { useRecipientCount } from './useRecipientCount';
 import { useIsThresholdReadOnly, useThresholdActions, useThresholdStoreWithDefault } from './useThreshold';
