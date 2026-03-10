@@ -6,8 +6,8 @@ import { ActionButtons } from '../ui/ActionButtons';
 import styles from './WhoEditor.module.css';
 import { type Recipient } from '../../lib/types/recipient';
 import { computeDerivedState, getVariantAndTitle } from './whoEditorUtils';
-import { RecipientsList } from './recipients/WhoEditorRecipientsList';
-import { WhoEditorHelpContent } from './recipients/WhoEditorHelpContent';
+import { RecipientsList } from './who/WhoEditorRecipientsList';
+import { WhoEditorHelpContent } from './who/WhoEditorHelpContent';
 
 const noRecipients: Recipient[] = []
 
