@@ -30,10 +30,66 @@ function useHasNodeType(editor: Editor | null, nodeType: string): boolean {
   );
 }
 
+const NODE_SYNC_SPEC: {
+  getHasNode: (flags: Record<string, boolean>) => boolean;
+  key: keyof IntroCheckboxState;
+}[] = [
+  { getHasNode: (f) => f.recipientsBlock, key: 'secretHolders' },
+  { getHasNode: (f) => f.conditionsBlock, key: 'openingConditions' },
+  { getHasNode: (f) => f.dateTimeInline, key: 'dated' },
+  { getHasNode: (f) => f.quorumInline, key: 'quorum' },
+];
+
+function buildChecklistItems(
+  keys: { key: keyof IntroCheckboxState; readonly: boolean }[],
+  checkboxState: IntroCheckboxState,
+  t: (key: string) => string,
+  makeSetter: (key: keyof IntroCheckboxState) => (value: boolean) => void
+): ChecklistItem[] {
+  return keys.map(({ key, readonly }) => ({
+    label: t(`introEditor.sidePanel.checkboxes.${key}.title`),
+    description: t(`introEditor.sidePanel.checkboxes.${key}.description`),
+    value: checkboxState[key],
+    readonly,
+    setter: readonly ? null : makeSetter(key),
+  }));
+}
+
+function computeIntroPanelStatus(
+  hasContent: boolean,
+  essentials: ChecklistItem[],
+  optionals: ChecklistItem[],
+  t: (key: string, opts?: Record<string, number>) => string
+): { variant: 'error' | 'warning' | 'info' | 'success'; title: string } {
+  if (!hasContent) {
+    return { variant: 'warning', title: t('introEditor.sidePanel.title') };
+  }
+  const essentialChecked = essentials.filter((e) => e.value).length;
+  const totalChecked = essentialChecked + optionals.filter((e) => e.value).length;
+  const totalCheckable = essentials.length + optionals.length;
+  const allEssentialsChecked = essentials.every((e) => e.value);
+
+  if (totalChecked === totalCheckable) {
+    return {
+      variant: 'success',
+      title: t('introEditor.sidePanel.successTitle', { count: totalChecked, total: totalCheckable }),
+    };
+  }
+  if (allEssentialsChecked) {
+    return {
+      variant: 'info',
+      title: t('introEditor.sidePanel.infoTitle', { count: totalChecked, total: totalCheckable }),
+    };
+  }
+  return {
+    variant: 'warning',
+    title: t('introEditor.sidePanel.warningTitle', { count: essentialChecked, total: essentials.length }),
+  };
+}
+
 /**
  * Compute derived state for IntroEditor validation.
- * Similar to useHowState for HowEditor — builds essentials/optionals arrays
- * and computes variant, title, canContinue from editor state.
+ * Builds essentials/optionals from config and computes variant, title, canContinue from editor state.
  */
 export function useIntroState(editor: Editor | null) {
   const { t } = useTranslation();
@@ -45,10 +101,12 @@ export function useIntroState(editor: Editor | null) {
       editor,
       selector: ({ editor: currentEditor }) => (currentEditor ? hasJsonContent(currentEditor.getJSON()) : false),
     }) ?? false;
-  const hasRecipientsBlock = useHasNodeType(editor, INTRO_NODE_TYPES.recipientsBlock);
-  const hasConditionsBlock = useHasNodeType(editor, INTRO_NODE_TYPES.conditionsBlock);
-  const hasDateTimeInline = useHasNodeType(editor, INTRO_NODE_TYPES.dateTimeInline);
-  const hasQuorumInline = useHasNodeType(editor, INTRO_NODE_TYPES.quorumInline);
+  const nodeFlags = {
+    recipientsBlock: useHasNodeType(editor, INTRO_NODE_TYPES.recipientsBlock),
+    conditionsBlock: useHasNodeType(editor, INTRO_NODE_TYPES.conditionsBlock),
+    dateTimeInline: useHasNodeType(editor, INTRO_NODE_TYPES.dateTimeInline),
+    quorumInline: useHasNodeType(editor, INTRO_NODE_TYPES.quorumInline),
+  };
 
   const makeCheckboxSetter = useCallback(
     (key: keyof IntroCheckboxState) => (value: boolean) => {
@@ -65,99 +123,37 @@ export function useIntroState(editor: Editor | null) {
     [setData]
   );
 
-  const recipientsSyncStateRef = useRef(createCheckboxSyncState(false));
-  const conditionsSyncStateRef = useRef(createCheckboxSyncState(false));
-  const dateTimeSyncStateRef = useRef(createCheckboxSyncState(false));
-  const quorumSyncStateRef = useRef(createCheckboxSyncState(false));
+  const syncStatesRef = useRef(
+    NODE_SYNC_SPEC.map(() => createCheckboxSyncState(false))
+  );
 
   useEffect(() => {
-    syncCheckboxWithNode(hasRecipientsBlock, recipientsSyncStateRef.current, makeCheckboxSetter('secretHolders'));
-  }, [hasRecipientsBlock, makeCheckboxSetter]);
+    NODE_SYNC_SPEC.forEach((spec, i) => {
+      syncCheckboxWithNode(
+        spec.getHasNode(nodeFlags),
+        syncStatesRef.current[i],
+        makeCheckboxSetter(spec.key)
+      );
+    });
+  }, [nodeFlags.recipientsBlock, nodeFlags.conditionsBlock, nodeFlags.dateTimeInline, nodeFlags.quorumInline, makeCheckboxSetter]);
 
-  useEffect(() => {
-    syncCheckboxWithNode(hasConditionsBlock, conditionsSyncStateRef.current, makeCheckboxSetter('openingConditions'));
-  }, [hasConditionsBlock, makeCheckboxSetter]);
-
-  useEffect(() => {
-    syncCheckboxWithNode(hasDateTimeInline, dateTimeSyncStateRef.current, makeCheckboxSetter('dated'));
-  }, [hasDateTimeInline, makeCheckboxSetter]);
-
-  useEffect(() => {
-    syncCheckboxWithNode(hasQuorumInline, quorumSyncStateRef.current, makeCheckboxSetter('quorum'));
-  }, [hasQuorumInline, makeCheckboxSetter]);
-
-  const { authorIdentity, secretHolders, openingConditions, dated, quorum, directives } = checkboxState;
-
-  const essentials: ChecklistItem[] = [
-    {
-      label: t('introEditor.sidePanel.checkboxes.dated.title'),
-      description: t('introEditor.sidePanel.checkboxes.dated.description'),
-      value: dated,
-      readonly: hasDateTimeInline,
-      setter: hasDateTimeInline ? null : makeCheckboxSetter('dated'),
-    },
-    {
-      label: t('introEditor.sidePanel.checkboxes.quorum.title'),
-      description: t('introEditor.sidePanel.checkboxes.quorum.description'),
-      value: quorum,
-      readonly: hasQuorumInline,
-      setter: hasQuorumInline ? null : makeCheckboxSetter('quorum'),
-    },
-    {
-      label: t('introEditor.sidePanel.checkboxes.openingConditions.title'),
-      description: t('introEditor.sidePanel.checkboxes.openingConditions.description'),
-      value: openingConditions,
-      readonly: hasConditionsBlock,
-      setter: hasConditionsBlock ? null : makeCheckboxSetter('openingConditions'),
-    },
-    {
-      label: t('introEditor.sidePanel.checkboxes.secretHolders.title'),
-      description: t('introEditor.sidePanel.checkboxes.secretHolders.description'),
-      value: secretHolders,
-      readonly: hasRecipientsBlock,
-      setter: hasRecipientsBlock ? null : makeCheckboxSetter('secretHolders'),
-    },
-    {
-      label: t('introEditor.sidePanel.checkboxes.authorIdentity.title'),
-      description: t('introEditor.sidePanel.checkboxes.authorIdentity.description'),
-      value: authorIdentity,
-      readonly: false,
-      setter: makeCheckboxSetter('authorIdentity'),
-    },
+  const essentialKeys: { key: keyof IntroCheckboxState; readonly: boolean }[] = [
+    { key: 'dated', readonly: nodeFlags.dateTimeInline },
+    { key: 'quorum', readonly: nodeFlags.quorumInline },
+    { key: 'openingConditions', readonly: nodeFlags.conditionsBlock },
+    { key: 'secretHolders', readonly: nodeFlags.recipientsBlock },
+    { key: 'authorIdentity', readonly: false },
   ];
+  const optionalKeys: (keyof IntroCheckboxState)[] = ['directives'];
 
-  const optionals: ChecklistItem[] = [
-    {
-      label: t('introEditor.sidePanel.checkboxes.directives.title'),
-      description: t('introEditor.sidePanel.checkboxes.directives.description'),
-      value: directives,
-      readonly: false,
-      setter: makeCheckboxSetter('directives'),
-    },
-  ];
-
-  const essentialChecked = essentials.filter(({ value }) => !!value).length;
-  const totalChecked = essentialChecked + optionals.filter(({ value }) => !!value).length;
-  const totalCheckable = essentials.length + optionals.length;
-
-  const allEssentialsChecked = essentials.every((e) => e.value);
-
-  let variant: 'error' | 'warning' | 'info' | 'success' = 'warning';
-  let title: string;
-
-  if (!hasContent) {
-    variant = 'warning';
-    title = t('introEditor.sidePanel.title');
-  } else if (totalChecked === totalCheckable) {
-    variant = 'success';
-    title = t('introEditor.sidePanel.successTitle', { count: totalChecked, total: totalCheckable });
-  } else if (allEssentialsChecked) {
-    variant = 'info';
-    title = t('introEditor.sidePanel.infoTitle', { count: totalChecked, total: totalCheckable });
-  } else {
-    variant = 'warning';
-    title = t('introEditor.sidePanel.warningTitle', { count: essentialChecked, total: essentials.length });
-  }
+  const essentials = buildChecklistItems(essentialKeys, checkboxState, t, makeCheckboxSetter);
+  const optionals = buildChecklistItems(
+    optionalKeys.map((key) => ({ key, readonly: false })),
+    checkboxState,
+    t,
+    makeCheckboxSetter
+  );
+  const { variant, title } = computeIntroPanelStatus(hasContent, essentials, optionals, t);
 
   return {
     essentials,

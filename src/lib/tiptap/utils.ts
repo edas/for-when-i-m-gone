@@ -22,15 +22,12 @@ function isNodeContentEmpty(node: JSONContent): boolean {
 }
 
 /**
- * Check if JSONContent has meaningful content (not just empty paragraphs, headings, or whitespace)
+ * True if the document has at least one node with meaningful content (not only empty paragraphs/headings or whitespace).
  */
 export function hasJsonContent(json: JSONContent | null | undefined): boolean {
-  if (!json) return false;
-  const content = json.content;
-  if (!content || content.length === 0) return false;
-  return !content.every(node =>
-    (node.type === 'paragraph' || node.type === 'heading')
-      ? isNodeContentEmpty(node)
-      : false
+  if (!json?.content?.length) return false;
+  return json.content.some(
+    (node) =>
+      (node.type !== 'paragraph' && node.type !== 'heading') || !isNodeContentEmpty(node)
   );
 }

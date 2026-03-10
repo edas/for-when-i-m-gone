@@ -103,8 +103,7 @@ function renderInjectedRecipientsAsHtml(
       .filter(Boolean)
       .join(' — ');
 
-    const contactsLine = contacts ? contacts : '';
-    return `<li><strong>${escapeHtml(safeName)}&nbsp;:</strong> ${contactsLine}</li>`;
+    return `<li><strong>${escapeHtml(safeName)}&nbsp;:</strong> ${contacts}</li>`;
   });
 
   return `<ul>${listItems.join('')}</ul>`;
