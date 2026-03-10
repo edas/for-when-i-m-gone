@@ -1,13 +1,9 @@
 import { TFunction } from 'i18next';
-import type { JSONContent } from '@tiptap/core';
-import { type IntroCheckboxState } from '../../lib/types/editorTypes';
-import { hasNodeTypeInJSON } from '../../lib/tiptap/extensions';
-import { computeInitialCheckboxState } from '../../lib/checkboxSync';
 
 /**
  * Contact type labels for rendering recipients
  */
-export interface ContactTypeLabels {
+interface ContactTypeLabels {
   phone: string;
   email: string;
   address: string;
@@ -34,35 +30,6 @@ export const INTRO_NODE_TYPES = {
   dateTimeInline: 'dateTimeInline',
   quorumInline: 'quorumInline',
 } as const;
-
-/**
- * Compute initial checkbox states based on content detection or saved state
- */
-export function computeInitialCheckboxStates(
-  content: JSONContent | null,
-  saved?: IntroCheckboxState
-): IntroCheckboxState {
-  return {
-    authorIdentity: saved?.authorIdentity ?? false,
-    secretHolders: computeInitialCheckboxState(
-      hasNodeTypeInJSON(content, INTRO_NODE_TYPES.recipientsBlock),
-      saved?.secretHolders
-    ),
-    openingConditions: computeInitialCheckboxState(
-      hasNodeTypeInJSON(content, INTRO_NODE_TYPES.conditionsBlock),
-      saved?.openingConditions
-    ),
-    dated: computeInitialCheckboxState(
-      hasNodeTypeInJSON(content, INTRO_NODE_TYPES.dateTimeInline),
-      saved?.dated
-    ),
-    quorum: computeInitialCheckboxState(
-      hasNodeTypeInJSON(content, INTRO_NODE_TYPES.quorumInline),
-      saved?.quorum
-    ),
-    directives: saved?.directives ?? false,
-  };
-}
 
 /**
  * Get contact type labels from translations

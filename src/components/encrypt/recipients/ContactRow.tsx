@@ -57,5 +57,3 @@ export function ContactRow({
     </div>
   );
 }
-
-export default ContactRow;

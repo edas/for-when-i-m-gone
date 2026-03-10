@@ -18,5 +18,3 @@ export function EssentialSection({ note, children }: EssentialSectionProps) {
     </div>
   );
 }
-
-export default EssentialSection;

@@ -73,5 +73,3 @@ export function IntroMessageEditor({ onContinue, onBack }: IntroMessageEditorPro
     </EditorLayout>
   );
 }
-
-export default IntroMessageEditor;

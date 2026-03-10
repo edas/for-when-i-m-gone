@@ -67,5 +67,3 @@ export function RichTextToolbar({ editor, insertButtons }: RichTextToolbarProps)
     </div>
   );
 }
-
-export default RichTextToolbar;

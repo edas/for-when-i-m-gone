@@ -48,4 +48,3 @@ export function WhoEditor({ onContinue, onBack }: WhoEditorProps) {
   );
 }
 
-export default WhoEditor;

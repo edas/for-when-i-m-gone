@@ -24,5 +24,3 @@ export function EditorLayout({
     </div>
   );
 }
-
-export default EditorLayout;

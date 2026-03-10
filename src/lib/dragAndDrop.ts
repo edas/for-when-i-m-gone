@@ -5,7 +5,7 @@
 /**
  * Item with an ID for identification during drag-and-drop
  */
-export interface DraggableItem {
+interface DraggableItem {
   id: string;
 }
 

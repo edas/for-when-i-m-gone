@@ -57,27 +57,6 @@ export function computeDerivedState(recipients: Recipient[]) {
   };
 }
 
-export function getInitialExpandedId(recipients: Recipient[]): string | null {
-  const unnamedRecipient = recipients.find(r => !r.name.trim());
-  if (unnamedRecipient) return unnamedRecipient.id;
-  if (recipients.length > 1) return null;
-  return recipients[0]?.id ?? null;
-}
-
-export function getInitialState(initialRecipients?: Recipient[]) {
-  if (initialRecipients?.length) {
-    return {
-      recipients: [...initialRecipients],
-      expandedId: getInitialExpandedId(initialRecipients),
-    };
-  }
-  const defaultRecipient = createEmptyRecipient();
-  return {
-    recipients: [defaultRecipient],
-    expandedId: defaultRecipient.id,
-  };
-}
-
 export function getVariantAndTitle(
   hasAtLeast2: boolean,
   unnamedCount: number,

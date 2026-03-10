@@ -90,8 +90,6 @@ i18n
     },
   });
 
-export default i18n;
-
 // Export helper functions for backward compatibility if needed
 function detectLanguage(): Language {
   const browserLang = navigator.language.toLowerCase();

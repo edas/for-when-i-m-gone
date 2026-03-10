@@ -12,5 +12,3 @@ export function Overlay({ children }: OverlayProps) {
     </div>
   );
 }
-
-export default Overlay;

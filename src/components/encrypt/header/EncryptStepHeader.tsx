@@ -23,5 +23,3 @@ export function EncryptStepHeader({ currentStep }: EncryptStepHeaderProps) {
     </div>
   );
 }
-
-export default EncryptStepHeader;

@@ -87,7 +87,6 @@ export function SecretEditor({ onContinue, onBack }: SecretEditorProps) {
   );
 }
 
-export default SecretEditor;
 
 function getVariantAndTitle(content: string, essentials: boolean[], optional: boolean[], t: TFunction): { variant: 'error' | 'warning' | 'info' | 'success', title: string } {
   const isEmpty = content.trim() === '';

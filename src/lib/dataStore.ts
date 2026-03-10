@@ -6,8 +6,7 @@
 import type { JSONContent } from '@tiptap/core';
 import type { SecretCheckboxState, IntroCheckboxState, HowData } from './types/editorTypes';
 import type { Recipient } from './types/recipient';
-import { base64ToUint8Array, bufferToText, decryptBufferWithPassword, encryptBufferWithPassword, textToBuffer } from './crypto/aes';
-import { uint8ArrayToBase64 } from './crypto/aes';
+import { base64ToUint8Array } from './crypto/aes';
 import { create } from 'zustand';
 import { detectedLanguage } from './i18n';
 
@@ -35,7 +34,7 @@ interface GenerateData {
   shares?: string[]; // Array of shares from ssss-js split
 }
 
-export interface ExportableGenerateData {
+interface ExportableGenerateData {
   aesKey?: string; // base64 encoded
   encryptedSecret?: string; // base64 encoded
   iv?: string; // base64 encoded
@@ -45,11 +44,11 @@ export interface ExportableGenerateData {
 /**
  * Application mode determined from initial DOM data
  */
-export type AppMode = 'encrypt' | 'decrypt' | 'locked';
+type AppMode = 'encrypt' | 'decrypt' | 'locked';
 
 export type StoredData = EncryptStoredData | DecryptStoredData | LockedStoredData;
 
-export type baseStoredData = {
+type baseStoredData = {
   mode: AppMode;
   language?: string;
 }
@@ -63,7 +62,7 @@ export type EncryptStoredData = baseStoredData & {
   generate?: GenerateData; // Can be internal (buffers) or serialized (base64)
 }
 
-export type ExportableEncryptStoredData = Omit<EncryptStoredData, 'generate'> & {
+type ExportableEncryptStoredData = Omit<EncryptStoredData, 'generate'> & {
   generate?: ExportableGenerateData; // Can be internal (buffers) or serialized (base64)
 }
 
@@ -104,7 +103,7 @@ function readInitialDataFromDOM(): StoredData {
  * Zustand store for reactive data management
  * Initialized from DOM at module load
  */
-export type StoreActions = {
+type StoreActions = {
   setData(updater: (current: StoredData) => Partial<StoredData>, replace?: boolean): void;
   getData(): StoredData;
 }
@@ -129,26 +128,6 @@ export function useEncryptDataStore(selector: (data: EncryptStoredData & StoreAc
     } 
     throw new Error('Invalid data store');
   });
-}
-
-export function toExportable(storedData: StoredData) : ExportableStoredData {
-  if (isEncryptData(storedData)) {
-    const exportable: ExportableEncryptStoredData = {
-      ...storedData,
-      generate: storedData.generate ? {
-        ...storedData.generate,
-        aesKey: storedData.generate?.aesKey ? uint8ArrayToBase64(storedData.generate.aesKey) : undefined,
-        encryptedSecret: storedData.generate?.encryptedSecret ? uint8ArrayToBase64(storedData.generate.encryptedSecret) : undefined,
-        iv: storedData.generate?.iv ? uint8ArrayToBase64(storedData.generate.iv) : undefined,
-      } : undefined,
-    }
-    return exportable;
-  } else if (isDecryptData(storedData)) {
-    return storedData;
-  } else if (isLockedData(storedData)) {
-    return storedData;
-  }
-  throw new Error('Invalid stored data');
 }
 
 function fromExportable(exportable: ExportableStoredData) : StoredData {
@@ -179,49 +158,21 @@ export type LockedStoredData = baseStoredData & {
 
 type ExportableStoredData = ExportableEncryptStoredData | DecryptStoredData | LockedStoredData;
 
-export async function encryptExportableData(exportableData: ExportableStoredData, password: string): Promise<LockedStoredData> {
-  const exportableString = JSON.stringify(exportableData);
-  const exportableBuffer = textToBuffer(exportableString);
-  const encryptedData = await encryptBufferWithPassword(exportableBuffer, password);
-  return {
-    mode: 'locked',
-    language: exportableData.language,
-    salt: uint8ArrayToBase64(encryptedData.salt),
-    iv: uint8ArrayToBase64(encryptedData.iv),
-    ciphertext: uint8ArrayToBase64(new Uint8Array(encryptedData.ciphertext)),
-  };
-}
-
-export async function decryptExportableData(exportableData: LockedStoredData, password: string): Promise<ExportableStoredData> {
-  const encryptedBuffer = {
-    salt: base64ToUint8Array(exportableData.salt),
-    iv: base64ToUint8Array(exportableData.iv),
-    ciphertext: base64ToUint8Array(exportableData.ciphertext).buffer,
-  }
-  const encryptedData = await decryptBufferWithPassword(encryptedBuffer, password);
-  const exportableString = bufferToText(encryptedData);
-  return JSON.parse(exportableString) as ExportableStoredData;
-}
-
 /**
  * Check if the current stored data is in locked/encrypted format
  */
-export function isLockedData(data: ExportableStoredData): data is ExportableStoredData & LockedStoredData {
+function isLockedData(data: ExportableStoredData): data is ExportableStoredData & LockedStoredData {
   return data.mode === 'locked';
 }
 
-export function isEncryptData(data: StoredData): data is StoredData & EncryptStoredData {
+function isEncryptData(data: StoredData): data is StoredData & EncryptStoredData {
   return data.mode === 'encrypt';
 }
 
-export function isExportableEncryptData(data: ExportableStoredData): data is ExportableStoredData & ExportableEncryptStoredData {
+function isExportableEncryptData(data: ExportableStoredData): data is ExportableStoredData & ExportableEncryptStoredData {
   return data.mode === 'encrypt';
 }
 
-export function isDecryptData(data: StoredData): data is StoredData & DecryptStoredData {
-  return data.mode === 'decrypt';
-}
-
-export function isExportableDecryptData(data: ExportableStoredData): data is ExportableStoredData & DecryptStoredData {
+function isExportableDecryptData(data: ExportableStoredData): data is ExportableStoredData & DecryptStoredData {
   return data.mode === 'decrypt';
 }

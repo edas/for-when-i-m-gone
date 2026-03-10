@@ -32,7 +32,7 @@ export function useIsThresholdReadOnly() {
   return isThresholdReadOnly;
 }
 
-export type ThresholdUpdater = number | ((threshold: number) => number);
+type ThresholdUpdater = number | ((threshold: number) => number);
 
 function _setThreshold(threshold: number | ThresholdUpdater, setData: EncryptStoreActions['setData']) {
   setData((current) => ({

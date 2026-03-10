@@ -310,5 +310,3 @@ export function RecipientCard({
     </div>
   );
 }
-
-export default RecipientCard;

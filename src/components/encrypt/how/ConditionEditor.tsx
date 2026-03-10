@@ -2,7 +2,7 @@ import howStyles from '../HowEditor.module.css';
 import styles from './ConditionEditor.module.css';
 import { useTranslation } from 'react-i18next';
 import { Editor, EditorContent } from '@tiptap/react';
-import Icon, { IconName } from '@/components/ui/Icons';
+import { Icon, type IconName } from '@/components/ui/Icons';
 import tiptap from '@/components/ui/TipTapEditor.module.css';
 
 export function ConditionEditor({ editor }: { editor: Editor }) {
@@ -29,7 +29,7 @@ interface ToolbarButton {
 }
 
 
-export function RichTextToolbar({ editor }: { editor: Editor }) {
+function RichTextToolbar({ editor }: { editor: Editor }) {
 
   const { t } = useTranslation();
   

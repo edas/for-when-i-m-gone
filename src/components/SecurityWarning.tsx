@@ -60,5 +60,3 @@ export function SecurityWarning({ initialChecked, onContinue }: SecurityWarningP
     </Overlay>
   );
 }
-
-export default SecurityWarning;

@@ -3,23 +3,7 @@
  */
 
 import type { Editor, JSONContent } from '@tiptap/core';
-import { createTiptapEditor, type TiptapEditorOptions } from './createEditor';
 import { toStorageDateTimeValue } from './extensions/datetime';
-
-/**
- * Initialize TipTap editor with common pattern
- */
-export function initializeTiptapEditor(
-  editorElement: HTMLElement | null,
-  options: Omit<TiptapEditorOptions, 'element'>
-): Editor | null {
-  if (!editorElement) return null;
-  
-  return createTiptapEditor({
-    element: editorElement,
-    ...options,
-  });
-}
 
 interface IntroDynamicExampleValues {
   quorum: number;

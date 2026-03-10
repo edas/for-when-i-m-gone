@@ -292,5 +292,3 @@ export function GenerateEditor({
     </EditorLayout>
   );
 }
-
-export default GenerateEditor;

@@ -57,5 +57,3 @@ export function HowEditor({ onContinue, onBack }: HowEditorProps) {
     </EditorLayout>
   );
 }
-
-export default HowEditor;

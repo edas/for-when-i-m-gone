@@ -58,5 +58,3 @@ function AppContent() {
   
   throw new Error(`Unknown step: ${step}`);
 }
-
-export default App;

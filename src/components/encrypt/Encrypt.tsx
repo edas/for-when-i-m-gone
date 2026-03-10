@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
-import SecretEditor from './SecretEditor';
-import WhoEditor from './WhoEditor';
-import HowEditor from './HowEditor';
-import IntroMessageEditor from './IntroMessageEditor';
-import GenerateEditor from './GenerateEditor';
+import { SecretEditor } from './SecretEditor';
+import { WhoEditor } from './WhoEditor';
+import { HowEditor } from './HowEditor';
+import { IntroMessageEditor } from './IntroMessageEditor';
+import { GenerateEditor } from './GenerateEditor';
 import { EncryptStepHeader } from './header/EncryptStepHeader';
 
 interface EncryptProps {
@@ -33,5 +33,3 @@ export function Encrypt({ onBack: backToParent }: EncryptProps) {
     </>
   );
 }
-
-export default Encrypt;

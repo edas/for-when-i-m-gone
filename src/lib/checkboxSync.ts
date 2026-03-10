@@ -2,7 +2,7 @@
  * Helper for syncing checkbox state with node presence in TipTap editor
  */
 
-export interface CheckboxSyncState {
+interface CheckboxSyncState {
   prevValue: boolean;
 }
 
@@ -37,15 +37,4 @@ export function syncCheckboxWithNode(
   }
   
   state.prevValue = currentHasNode;
-}
-
-/**
- * Compute initial checkbox states based on content detection or saved state.
- * Used for IntroMessageEditor checkboxes.
- */
-export function computeInitialCheckboxState(
-  hasNode: boolean,
-  savedValue: boolean | undefined
-): boolean {
-  return hasNode || (savedValue ?? false);
 }

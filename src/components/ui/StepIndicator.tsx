@@ -94,5 +94,3 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
     </div>
   );
 }
-
-export default StepIndicator;

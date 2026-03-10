@@ -28,5 +28,3 @@ export function SecurityCheckbox({ checked, onChange, children }: SecurityCheckb
     </div>
   );
 }
-
-export default SecurityCheckbox;

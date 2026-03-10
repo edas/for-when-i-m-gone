@@ -34,5 +34,3 @@ export function HelpSection({ title, defaultOpen = false, children }: HelpSectio
     </div>
   );
 }
-
-export default HelpSection;

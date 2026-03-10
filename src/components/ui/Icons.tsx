@@ -138,5 +138,3 @@ export function Icon({ name, size = 20, strokeWidth = 2 }: IconProps) {
     />
   );
 }
-
-export default Icon;
