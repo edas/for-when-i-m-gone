@@ -3,7 +3,10 @@ import { useCallback, useEffect, useRef } from 'react';
 import type { Editor } from '@tiptap/core';
 import { useEditorState } from '@tiptap/react';
 import { useEncryptDataStore, type EncryptStoreActions } from '../../../lib/dataStore';
-import { defaultIntroCheckboxState } from '../../../lib/types/editorTypes';
+import {
+  defaultIntroCheckboxState,
+  type IntroCheckboxState,
+} from '../../../lib/types/editorTypes';
 import { createCheckboxSyncState, syncCheckboxWithNode } from '../../../lib/checkboxSync';
 import { hasJsonContent } from '../../../lib/tiptap/utils';
 import { hasNodeTypeInJSON } from '../../../lib/tiptap/extensions';
@@ -17,6 +20,16 @@ interface ChecklistItem {
   setter: ((value: boolean) => void) | null;
 }
 
+function useHasNodeType(editor: Editor | null, nodeType: string): boolean {
+  return (
+    useEditorState({
+      editor,
+      selector: ({ editor: currentEditor }) =>
+        currentEditor ? hasNodeTypeInJSON(currentEditor.getJSON(), nodeType) : false,
+    }) ?? false
+  );
+}
+
 /**
  * Compute derived state for IntroEditor validation.
  * Similar to useHowState for HowEditor — builds essentials/optionals arrays
@@ -27,114 +40,30 @@ export function useIntroState(editor: Editor | null) {
   const checkboxState = useEncryptDataStore((state) => state.intro?.checkboxState ?? defaultIntroCheckboxState);
   const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData);
 
-  const hasContent = useEditorState({
-    editor,
-    selector: ({ editor: currentEditor }) => (currentEditor ? hasJsonContent(currentEditor.getJSON()) : false),
-  }) ?? false;
-  const hasRecipientsBlock = useEditorState({
-    editor,
-    selector: ({ editor: currentEditor }) => (
-      currentEditor
-        ? hasNodeTypeInJSON(currentEditor.getJSON(), INTRO_NODE_TYPES.recipientsBlock)
-        : false
-    ),
-  }) ?? false;
-  const hasConditionsBlock = useEditorState({
-    editor,
-    selector: ({ editor: currentEditor }) => (
-      currentEditor
-        ? hasNodeTypeInJSON(currentEditor.getJSON(), INTRO_NODE_TYPES.conditionsBlock)
-        : false
-    ),
-  }) ?? false;
-  const hasDateTimeInline = useEditorState({
-    editor,
-    selector: ({ editor: currentEditor }) => (
-      currentEditor
-        ? hasNodeTypeInJSON(currentEditor.getJSON(), INTRO_NODE_TYPES.dateTimeInline)
-        : false
-    ),
-  }) ?? false;
-  const hasQuorumInline = useEditorState({
-    editor,
-    selector: ({ editor: currentEditor }) => (
-      currentEditor
-        ? hasNodeTypeInJSON(currentEditor.getJSON(), INTRO_NODE_TYPES.quorumInline)
-        : false
-    ),
-  }) ?? false;
+  const hasContent =
+    useEditorState({
+      editor,
+      selector: ({ editor: currentEditor }) => (currentEditor ? hasJsonContent(currentEditor.getJSON()) : false),
+    }) ?? false;
+  const hasRecipientsBlock = useHasNodeType(editor, INTRO_NODE_TYPES.recipientsBlock);
+  const hasConditionsBlock = useHasNodeType(editor, INTRO_NODE_TYPES.conditionsBlock);
+  const hasDateTimeInline = useHasNodeType(editor, INTRO_NODE_TYPES.dateTimeInline);
+  const hasQuorumInline = useHasNodeType(editor, INTRO_NODE_TYPES.quorumInline);
 
-  const setCheckAuthorIdentity = useCallback((value: boolean) => {
-    setData((current) => ({
-      intro: {
-        ...current.intro,
-        checkboxState: {
-          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
-          authorIdentity: value,
+  const makeCheckboxSetter = useCallback(
+    (key: keyof IntroCheckboxState) => (value: boolean) => {
+      setData((current) => ({
+        intro: {
+          ...current.intro,
+          checkboxState: {
+            ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
+            [key]: value,
+          },
         },
-      },
-    }));
-  }, [setData]);
-
-  const setCheckSecretHolders = useCallback((value: boolean) => {
-    setData((current) => ({
-      intro: {
-        ...current.intro,
-        checkboxState: {
-          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
-          secretHolders: value,
-        },
-      },
-    }));
-  }, [setData]);
-
-  const setCheckOpeningConditions = useCallback((value: boolean) => {
-    setData((current) => ({
-      intro: {
-        ...current.intro,
-        checkboxState: {
-          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
-          openingConditions: value,
-        },
-      },
-    }));
-  }, [setData]);
-
-  const setCheckDated = useCallback((value: boolean) => {
-    setData((current) => ({
-      intro: {
-        ...current.intro,
-        checkboxState: {
-          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
-          dated: value,
-        },
-      },
-    }));
-  }, [setData]);
-
-  const setCheckQuorum = useCallback((value: boolean) => {
-    setData((current) => ({
-      intro: {
-        ...current.intro,
-        checkboxState: {
-          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
-          quorum: value,
-        },
-      },
-    }));
-  }, [setData]);
-
-  const setCheckDirectives = useCallback((value: boolean) => {
-    setData((current) => ({
-      intro: {
-        ...current.intro,
-        checkboxState: {
-          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
-          directives: value,
-        },
-      },
-    }));
-  }, [setData]);
+      }));
+    },
+    [setData]
+  );
 
   const recipientsSyncStateRef = useRef(createCheckboxSyncState(false));
   const conditionsSyncStateRef = useRef(createCheckboxSyncState(false));
@@ -142,20 +71,20 @@ export function useIntroState(editor: Editor | null) {
   const quorumSyncStateRef = useRef(createCheckboxSyncState(false));
 
   useEffect(() => {
-    syncCheckboxWithNode(hasRecipientsBlock, recipientsSyncStateRef.current, setCheckSecretHolders);
-  }, [hasRecipientsBlock, setCheckSecretHolders]);
+    syncCheckboxWithNode(hasRecipientsBlock, recipientsSyncStateRef.current, makeCheckboxSetter('secretHolders'));
+  }, [hasRecipientsBlock, makeCheckboxSetter]);
 
   useEffect(() => {
-    syncCheckboxWithNode(hasConditionsBlock, conditionsSyncStateRef.current, setCheckOpeningConditions);
-  }, [hasConditionsBlock, setCheckOpeningConditions]);
+    syncCheckboxWithNode(hasConditionsBlock, conditionsSyncStateRef.current, makeCheckboxSetter('openingConditions'));
+  }, [hasConditionsBlock, makeCheckboxSetter]);
 
   useEffect(() => {
-    syncCheckboxWithNode(hasDateTimeInline, dateTimeSyncStateRef.current, setCheckDated);
-  }, [hasDateTimeInline, setCheckDated]);
+    syncCheckboxWithNode(hasDateTimeInline, dateTimeSyncStateRef.current, makeCheckboxSetter('dated'));
+  }, [hasDateTimeInline, makeCheckboxSetter]);
 
   useEffect(() => {
-    syncCheckboxWithNode(hasQuorumInline, quorumSyncStateRef.current, setCheckQuorum);
-  }, [hasQuorumInline, setCheckQuorum]);
+    syncCheckboxWithNode(hasQuorumInline, quorumSyncStateRef.current, makeCheckboxSetter('quorum'));
+  }, [hasQuorumInline, makeCheckboxSetter]);
 
   const { authorIdentity, secretHolders, openingConditions, dated, quorum, directives } = checkboxState;
 
@@ -165,35 +94,35 @@ export function useIntroState(editor: Editor | null) {
       description: t('introEditor.sidePanel.checkboxes.dated.description'),
       value: dated,
       readonly: hasDateTimeInline,
-      setter: hasDateTimeInline ? null : setCheckDated,
+      setter: hasDateTimeInline ? null : makeCheckboxSetter('dated'),
     },
     {
       label: t('introEditor.sidePanel.checkboxes.quorum.title'),
       description: t('introEditor.sidePanel.checkboxes.quorum.description'),
       value: quorum,
       readonly: hasQuorumInline,
-      setter: hasQuorumInline ? null : setCheckQuorum,
+      setter: hasQuorumInline ? null : makeCheckboxSetter('quorum'),
     },
     {
       label: t('introEditor.sidePanel.checkboxes.openingConditions.title'),
       description: t('introEditor.sidePanel.checkboxes.openingConditions.description'),
       value: openingConditions,
       readonly: hasConditionsBlock,
-      setter: hasConditionsBlock ? null : setCheckOpeningConditions,
+      setter: hasConditionsBlock ? null : makeCheckboxSetter('openingConditions'),
     },
     {
       label: t('introEditor.sidePanel.checkboxes.secretHolders.title'),
       description: t('introEditor.sidePanel.checkboxes.secretHolders.description'),
       value: secretHolders,
       readonly: hasRecipientsBlock,
-      setter: hasRecipientsBlock ? null : setCheckSecretHolders,
+      setter: hasRecipientsBlock ? null : makeCheckboxSetter('secretHolders'),
     },
     {
       label: t('introEditor.sidePanel.checkboxes.authorIdentity.title'),
       description: t('introEditor.sidePanel.checkboxes.authorIdentity.description'),
       value: authorIdentity,
       readonly: false,
-      setter: setCheckAuthorIdentity,
+      setter: makeCheckboxSetter('authorIdentity'),
     },
   ];
 
@@ -203,7 +132,7 @@ export function useIntroState(editor: Editor | null) {
       description: t('introEditor.sidePanel.checkboxes.directives.description'),
       value: directives,
       readonly: false,
-      setter: setCheckDirectives,
+      setter: makeCheckboxSetter('directives'),
     },
   ];
 

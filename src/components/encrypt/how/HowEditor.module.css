@@ -36,16 +36,6 @@
   min-height: 0;
 }
 
-.optionalSection {
-  margin-top: 1rem;
-}
-
-.sectionDivider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 1.5rem 0;
-}
-
 @media (max-width: 600px) {
   .howContent {
     padding: 1.5rem 0 0 0;

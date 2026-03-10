@@ -1,24 +1,11 @@
 import { Node, mergeAttributes, type Editor } from '@tiptap/core';
 import type { ContactInfo, ContactType, Recipient } from '../../types/recipient';
+import { hasNodeTypeInEditor } from '../extensions';
 import styles from '../extensions.module.css';
 
 const RECIPIENTS_TYPE = 'recipientsBlock';
 const RECIPIENTS_DATA_TYPE = 'recipients-block';
 type ContactTypeLabelsMap = Record<ContactType, string>;
-
-function hasNodeTypeInEditor(editor: Editor, nodeType: string): boolean {
-  let found = false;
-  editor.state.doc.descendants((node) => {
-    if (node.type.name === nodeType) {
-      found = true;
-      return false;
-    }
-
-    return true;
-  });
-
-  return found;
-}
 
 export function hasRecipientsBlock(editor: Editor | null): boolean {
   if (!editor) return false;

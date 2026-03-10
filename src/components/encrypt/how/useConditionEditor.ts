@@ -1,7 +1,7 @@
-import { useEditor } from "@tiptap/react";
+import { useEditor } from '@tiptap/react';
 import type { JSONContent } from '@tiptap/core';
-import StarterKit from "@tiptap/starter-kit";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
+import { getBaseStarterKit } from '@/lib/tiptap/createEditor';
 
 export function useConditionEditor(
   defaultValue: JSONContent | undefined,
@@ -9,17 +9,7 @@ export function useConditionEditor(
 ) {
   const { t } = useTranslation();
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        blockquote: false,
-        code: false,
-        codeBlock: false,
-        hardBreak: false,
-        horizontalRule: false,
-        strike: false,
-        heading: false,
-      }),
-    ],
+    extensions: [getBaseStarterKit()],
     content: defaultValue ?? undefined,
     editorProps: {
       attributes: {

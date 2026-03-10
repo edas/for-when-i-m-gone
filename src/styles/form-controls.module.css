@@ -3,48 +3,40 @@
  * Used across multiple editor components
  */
 
-/* Text inputs */
-.formInput {
-  padding: 0.75rem 1rem;
+.formControl {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
   color: #e2e8f0;
-  font-size: 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.formControl:focus {
+  outline: none;
+  border-color: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+.formInput {
+  composes: formControl;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
 }
 
 .formInput::placeholder {
   color: rgba(255, 255, 255, 0.4);
 }
 
-.formInput:focus {
-  outline: none;
-  border-color: rgba(96, 165, 250, 0.5);
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
-}
-
-/* Smaller variant */
 .formInputSmall {
   padding: 0.6rem 0.75rem;
 }
 
-/* Select dropdowns */
 .formSelect {
+  composes: formControl;
   padding: 0.6rem 0.75rem;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
-  color: #e2e8f0;
   font-size: 1rem;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.formSelect:focus {
-  outline: none;
-  border-color: rgba(96, 165, 250, 0.5);
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
 }
 
 .formSelect option {
@@ -52,29 +44,19 @@
   color: #e2e8f0;
 }
 
-/* Textarea */
 .formTextarea {
+  composes: formControl;
   flex: 1;
   min-height: 400px;
   padding: 1.5rem;
+  border-radius: 12px;
   font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
   line-height: 1.6;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  color: #e2e8f0;
   resize: vertical;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .formTextarea::placeholder {
   color: rgba(255, 255, 255, 0.4);
-}
-
-.formTextarea:focus {
-  outline: none;
-  border-color: rgba(96, 165, 250, 0.5);
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
 }
 
 /* Form field wrapper */

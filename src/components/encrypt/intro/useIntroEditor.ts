@@ -1,7 +1,7 @@
 import { useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
 import { useTranslation } from 'react-i18next';
 import { useEncryptDataStore } from '../../../lib/dataStore';
+import { getBaseStarterKit } from '../../../lib/tiptap/createEditor';
 import { getContactTypeLabels } from './introEditorUtils';
 import { DateTimeInline } from '../../../lib/tiptap/extensions/datetime';
 import { createQuorumInline } from '../../../lib/tiptap/extensions/quorum';
@@ -24,15 +24,7 @@ export function useIntroEditor() {
 
   return useEditor({
     extensions: [
-      StarterKit.configure({
-        blockquote: false,
-        code: false,
-        codeBlock: false,
-        hardBreak: false,
-        horizontalRule: false,
-        strike: false,
-      }),
-      
+      getBaseStarterKit(true),
       recipientsBlock,
       conditionsBlock,
       DateTimeInline,

@@ -1,9 +1,24 @@
 /**
- * TipTap extensions utilities (e.g. node-type checks in JSON).
+ * TipTap extensions utilities (e.g. node-type checks in JSON and live editor).
  * Extension nodes (conditions, recipients, datetime, quorum) live in ./extensions/*.
  */
 
-import type { JSONContent } from '@tiptap/core';
+import type { Editor, JSONContent } from '@tiptap/core';
+
+/**
+ * Check if a node type exists in the editor's current document
+ */
+export function hasNodeTypeInEditor(editor: Editor, nodeType: string): boolean {
+  let found = false;
+  editor.state.doc.descendants((node) => {
+    if (node.type.name === nodeType) {
+      found = true;
+      return false;
+    }
+    return true;
+  });
+  return found;
+}
 
 /**
  * Check if a node type exists in JSONContent
