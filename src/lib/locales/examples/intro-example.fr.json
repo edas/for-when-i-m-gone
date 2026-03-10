@@ -5,7 +5,7 @@
       "type": "paragraph",
       "content": [
         { "type": "text", "text": "Le " },
-        { "type": "dateTimeInline" }
+        { "type": "docDatetime", "attrs": { "datetime": "2026-03-10 12:00" } }
       ]
     },
     { "type": "paragraph" },
@@ -13,7 +13,7 @@
       "type": "paragraph",
       "content": [
         { "type": "text", "text": "Je vous ai laissé mes informations à vous tous. Vous pourrez y accéder ensemble, à condition d'être au moins " },
-        { "type": "quorumInline" },
+        { "type": "quorumInline", "attrs": { "quorum": 2 } },
         { "type": "text", "text": ". Faites-en un usage raisonné." }
       ]
     },

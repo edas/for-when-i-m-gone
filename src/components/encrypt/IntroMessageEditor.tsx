@@ -24,6 +24,7 @@ export function IntroMessageEditor({ onContinue, onBack }: IntroMessageEditorPro
   const { hasContent, variant, canContinue } = useIntroState(editor);
   const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData);
   const checkboxState = useEncryptDataStore((state) => state.intro?.checkboxState ?? defaultIntroCheckboxState);
+  const threshold = useEncryptDataStore((state) => state.how?.threshold ?? 2);
   const messageJson = useEditorState({
     editor,
     selector: ({ editor: currentEditor }) => (currentEditor ? currentEditor.getJSON() : null),
@@ -42,8 +43,11 @@ export function IntroMessageEditor({ onContinue, onBack }: IntroMessageEditorPro
   const generateExample = useCallback(() => {
     if (!editor) return;
     const exampleContent = t('introEditor.sidePanel.exampleContentJson', { returnObjects: true }) as JSONContent;
-    generateExampleInEditor(editor, exampleContent, hasContent);
-  }, [editor, t, hasContent]);
+    generateExampleInEditor(editor, exampleContent, hasContent, {
+      quorum: threshold,
+      date: new Date(),
+    });
+  }, [editor, t, hasContent, threshold]);
 
   return (
     <EditorLayout

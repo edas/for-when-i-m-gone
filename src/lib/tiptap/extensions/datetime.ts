@@ -6,7 +6,7 @@ function padToTwoDigits(value: number): string {
   return String(value).padStart(2, '0');
 }
 
-function toStorageDateTimeValue(date: Date): string {
+export function toStorageDateTimeValue(date: Date): string {
   const year = date.getFullYear();
   const month = padToTwoDigits(date.getMonth() + 1);
   const day = padToTwoDigits(date.getDate());
@@ -99,7 +99,7 @@ export const DateTimeInline = Node.create({
     return {
       insertDateTimeInline:
         () =>
-        ({ commands }) => {
+        ({ commands }: { commands: any }) => {
           return commands.insertContent({
             type: this.name,
             attrs: {
@@ -107,6 +107,6 @@ export const DateTimeInline = Node.create({
             },
           });
         },
-    };
+    } as any;
   },
 });
