@@ -52,20 +52,10 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
   return (
     <div className={styles.stepIndicatorWrapper} ref={scrollContainerRef}>
       <div className={styles.stepIndicator} ref={stepContainerRef}>
-        {steps.map((step, index) => {
-          const isPrevious = index === currentStep - 1;
-          const isCurrent = index === currentStep;
-          const isNext = index === currentStep + 1;
-          
-          return (
-            <div 
+        {steps.map((step, index) => (
+            <div
               key={step.key}
-              className={`${styles.stepWrapper} ${
-                isPrevious ? styles.stepPrevious : 
-                isCurrent ? styles.stepCurrent : 
-                isNext ? styles.stepNext : 
-                styles.stepOther
-              }`}
+              className={styles.stepWrapper}
             >
               <div
                 className={`${styles.step} ${
@@ -88,8 +78,7 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
                 <div className={`${styles.stepLine} ${index < currentStep ? styles.completed : ''}`}></div>
               )}
             </div>
-          );
-        })}
+        ))}
       </div>
     </div>
   );

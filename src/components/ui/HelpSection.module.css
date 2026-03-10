@@ -81,48 +81,6 @@
   margin-bottom: 1.25rem;
 }
 
-.helpSectionContent .regularSection {
-  margin-bottom: 1.25rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.helpSectionContent .optionalSection {
-  opacity: 0.85;
-}
-
-.helpSectionContent .recipientCount {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.helpSectionContent .countNumber {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #ffffff;
-  min-width: 48px;
-  text-align: center;
-}
-
-.helpSectionContent .countDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.helpSectionContent .countLabel {
-  color: #e2e8f0;
-}
-
-.helpSectionContent .countWarnings {
-  color: #f6ad55;
-}
-
 /* Responsive */
 @media (max-width: 600px) {
   .helpSection {

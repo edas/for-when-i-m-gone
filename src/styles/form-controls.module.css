@@ -27,10 +27,6 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
-.formInputSmall {
-  padding: 0.6rem 0.75rem;
-}
-
 .formSelect {
   composes: formControl;
   padding: 0.6rem 0.75rem;
@@ -57,18 +53,6 @@
 
 .formTextarea::placeholder {
   color: rgba(255, 255, 255, 0.4);
-}
-
-/* Form field wrapper */
-.formField {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.formField label {
-  color: #a0aec0;
-  font-weight: 500;
 }
 
 /* Add button (dashed border style) */
@@ -127,19 +111,6 @@
 .removeButton:hover {
   background: rgba(239, 68, 68, 0.2);
   border-color: rgba(239, 68, 68, 0.5);
-}
-
-.removeButtonLarge {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-}
-
-/* Section divider */
-.sectionDivider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 1.5rem 0;
 }
 
 /* Optional section */

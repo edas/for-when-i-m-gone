@@ -11,6 +11,11 @@
   cursor: default;
 }
 
+.checkboxItem.essential .labelTitle,
+.checkboxItem.essential .labelText {
+  font-weight: 500;
+}
+
 .checkboxItem input[type="checkbox"] {
   position: absolute;
   opacity: 0;
