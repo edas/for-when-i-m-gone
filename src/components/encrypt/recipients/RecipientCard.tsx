@@ -73,7 +73,11 @@ function RecipientNameInput({
 }: RecipientNameInputProps) {
   const { updateRecipientName } = useRecipientActions();
   return (
-    <div className={styles.nameInputWrapper}>
+    <div
+      className={styles.nameInputWrapper}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
       <input
         ref={nameInputRef}
         id={`name-${recipient.id}`}
@@ -164,7 +168,7 @@ function RecipientActions({
       {expanded && (
         <button
           className={styles.privateToggleButton}
-          onClick={() => updateRecipientVisibility(recipient.id, !recipient.isPrivate)}
+          onClick={(e) => { e.stopPropagation(); updateRecipientVisibility(recipient.id, !recipient.isPrivate); }}
           title={t.fields.notListedPublicly}
         >
           <Icon name={recipient.isPrivate ? 'eye-off' : 'eye'} size={18} />
@@ -173,7 +177,7 @@ function RecipientActions({
       {expanded && !recipient.number && (
         <button
           className={`${styles.removeButton} ${styles.large}`}
-          onClick={() => { removeRecipient(recipient.id) }}
+          onClick={(e) => { e.stopPropagation(); removeRecipient(recipient.id); }}
           title={t.removeRecipient}
         >
           <Icon name="minus" size={16} />
