@@ -3,7 +3,7 @@ import styles from './ConditionEditor.module.css';
 import { useTranslation } from 'react-i18next';
 import { Editor, EditorContent } from '@tiptap/react';
 import Icon, { IconName } from '@/components/ui/Icons';
-
+import tiptap from '@/components/ui/TipTapEditor.module.css';
 
 export function ConditionEditor({ editor }: { editor: Editor }) {
   const { t } = useTranslation();
@@ -14,7 +14,7 @@ export function ConditionEditor({ editor }: { editor: Editor }) {
           {t('howEditor.conditions.title')}
         </label>
         
-        <div className={styles.editorWrapper}>
+        <div className={tiptap.editorWrapper}>
           <RichTextToolbar editor={editor} />
           <EditorContent editor={editor} className="tiptap-editor compact" />
         </div>
