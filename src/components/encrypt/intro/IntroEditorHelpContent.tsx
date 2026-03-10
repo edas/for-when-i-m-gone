@@ -4,11 +4,11 @@ import { HelpSection } from '../../ui/HelpSection';
 import { CheckboxItem } from '../../ui/CheckboxItem';
 import formControls from '../../../styles/form-controls.module.css';
 import helpStyles from '../../ui/HelpSection.module.css';
-import { type UseIntroEditorReturn } from './useIntroEditor';
+import type { Editor } from '@tiptap/core';
 import { useIntroState } from './useIntroState';
 
 interface IntroEditorHelpContentProps {
-  editor: UseIntroEditorReturn;
+  editor: Editor | null;
 }
 
 export function IntroEditorHelpContent({ editor }: IntroEditorHelpContentProps) {

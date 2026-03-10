@@ -1,13 +1,18 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useEditorState } from '@tiptap/react';
+import type { JSONContent } from '@tiptap/core';
 import { EditorLayout } from '../ui/EditorLayout';
 import { ActionButtons } from '../ui/ActionButtons';
-import { RichTextToolbar } from '../ui/RichTextToolbar';
 import { useIntroEditor } from './intro/useIntroEditor';
 import { useIntroState } from './intro/useIntroState';
+import { IntroEditor } from './intro/IntroEditor';
 import { IntroEditorHelpContent } from './intro/IntroEditorHelpContent';
-import '../../styles/tiptap-editor.css';
 import styles from './IntroMessageEditor.module.css';
+import { useEncryptDataStore, type EncryptStoreActions } from '../../lib/dataStore';
+import { defaultIntroCheckboxState } from '../../lib/types/editorTypes';
+import { generateExampleInEditor } from '../../lib/tiptap/editorHelpers';
+import { useIntroDynamicData } from './intro/useIntroDynamicData';
 
 interface IntroMessageEditorProps {
   onContinue: () => void;
@@ -16,24 +21,39 @@ interface IntroMessageEditorProps {
 
 export function IntroMessageEditor({ onContinue, onBack }: IntroMessageEditorProps) {
   const { t } = useTranslation();
-
   const editor = useIntroEditor();
+  useIntroDynamicData(editor);
   const { hasContent, variant, canContinue } = useIntroState(editor);
+  const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData);
+  const checkboxState = useEncryptDataStore((state) => state.intro?.checkboxState ?? defaultIntroCheckboxState);
+  const messageJson = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) => (currentEditor ? currentEditor.getJSON() : null),
+  }) ?? null;
+
+  useEffect(() => {
+    setData((current) => ({
+      intro: {
+        ...current.intro,
+        message: messageJson,
+        checkboxState,
+      },
+    }));
+  }, [messageJson, checkboxState, setData]);
 
   const generateExample = useCallback(() => {
-    editor.generateExample();
-  }, [editor.generateExample]);
+    if (!editor) return;
+    const exampleContent = t('introEditor.sidePanel.exampleContentJson', { returnObjects: true }) as JSONContent;
+    generateExampleInEditor(editor, exampleContent, hasContent);
+  }, [editor, t, hasContent]);
 
   return (
     <EditorLayout
       title={t('introEditor.title')}
-      subtitle={t('introEditor.subtitle')}
-      toolbar={
-        <RichTextToolbar editor={editor.editorInstanceRef.current} />
-      }
     >
-      <div className={`tiptap-editor ${styles.tiptapEditor}`} ref={editor.editorRef}></div>
-
+      <div className={styles.introContent}>
+        <IntroEditor editor={editor} />
+      </div>
       <IntroEditorHelpContent editor={editor} />
 
       <ActionButtons

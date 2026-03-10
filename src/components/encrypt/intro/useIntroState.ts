@@ -1,5 +1,13 @@
 import { useTranslation } from 'react-i18next';
-import { type UseIntroEditorReturn } from './useIntroEditor';
+import { useCallback, useEffect, useRef } from 'react';
+import type { Editor } from '@tiptap/core';
+import { useEditorState } from '@tiptap/react';
+import { useEncryptDataStore, type EncryptStoreActions } from '../../../lib/dataStore';
+import { defaultIntroCheckboxState } from '../../../lib/types/editorTypes';
+import { createCheckboxSyncState, syncCheckboxWithNode } from '../../../lib/checkboxSync';
+import { hasJsonContent } from '../../../lib/tiptap/utils';
+import { hasNodeTypeInJSON } from '../../../lib/tiptap/extensions';
+import { INTRO_NODE_TYPES } from '../introEditorUtils';
 
 interface ChecklistItem {
   label: string;
@@ -14,15 +22,140 @@ interface ChecklistItem {
  * Similar to useHowState for HowEditor — builds essentials/optionals arrays
  * and computes variant, title, canContinue from editor state.
  */
-export function useIntroState(editor: UseIntroEditorReturn) {
+export function useIntroState(editor: Editor | null) {
   const { t } = useTranslation();
+  const checkboxState = useEncryptDataStore((state) => state.intro?.checkboxState ?? defaultIntroCheckboxState);
+  const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData);
 
-  const {
-    checkboxState, hasContent,
-    hasRecipientsBlock, hasConditionsBlock, hasDateTimeInline, hasQuorumInline,
-    setCheckAuthorIdentity, setCheckSecretHolders, setCheckOpeningConditions,
-    setCheckDated, setCheckQuorum, setCheckDirectives,
-  } = editor;
+  const hasContent = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) => (currentEditor ? hasJsonContent(currentEditor.getJSON()) : false),
+  }) ?? false;
+  const hasRecipientsBlock = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) => (
+      currentEditor
+        ? hasNodeTypeInJSON(currentEditor.getJSON(), INTRO_NODE_TYPES.recipientsBlock)
+        : false
+    ),
+  }) ?? false;
+  const hasConditionsBlock = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) => (
+      currentEditor
+        ? hasNodeTypeInJSON(currentEditor.getJSON(), INTRO_NODE_TYPES.conditionsBlock)
+        : false
+    ),
+  }) ?? false;
+  const hasDateTimeInline = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) => (
+      currentEditor
+        ? hasNodeTypeInJSON(currentEditor.getJSON(), INTRO_NODE_TYPES.dateTimeInline)
+        : false
+    ),
+  }) ?? false;
+  const hasQuorumInline = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) => (
+      currentEditor
+        ? hasNodeTypeInJSON(currentEditor.getJSON(), INTRO_NODE_TYPES.quorumInline)
+        : false
+    ),
+  }) ?? false;
+
+  const setCheckAuthorIdentity = useCallback((value: boolean) => {
+    setData((current) => ({
+      intro: {
+        ...current.intro,
+        checkboxState: {
+          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
+          authorIdentity: value,
+        },
+      },
+    }));
+  }, [setData]);
+
+  const setCheckSecretHolders = useCallback((value: boolean) => {
+    setData((current) => ({
+      intro: {
+        ...current.intro,
+        checkboxState: {
+          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
+          secretHolders: value,
+        },
+      },
+    }));
+  }, [setData]);
+
+  const setCheckOpeningConditions = useCallback((value: boolean) => {
+    setData((current) => ({
+      intro: {
+        ...current.intro,
+        checkboxState: {
+          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
+          openingConditions: value,
+        },
+      },
+    }));
+  }, [setData]);
+
+  const setCheckDated = useCallback((value: boolean) => {
+    setData((current) => ({
+      intro: {
+        ...current.intro,
+        checkboxState: {
+          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
+          dated: value,
+        },
+      },
+    }));
+  }, [setData]);
+
+  const setCheckQuorum = useCallback((value: boolean) => {
+    setData((current) => ({
+      intro: {
+        ...current.intro,
+        checkboxState: {
+          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
+          quorum: value,
+        },
+      },
+    }));
+  }, [setData]);
+
+  const setCheckDirectives = useCallback((value: boolean) => {
+    setData((current) => ({
+      intro: {
+        ...current.intro,
+        checkboxState: {
+          ...(current.intro?.checkboxState ?? defaultIntroCheckboxState),
+          directives: value,
+        },
+      },
+    }));
+  }, [setData]);
+
+  const recipientsSyncStateRef = useRef(createCheckboxSyncState(false));
+  const conditionsSyncStateRef = useRef(createCheckboxSyncState(false));
+  const dateTimeSyncStateRef = useRef(createCheckboxSyncState(false));
+  const quorumSyncStateRef = useRef(createCheckboxSyncState(false));
+
+  useEffect(() => {
+    syncCheckboxWithNode(hasRecipientsBlock, recipientsSyncStateRef.current, setCheckSecretHolders);
+  }, [hasRecipientsBlock, setCheckSecretHolders]);
+
+  useEffect(() => {
+    syncCheckboxWithNode(hasConditionsBlock, conditionsSyncStateRef.current, setCheckOpeningConditions);
+  }, [hasConditionsBlock, setCheckOpeningConditions]);
+
+  useEffect(() => {
+    syncCheckboxWithNode(hasDateTimeInline, dateTimeSyncStateRef.current, setCheckDated);
+  }, [hasDateTimeInline, setCheckDated]);
+
+  useEffect(() => {
+    syncCheckboxWithNode(hasQuorumInline, quorumSyncStateRef.current, setCheckQuorum);
+  }, [hasQuorumInline, setCheckQuorum]);
 
   const { authorIdentity, secretHolders, openingConditions, dated, quorum, directives } = checkboxState;
 
@@ -78,7 +211,7 @@ export function useIntroState(editor: UseIntroEditorReturn) {
   const totalChecked = essentialChecked + optionals.filter(({ value }) => !!value).length;
   const totalCheckable = essentials.length + optionals.length;
 
-  const allEssentialsChecked = essentials.every(e => e.value);
+  const allEssentialsChecked = essentials.every((e) => e.value);
 
   let variant: 'error' | 'warning' | 'info' | 'success' = 'warning';
   let title: string;
