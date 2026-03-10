@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { EditorLayout } from '../ui/EditorLayout';
 import { ActionButtons } from '../ui/ActionButtons';
 import { HowEditorHelpContent } from './how/HowEditorHelpContent';
-import '../../styles/tiptap-editor.css';
+// import '../../styles/tiptap-editor.css';
 import styles from './HowEditor.module.css';
 import { Threshold } from './how/Threshold';
 import { ConditionEditor } from './how/ConditionEditor';
