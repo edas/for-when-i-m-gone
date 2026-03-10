@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { useEncryptDataStore } from '../../../lib/dataStore';
 import {
   ConditionsBlock,
-  DateTimeInline,
   DynamicDataExtension,
   QuorumInline,
   RecipientsBlock,
 } from '../../../lib/tiptap/extensions';
+import { DateTimeInline } from '../../../lib/tiptap/extensions/datetime';
 
 /**
  * Intro editor hook, intentionally kept small like useConditionEditor.
