@@ -11,6 +11,10 @@ import { generateHTML } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import type { Recipient } from '../types/recipient';
 import type { Language } from '../i18n';
+export { DateTimeInline } from './extensions/datetime';
+export { createConditionsBlock } from './extensions/conditions';
+export { createRecipientsBlock } from './extensions/recipients';
+export { createQuorumInline } from './extensions/quorum';
 
 // ============================================================================
 // Types
@@ -407,44 +411,6 @@ function createBlockNodeView(
   };
 }
 
-/**
- * Create an inline NodeView with reactive rendering
- */
-function createInlineNodeView(
-  className: string,
-  dataType: string,
-  renderContent: (data: DynamicExtensionData) => string
-) {
-  return ({ editor }: { editor: Editor }) => {
-    const dom = document.createElement('span');
-    dom.setAttribute('data-type', dataType);
-    dom.className = className;
-    dom.contentEditable = 'false';
-
-    const render = () => {
-      const data = getDataFromEditor(editor);
-      dom.textContent = renderContent(data);
-    };
-
-    // Register this NodeView for reactive updates
-    registerNodeView(editor, render);
-
-    render();
-
-    return {
-      dom,
-      update: () => {
-        render();
-        return true;
-      },
-      destroy: () => {
-        unregisterNodeView(editor, render);
-      },
-      ignoreMutation: () => true,
-    };
-  };
-}
-
 // ============================================================================
 // Block Extensions
 // ============================================================================
@@ -565,151 +531,5 @@ export const ConditionsBlock = Node.create({
 });
 
 // ============================================================================
-// Inline Extensions
-// ============================================================================
-
-/**
- * DateTimeInline - Inline element for displaying today's date and time
- */
-export const DateTimeInline = Node.create({
-  name: 'dateTimeInline',
-  group: 'inline',
-  inline: true,
-  atom: true,
-  selectable: true,
-
-  parseHTML() {
-    return [{ tag: 'span[data-type="datetime-inline"]' }];
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    const now = new Date();
-    const formattedDate = now.toLocaleDateString(undefined, {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    const formattedTime = now.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-    return [
-      'span',
-      mergeAttributes(HTMLAttributes, {
-        'data-type': 'datetime-inline',
-        'class': 'datetime-inline',
-        'contenteditable': 'false',
-      }),
-      `${formattedDate}, ${formattedTime}`,
-    ];
-  },
-
-  addNodeView() {
-    return createInlineNodeView(
-      'datetime-inline',
-      'datetime-inline',
-      () => {
-        const now = new Date();
-        const formattedDate = now.toLocaleDateString(undefined, {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        });
-        const formattedTime = now.toLocaleTimeString(undefined, {
-          hour: '2-digit',
-          minute: '2-digit',
-        });
-        return `${formattedDate}, ${formattedTime}`;
-      }
-    );
-  },
-
-  addCommands() {
-    return {
-      insertDateTimeInline:
-        () =>
-        ({ commands }) => {
-          return commands.insertContent({ type: this.name });
-        },
-    };
-  },
-});
-
-/**
- * QuorumInline - Inline element for displaying the required quorum
- */
-export const QuorumInline = Node.create({
-  name: 'quorumInline',
-  group: 'inline',
-  inline: true,
-  atom: true,
-  selectable: true,
-
-  parseHTML() {
-    return [{ tag: 'span[data-type="quorum-inline"]' }];
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    return [
-      'span',
-      mergeAttributes(HTMLAttributes, {
-        'data-type': 'quorum-inline',
-        'class': 'quorum-inline',
-        'contenteditable': 'false',
-      }),
-      '[Quorum]',
-    ];
-  },
-
-  addNodeView() {
-    return createInlineNodeView(
-      'quorum-inline',
-      'quorum-inline',
-      (data) => {
-        const threshold = data.threshold;
-        return threshold > 0 ? String(threshold) : '[Quorum]';
-      }
-    );
-  },
-
-  addCommands() {
-    return {
-      insertQuorumInline:
-        () =>
-        ({ commands }) => {
-          return commands.insertContent({ type: this.name });
-        },
-    };
-  },
-});
-
-// ============================================================================
 // Type Augmentation
-// ============================================================================
-
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    recipientsBlock: {
-      insertRecipientsBlock: () => ReturnType;
-    };
-    conditionsBlock: {
-      insertConditionsBlock: () => ReturnType;
-    };
-    dateTimeInline: {
-      insertDateTimeInline: () => ReturnType;
-    };
-    quorumInline: {
-      insertQuorumInline: () => ReturnType;
-    };
-    dynamicData: {
-      setDynamicData: (data: Partial<DynamicExtensionData>) => ReturnType;
-    };
-  }
-  
-  interface Storage {
-    dynamicData: DynamicDataStorage;
-  }
-}
+// =========================================================================

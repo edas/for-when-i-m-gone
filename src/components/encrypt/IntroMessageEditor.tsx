@@ -12,7 +12,6 @@ import styles from './IntroMessageEditor.module.css';
 import { useEncryptDataStore, type EncryptStoreActions } from '../../lib/dataStore';
 import { defaultIntroCheckboxState } from '../../lib/types/editorTypes';
 import { generateExampleInEditor } from '../../lib/tiptap/editorHelpers';
-import { useIntroDynamicData } from './intro/useIntroDynamicData';
 
 interface IntroMessageEditorProps {
   onContinue: () => void;
@@ -22,7 +21,6 @@ interface IntroMessageEditorProps {
 export function IntroMessageEditor({ onContinue, onBack }: IntroMessageEditorProps) {
   const { t } = useTranslation();
   const editor = useIntroEditor();
-  useIntroDynamicData(editor);
   const { hasContent, variant, canContinue } = useIntroState(editor);
   const setData: EncryptStoreActions['setData'] = useEncryptDataStore((state) => state.setData);
   const checkboxState = useEncryptDataStore((state) => state.intro?.checkboxState ?? defaultIntroCheckboxState);

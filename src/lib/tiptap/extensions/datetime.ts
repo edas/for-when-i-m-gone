@@ -1,5 +1,4 @@
 import { Node, mergeAttributes } from '@tiptap/core';
-import styles from './datetime.module.css';
 
 const DATE_TIME_TYPE = 'docDatetime';
 
@@ -89,7 +88,6 @@ export const DateTimeInline = Node.create({
       'time',
       mergeAttributes(HTMLAttributes, {
         'data-type': DATE_TIME_TYPE,
-        'class': styles.docDatetime,
         contenteditable: 'false',
         datetime: storedDateTime,
       }),
