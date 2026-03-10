@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LanguageSelector } from './ui/LanguageSelector';
-import { Icon } from './ui/Icons';
+import { LanguageSelector } from '../ui/LanguageSelector';
+import { Icon } from '../ui/Icons';
 import styles from './SecurityWarning.module.css';
 
 interface SecurityWarningProps {

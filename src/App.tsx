@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SecurityWarning } from './components/SecurityWarning';
+import { SecurityWarning } from './components/security/SecurityWarning';
 import { ModePlaceholder } from './components/ModePlaceholder';
 import { Encrypt } from './components/encrypt/Encrypt';
 import { useDataStore } from './lib/dataStore';
