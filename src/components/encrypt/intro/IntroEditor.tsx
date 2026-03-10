@@ -7,21 +7,30 @@ import { useTranslation } from 'react-i18next';
 import { hasConditionsBlock } from '@/lib/tiptap/extensions/conditions';
 import { hasRecipientsBlock } from '@/lib/tiptap/extensions/recipients';
 
+/** Chain type including custom intro-editor commands (not in @tiptap/core typings) */
+type IntroEditorChain = ReturnType<Editor['chain']> & {
+  insertDateTimeInline(): IntroEditorChain;
+  insertQuorumInline(): IntroEditorChain;
+  insertConditionsBlock(): IntroEditorChain;
+  insertRecipientsBlock(): IntroEditorChain;
+};
+
 export function IntroEditor({ editor }: { editor: Editor | null }) {
   const { t } = useTranslation();
+  const chain = () => editor?.chain()?.focus() as IntroEditorChain | undefined;
   const insertButtons: ToolbarButton[] = [
-    { icon: 'calendar', label: t('introEditor.toolbar.insertDateTime'), action: () => editor?.chain().focus().insertDateTimeInline().run() },
-    { icon: 'quorum', label: t('introEditor.toolbar.insertQuorum'), action: () => editor?.chain().focus().insertQuorumInline().run() },
+    { icon: 'calendar', label: t('introEditor.toolbar.insertDateTime'), action: () => chain()?.insertDateTimeInline().run() },
+    { icon: 'quorum', label: t('introEditor.toolbar.insertQuorum'), action: () => chain()?.insertQuorumInline().run() },
     {
       icon: 'lock',
       label: t('introEditor.toolbar.insertConditions'),
-      action: () => editor?.chain().focus().insertConditionsBlock().run(),
+      action: () => chain()?.insertConditionsBlock().run(),
       disabled: hasConditionsBlock(editor),
     },
     {
       icon: 'users',
       label: t('introEditor.toolbar.insertRecipients'),
-      action: () => editor?.chain().focus().insertRecipientsBlock().run(),
+      action: () => chain()?.insertRecipientsBlock().run(),
       disabled: hasRecipientsBlock(editor),
     },
   ];

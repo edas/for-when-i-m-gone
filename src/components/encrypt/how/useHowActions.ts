@@ -8,7 +8,7 @@ export function useHowActions() {
   const setConditions = useCallback((conditions: JSONContent | null) => {
     setData((prev) => ({
       how: {
-        conditions: null,
+        threshold: prev.how?.threshold ?? 999,
         hasNoOpenConditions: false,
         ...prev.how,
         conditions,

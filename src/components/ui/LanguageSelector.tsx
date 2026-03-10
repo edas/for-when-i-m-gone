@@ -1,17 +1,17 @@
 import { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { availableLanguages, type Language } from '../../lib/i18n';
-import { useDataStore } from '../../lib/dataStore';
+import { useDataStore, type StoredData } from '../../lib/dataStore';
 import styles from './LanguageSelector.module.css';
 
 export function LanguageSelector() {
   const { i18n } = useTranslation();
-  const updateStoredData = useDataStore((state) => state.update);
+  const setData = useDataStore((state) => state.setData);
 
   function handleLanguageSelect(event: ChangeEvent<HTMLSelectElement>): void {
     const lang = event.target.value as Language;
     i18n.changeLanguage(lang);
-    updateStoredData((currentData) => ({ ...currentData, language: lang }));
+    setData((currentData: StoredData) => ({ ...currentData, language: lang }));
   }
 
   return (

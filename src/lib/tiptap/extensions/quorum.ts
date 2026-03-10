@@ -64,13 +64,13 @@ export function createQuorumInline(injectedQuorum: number) {
       return {
         insertQuorumInline:
           () =>
-          ({ commands }) => {
+          ({ commands }: { commands: any }) => {
             return commands.insertContent({
               type: this.name,
               attrs: { quorum: normalizedInjectedQuorum },
             });
           },
-      };
+      } as any;
     },
   });
 }

@@ -61,7 +61,7 @@ export function createConditionsBlock(injectedConditions: JSONContent | null) {
       return [{ tag: `div[data-type="${CONDITIONS_DATA_TYPE}"]` }];
     },
 
-    renderHTML({ HTMLAttributes }) {
+    renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, unknown> }) {
       return [
         'div',
         mergeAttributes(HTMLAttributes, {
@@ -102,7 +102,7 @@ export function createConditionsBlock(injectedConditions: JSONContent | null) {
               { type: 'paragraph' },
             ]);
           },
-      };
+      } as any;
     },
   });
 }
