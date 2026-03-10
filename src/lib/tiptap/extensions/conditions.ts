@@ -1,6 +1,7 @@
 import { Node, mergeAttributes, type Editor, type JSONContent } from '@tiptap/core';
 import { generateHTML } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
+import styles from '../extensions.module.css';
 
 const CONDITIONS_TYPE = 'conditionsBlock';
 const CONDITIONS_DATA_TYPE = 'conditions-block';
@@ -66,17 +67,18 @@ export function createConditionsBlock(injectedConditions: JSONContent | null) {
         'div',
         mergeAttributes(HTMLAttributes, {
           'data-type': CONDITIONS_DATA_TYPE,
-          class: 'conditions-block',
+          class: `conditions-block ${styles.tiptapCustomNode}`,
           contenteditable: 'false',
         })
       ];
     },
 
+    // @todo: merge avec renderHTML
     addNodeView() {
       return () => {
         const dom = document.createElement('div');
         dom.setAttribute('data-type', CONDITIONS_DATA_TYPE);
-        dom.className = 'conditions-block';
+        dom.className = `conditions-block ${styles.tiptapCustomNode}`;
         dom.contentEditable = 'false';
 
         dom.innerHTML = renderedInjectedHtml;

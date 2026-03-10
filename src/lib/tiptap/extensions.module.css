@@ -1,0 +1,4 @@
+/* Common tint for custom tiptap nodes (recipients, conditions, quorum, datetime) */
+.tiptapCustomNode {
+  color: #cec3f8;
+}

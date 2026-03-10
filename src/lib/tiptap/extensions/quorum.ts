@@ -1,4 +1,5 @@
 import { Node, mergeAttributes } from '@tiptap/core';
+import styles from '../extensions.module.css';
 
 const QUORUM_TYPE = 'quorumInline';
 
@@ -53,6 +54,7 @@ export function createQuorumInline(injectedQuorum: number) {
         'span',
         mergeAttributes(HTMLAttributes, {
           'data-type': QUORUM_TYPE,
+          class: `${styles.tiptapCustomNode}`,
           'contenteditable': 'false',
           'data-quorum': String(normalizedInjectedQuorum),
         }),

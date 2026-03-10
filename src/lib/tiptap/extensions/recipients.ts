@@ -1,5 +1,6 @@
 import { Node, mergeAttributes, type Editor } from '@tiptap/core';
 import type { ContactInfo, ContactType, Recipient } from '../../types/recipient';
+import styles from '../extensions.module.css';
 
 const RECIPIENTS_TYPE = 'recipientsBlock';
 const RECIPIENTS_DATA_TYPE = 'recipients-block';
@@ -147,17 +148,18 @@ export function createRecipientsBlock(
         'div',
         mergeAttributes(HTMLAttributes, {
           'data-type': RECIPIENTS_DATA_TYPE,
-          class: 'recipients-block',
+          class: `recipients-block ${styles.tiptapCustomNode}`,
           contenteditable: 'false',
         }),
       ];
     },
 
+    // @todo: merge avec renderHTML
     addNodeView() {
       return () => {
         const dom = document.createElement('div');
         dom.setAttribute('data-type', RECIPIENTS_DATA_TYPE);
-        dom.className = 'recipients-block';
+        dom.className = `recipients-block ${styles.tiptapCustomNode}`;
         dom.contentEditable = 'false';
         dom.innerHTML = renderedInjectedHtml;
 
