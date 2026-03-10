@@ -1,4 +1,4 @@
-import { useCallback,  } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EditorLayout } from '../ui/EditorLayout';
 import { ActionButtons } from '../ui/ActionButtons';
@@ -11,6 +11,7 @@ import { useEncryptDataStore } from '@/lib/dataStore';
 import { useConditionEditor } from './how/useConditionEditor';
 import { parseHtmlToJson } from '@/lib/htmlParser';
 import { useHowState } from './how/useHowState';
+import { useHowActions } from './how/useHowActions';
 
 interface HowEditorProps {
   onContinue: () => void;
@@ -19,9 +20,10 @@ interface HowEditorProps {
 
 export function HowEditor({ onContinue, onBack }: HowEditorProps) {
   const { t } = useTranslation();
-  
+
+  const { setConditions } = useHowActions();
   const content = useEncryptDataStore((state) => state.how?.conditions ?? null);
-  const editor = useConditionEditor(content);
+  const editor = useConditionEditor(content, setConditions);
   const { hasConditions, variant, canContinue } = useHowState(editor);
   const generateExample = useCallback(() => {
     if (!editor) return ;

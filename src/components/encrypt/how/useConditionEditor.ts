@@ -1,8 +1,12 @@
-import { JSONContent, useEditor } from "@tiptap/react";
+import { useEditor } from "@tiptap/react";
+import type { JSONContent } from '@tiptap/core';
 import StarterKit from "@tiptap/starter-kit";
 import { useTranslation } from "react-i18next";
 
-export function useConditionEditor(defaultValue: JSONContent | undefined) {
+export function useConditionEditor(
+  defaultValue: JSONContent | undefined,
+  onConditionsChange: (conditions: JSONContent | null) => void,
+) {
   const { t } = useTranslation();
   const editor = useEditor({
     extensions: [
@@ -22,6 +26,9 @@ export function useConditionEditor(defaultValue: JSONContent | undefined) {
         class: 'tiptap-content',
         'data-placeholder': t('howEditor.conditions.placeholder'),
       },
+    },
+    onUpdate: ({ editor: currentEditor }) => {
+      onConditionsChange(currentEditor.getJSON());
     },
   });
   return editor;
