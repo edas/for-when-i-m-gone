@@ -69,9 +69,7 @@ const resources = {
   },
 };
 
-export const detectedLanguage = detectLanguage();
-
-// Configure i18next
+// Configure i18next (LanguageDetector sets initial language from localStorage then navigator)
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -79,7 +77,6 @@ i18n
     resources,
     fallbackLng: 'en',
     supportedLngs: ['fr', 'en'],
-    lng: detectedLanguage, // Set initial language
     interpolation: {
       escapeValue: false, // React already escapes values
     },
@@ -90,14 +87,8 @@ i18n
     },
   });
 
-// Export helper functions for backward compatibility if needed
-function detectLanguage(): Language {
-  const browserLang = navigator.language.toLowerCase();
-  if (browserLang.startsWith('fr')) {
-    return 'fr';
-  }
-  return 'en';
-}
+/** Language resolved at app load; used to seed the data store. */
+export const initialLanguage = (i18n.language === 'fr' || i18n.language === 'en' ? i18n.language : 'en') as Language;
 
 export const availableLanguages: { code: Language; name: string }[] = [
   { code: 'fr', name: 'Français' },

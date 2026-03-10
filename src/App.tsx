@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SecurityWarning } from './components/SecurityWarning';
-import { Locked } from './components/locked/Locked';
+import { ModePlaceholder } from './components/ModePlaceholder';
 import { Encrypt } from './components/encrypt/Encrypt';
 import { useDataStore } from './lib/dataStore';
-import { Decrypt } from './components/decrypt/Decrypt';
 import styles from './App.module.css';
 
 
@@ -30,31 +29,18 @@ function AppContent() {
   }, [language, i18n.language]);
 
   const appMode = useDataStore(state => state.mode);
-  
+
   if (step === 0) {
-    return (
-        <SecurityWarning onContinue={onContinue} />
-    );
+    return <SecurityWarning onContinue={onContinue} />;
   }
-  
-  else if (step === 1) {
-    if (appMode === 'locked') {
-      return (
-          <Locked onBack={onBack} />
-      );
-    }
-    else if (appMode === 'encrypt') {
-      return (
-          <Encrypt onBack={onBack} />
-      );
-    }
-    else if (appMode === 'decrypt') {
-      return (
-          <Decrypt onBack={onBack} />
-      );
-    }
-    throw new Error(`Unknown app mode: ${appMode}`);
+
+  switch (appMode) {
+    case 'locked':
+    case 'decrypt':
+      return <ModePlaceholder onBack={onBack} />;
+    case 'encrypt':
+      return <Encrypt onBack={onBack} />;
+    default:
+      throw new Error(`Unknown app mode: ${appMode}`);
   }
-  
-  throw new Error(`Unknown step: ${step}`);
 }

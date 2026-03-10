@@ -2,9 +2,6 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from './ui/LanguageSelector';
 import { Icon } from './ui/Icons';
-import { ActionButton } from './ui/ActionButton';
-import { Overlay } from './ui/Overlay';
-import { SecurityCheckbox } from './ui/SecurityCheckbox';
 import styles from './SecurityWarning.module.css';
 
 interface SecurityWarningProps {
@@ -27,7 +24,7 @@ export function SecurityWarning({ initialChecked, onContinue }: SecurityWarningP
   }, [isChecked, onContinue]);
 
   return (
-    <Overlay>
+    <div className={styles.overlay}>
       <LanguageSelector />
 
       <div className={styles.warningContainer}>
@@ -38,25 +35,37 @@ export function SecurityWarning({ initialChecked, onContinue }: SecurityWarningP
         <h1>{t('securityWarning.title')}</h1>
         <p className={styles.subtitle}>{t('securityWarning.subtitle')}</p>
 
-        <SecurityCheckbox checked={isChecked} onChange={handleCheckboxChange}>
-          {t('securityWarning.checkboxLabel')}
-          <a
-            href="https://github.com/edas/for-when-i-m-gone"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t('securityWarning.checkboxLabelLink')}
-          </a>
-          {t('securityWarning.checkboxLabelEnd')}
-        </SecurityCheckbox>
+        <div className={styles.checkboxBlock}>
+          <label className={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={isChecked}
+              onChange={(e) => handleCheckboxChange(e.target.checked)}
+            />
+            <span className={styles.checkmark} />
+            <span className={styles.labelText}>
+              {t('securityWarning.checkboxLabel')}
+              <a
+                href="https://github.com/edas/for-when-i-m-gone"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('securityWarning.checkboxLabelLink')}
+              </a>
+              {t('securityWarning.checkboxLabelEnd')}
+            </span>
+          </label>
+        </div>
 
-        <ActionButton
+        <button
+          type="button"
+          className={styles.continueButton}
           disabled={!isChecked}
           onClick={handleContinue}
         >
           {t('securityWarning.continueButton')}
-        </ActionButton>
+        </button>
       </div>
-    </Overlay>
+    </div>
   );
 }

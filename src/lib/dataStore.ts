@@ -8,7 +8,7 @@ import type { SecretCheckboxState, IntroCheckboxState, HowData } from './types/e
 import type { Recipient } from './types/recipient';
 import { base64ToUint8Array } from './crypto/aes';
 import { create } from 'zustand';
-import { detectedLanguage } from './i18n';
+import { initialLanguage } from './i18n';
 
 interface WhatData {
   content?: string;
@@ -91,7 +91,7 @@ function readInitialDataFromDOM(): StoredData {
   try {
     const parsed = JSON.parse(scriptElement.textContent) as ExportableStoredData;
     return {
-      language: detectedLanguage,
+      language: initialLanguage,
       ...fromExportable(parsed)
     };
   } catch (error) {
@@ -130,23 +130,24 @@ export function useEncryptDataStore(selector: (data: EncryptStoredData & StoreAc
   });
 }
 
-function fromExportable(exportable: ExportableStoredData) : StoredData {
-  if (isExportableEncryptData(exportable)) {
-    return {
-      ...exportable,
-      generate: exportable.generate ? {
-        ...exportable.generate,
-        aesKey: exportable.generate?.aesKey ? base64ToUint8Array(exportable.generate.aesKey) : undefined,
-        encryptedSecret: exportable.generate?.encryptedSecret ? base64ToUint8Array(exportable.generate.encryptedSecret) : undefined,
-        iv: exportable.generate?.iv ? base64ToUint8Array(exportable.generate.iv) : undefined,
-      } : undefined,
-    }
-  } else if (isExportableDecryptData(exportable)) {
-    return exportable;
-  } else if (isLockedData(exportable)) {
-    return exportable;
+function fromExportable(exportable: ExportableStoredData): StoredData {
+  switch (exportable.mode) {
+    case 'encrypt':
+      return {
+        ...exportable,
+        generate: exportable.generate ? {
+          ...exportable.generate,
+          aesKey: exportable.generate.aesKey ? base64ToUint8Array(exportable.generate.aesKey) : undefined,
+          encryptedSecret: exportable.generate.encryptedSecret ? base64ToUint8Array(exportable.generate.encryptedSecret) : undefined,
+          iv: exportable.generate.iv ? base64ToUint8Array(exportable.generate.iv) : undefined,
+        } : undefined,
+      };
+    case 'decrypt':
+    case 'locked':
+      return exportable;
+    default:
+      throw new Error('Invalid exportable data');
   }
-  throw new Error('Invalid exportable data');
 }
 
 export type LockedStoredData = baseStoredData & {
@@ -158,21 +159,6 @@ export type LockedStoredData = baseStoredData & {
 
 type ExportableStoredData = ExportableEncryptStoredData | DecryptStoredData | LockedStoredData;
 
-/**
- * Check if the current stored data is in locked/encrypted format
- */
-function isLockedData(data: ExportableStoredData): data is ExportableStoredData & LockedStoredData {
-  return data.mode === 'locked';
-}
-
 function isEncryptData(data: StoredData): data is StoredData & EncryptStoredData {
   return data.mode === 'encrypt';
-}
-
-function isExportableEncryptData(data: ExportableStoredData): data is ExportableStoredData & ExportableEncryptStoredData {
-  return data.mode === 'encrypt';
-}
-
-function isExportableDecryptData(data: ExportableStoredData): data is ExportableStoredData & DecryptStoredData {
-  return data.mode === 'decrypt';
 }

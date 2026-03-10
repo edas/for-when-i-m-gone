@@ -23,7 +23,6 @@ export default defineConfig({
     cssCodeSplit: false,
   },
   test: {
-    globals: true,
     environment: 'node',
   },
 })

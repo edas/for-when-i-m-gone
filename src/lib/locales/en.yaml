@@ -9,60 +9,6 @@ steps:
   intro: Intro
   generate: Generate
 
-decryptSteps:
-  recovery: Recovery
-  decrypt: Decrypt
-
-lockedSteps:
-  unlock: Unlock
-
-unlockEditor:
-  title: Unlock Document
-  subtitle: This document is password protected
-  placeholder: Enter the password...
-  unlocking: Unlocking...
-  error: Incorrect password or corrupted data
-  buttons:
-    unlock: Unlock
-  sidePanel:
-    title: Protected Document
-    intro: >-
-      This document has been encrypted with a password to protect 
-      your data in case of loss or theft. 
-      Enter the password to continue.
-    collapse: Collapse
-    expand: Help
-
-recoveryEditor:
-  title: Token Recovery
-  subtitle: Gather the recipients' tokens to reconstruct the secret
-  placeholder: Enter the shared tokens here...
-  buttons:
-    continue: Continue
-  sidePanel:
-    title: Instructions
-    intro: >-
-      To decrypt the secret, you need to gather enough tokens 
-      from the recipients. Each person received a unique token.
-    collapse: Collapse
-    expand: Help
-
-decryptEditor:
-  title: Decryption
-  subtitle: The secret is being reconstructed
-  processing: Decrypting...
-  success: Secret decrypted successfully
-  error: Decryption error
-  buttons:
-    back: Back
-  sidePanel:
-    title: Result
-    intro: >-
-      Once all tokens are gathered, the secret will be automatically 
-      decrypted and displayed below.
-    collapse: Collapse
-    expand: Help
-
 whoEditor:
   title: Who will receive this secret?
   description: >-
@@ -74,10 +20,6 @@ whoEditor:
   removeRecipient: Remove this person
   addContact: Add contact info
   removeContact: Remove this contact
-  buttons:
-    continueWithoutConfirm: Continue without confirmation
-    continueWithoutEssentials: Continue without essentials
-    continue: Continue
   fields:
     name: Who is this?
     contacts: Contact information
@@ -172,23 +114,12 @@ secretEditor:
     sectionOptional: If applicable
     generateExample: Generate an example
     # exampleContent is loaded from examples/secret-example.en.txt
-  buttons:
-    continueWithoutConfirm: Continue without confirmation
-    continueWithoutEssentials: Continue without essentials
-    continue: Continue
 
 introEditor:
   title: Introduction Message
   subtitle: This message will accompany your secret and explain its context
   placeholder: Write your introduction message here...
   toolbar:
-    heading: Heading
-    paragraph: Paragraph
-    bold: Bold
-    italic: Italic
-    underline: Underline
-    bulletList: Bullet list
-    numberedList: Numbered list
     insertRecipients: Insert recipients list
     insertConditions: Insert opening conditions
     insertDateTime: Insert today's date
@@ -226,8 +157,6 @@ introEditor:
     generateExample: Generate an example
     # exampleContent is loaded from examples/intro-example.en.html
   buttons:
-    continueWithoutConfirm: Continue without confirmation
-    continueWithoutEssentials: Continue without essentials
     continue: Continue
 
 howEditor:
@@ -285,7 +214,6 @@ howEditor:
     generateExample: Generate an example
     # exampleContent is loaded from examples/conditions-example.en.html
   buttons:
-    continueWithoutEssentials: Continue without essentials
     continue: Continue
 
 generateEditor:

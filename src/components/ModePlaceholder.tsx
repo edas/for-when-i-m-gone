@@ -1,8 +1,8 @@
-interface LockedProps {
+interface ModePlaceholderProps {
   onBack: () => void;
 }
 
-export function Locked({ onBack }: LockedProps) {
+export function ModePlaceholder({ onBack }: ModePlaceholderProps) {
   return (
     <div>
       <h1>Not implemented</h1>

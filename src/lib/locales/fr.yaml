@@ -9,60 +9,6 @@ steps:
   intro: Intro
   generate: Générer
 
-decryptSteps:
-  recovery: Récupération
-  decrypt: Déchiffrement
-
-lockedSteps:
-  unlock: Déverrouillage
-
-unlockEditor:
-  title: Déverrouillage du document
-  subtitle: Ce document est protégé par un mot de passe
-  placeholder: Entrez le mot de passe...
-  unlocking: Déverrouillage en cours...
-  error: Mot de passe incorrect ou données corrompues
-  buttons:
-    unlock: Déverrouiller
-  sidePanel:
-    title: Document protégé
-    intro: >-
-      Ce document a été chiffré avec un mot de passe pour protéger 
-      vos données en cas de perte ou de vol du fichier. 
-      Entrez le mot de passe pour continuer.
-    collapse: Replier
-    expand: Aide
-
-recoveryEditor:
-  title: Récupération des jetons
-  subtitle: Rassemblez les jetons des destinataires pour reconstituer le secret
-  placeholder: Entrez les jetons partagés ici...
-  buttons:
-    continue: Continuer
-  sidePanel:
-    title: Instructions
-    intro: >-
-      Pour déchiffrer le secret, vous devez rassembler suffisamment de jetons 
-      provenant des destinataires. Chaque personne a reçu un jeton unique.
-    collapse: Replier
-    expand: Aide
-
-decryptEditor:
-  title: Déchiffrement
-  subtitle: Le secret est en cours de reconstitution
-  processing: Déchiffrement en cours...
-  success: Secret déchiffré avec succès
-  error: Erreur lors du déchiffrement
-  buttons:
-    back: Retour
-  sidePanel:
-    title: Résultat
-    intro: >-
-      Une fois tous les jetons rassemblés, le secret sera automatiquement 
-      déchiffré et affiché ci-dessous.
-    collapse: Replier
-    expand: Aide
-
 whoEditor:
   title: À qui destinez-vous ce secret ?
   description: >-
@@ -74,8 +20,6 @@ whoEditor:
   removeRecipient: Retirer cette personne
   addContact: Ajouter une coordonnée
   removeContact: Retirer cette coordonnée
-  buttons:
-    continue: Continuer
   fields:
     name: Qui est-ce ?
     contacts: Coordonnées
@@ -171,23 +115,12 @@ secretEditor:
     sectionOptional: Si cela vous concerne
     generateExample: Générer un exemple
     # exampleContent est chargé depuis examples/secret-example.fr.txt
-  buttons:
-    continueWithoutConfirm: Continuer sans confirmation
-    continueWithoutEssentials: Continuer sans les essentiels
-    continue: Continuer
 
 introEditor:
   title: Message d'introduction
   subtitle: Ce message accompagnera votre secret et expliquera son contexte
   placeholder: Écrivez ici votre message d'introduction...
   toolbar:
-    heading: Titre
-    paragraph: Paragraphe
-    bold: Gras
-    italic: Italique
-    underline: Souligné
-    bulletList: Liste à puces
-    numberedList: Liste numérotée
     insertRecipients: Insérer la liste des destinataires
     insertConditions: Insérer les conditions d'ouverture
     insertDateTime: Insérer la date du jour
@@ -225,8 +158,6 @@ introEditor:
     generateExample: Générer un exemple
     # exampleContent est chargé depuis examples/intro-example.fr.html
   buttons:
-    continueWithoutConfirm: Continuer sans confirmation
-    continueWithoutEssentials: Continuer sans les essentiels
     continue: Continuer
 
 howEditor:
@@ -284,7 +215,6 @@ howEditor:
     generateExample: Générer un exemple
     # exampleContent est chargé depuis examples/conditions-example.fr.html
   buttons:
-    continueWithoutEssentials: Continuer sans les essentiels
     continue: Continuer
 
 generateEditor:
