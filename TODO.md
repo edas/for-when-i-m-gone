@@ -1,0 +1,9 @@
+- Un bouton pour supprimer les blocs custom dans l'éditeur d'intro
+- Le bon fonctionnement des cases à cocher dans l'éditeur d'intro
+- retirer la signature du message par défaut de l'éditeur d'intro
+- passer à l'étape de génération
+- permettre les fichiers joijts sur l'étape du quoi
+- s'assurer de verrouiller le quorum et les participants quand on génère une clé
+- simplifier les composants custom tiptap qui ont parfois un nodeview et un renderhtml
+- Permettre les titres dans l'éditeur d'intro (mais pas celui des conditions, ou alors que ce ne soient pas les mêmes niveaux de titre)
+- dans la liste des destinataires, le nom d'une carte repliée doit être plus gros
