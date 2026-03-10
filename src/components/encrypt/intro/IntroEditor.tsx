@@ -4,7 +4,8 @@ import tiptap from '@/components/ui/TipTapEditor.module.css';
 import introStyles from '../IntroMessageEditor.module.css';
 import { RichTextToolbar, type ToolbarButton } from '@/components/ui/RichTextToolbar';
 import { useTranslation } from 'react-i18next';
-import { hasConditionsBlock, hasRecipientsBlock } from '@/lib/tiptap/extensions';
+import { hasConditionsBlock } from '@/lib/tiptap/extensions/conditions';
+import { hasRecipientsBlock } from '@/lib/tiptap/extensions/recipients';
 
 export function IntroEditor({ editor }: { editor: Editor | null }) {
   const { t } = useTranslation();

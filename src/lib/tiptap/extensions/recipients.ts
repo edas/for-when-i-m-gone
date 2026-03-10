@@ -19,6 +19,11 @@ function hasNodeTypeInEditor(editor: Editor, nodeType: string): boolean {
   return found;
 }
 
+export function hasRecipientsBlock(editor: Editor | null): boolean {
+  if (!editor) return false;
+  return hasNodeTypeInEditor(editor, RECIPIENTS_TYPE);
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -110,8 +115,8 @@ function renderInjectedRecipientsAsHtml(
       .filter(Boolean)
       .join(' — ');
 
-    const contactsLine = contacts ? `<div>${contacts}</div>` : '<div></div>';
-    return `<li><strong>${escapeHtml(safeName)}</strong>${contactsLine}</li>`;
+    const contactsLine = contacts ? contacts : '';
+    return `<li><strong>${escapeHtml(safeName)}&nbsp;:</strong> ${contactsLine}</li>`;
   });
 
   return `<ul>${listItems.join('')}</ul>`;

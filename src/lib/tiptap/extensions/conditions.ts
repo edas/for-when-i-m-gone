@@ -29,6 +29,11 @@ function hasNodeTypeInEditor(editor: Editor, nodeType: string): boolean {
   return found;
 }
 
+export function hasConditionsBlock(editor: Editor | null): boolean {
+  if (!editor) return false;
+  return hasNodeTypeInEditor(editor, CONDITIONS_TYPE);
+}
+
 function renderInjectedConditionsAsHtml(injectedConditions: JSONContent | null): string {
   if (!injectedConditions) {
     return '';

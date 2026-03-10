@@ -1,8 +1,29 @@
 import { TFunction } from 'i18next';
 import type { JSONContent } from '@tiptap/core';
 import { type IntroCheckboxState } from '../../lib/types/editorTypes';
-import { hasNodeTypeInJSON, type ContactTypeLabels } from '../../lib/tiptap/extensions';
+import { hasNodeTypeInJSON } from '../../lib/tiptap/extensions';
 import { computeInitialCheckboxState } from '../../lib/checkboxSync';
+
+/**
+ * Contact type labels for rendering recipients
+ */
+export interface ContactTypeLabels {
+  phone: string;
+  email: string;
+  address: string;
+  x: string;
+  bluesky: string;
+  mastodon: string;
+  facebook: string;
+  telegram: string;
+  whatsapp: string;
+  signal: string;
+  instagram: string;
+  snapchat: string;
+  linkedin: string;
+  web: string;
+  other: string;
+}
 
 /**
  * Node types for intro editor dynamic blocks
