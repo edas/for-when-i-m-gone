@@ -13,7 +13,7 @@
       "type": "paragraph",
       "content": [
         { "type": "text", "text": "Je vous ai laissé mes informations à vous tous. Vous pourrez y accéder ensemble, à condition d'être au moins " },
-        { "type": "quorumInline", "attrs": { "quorum": 2 } },
+        { "type": "quorumInline", "attrs": { "data-quorum": 2 } },
         { "type": "text", "text": ". Faites-en un usage raisonné." }
       ]
     },

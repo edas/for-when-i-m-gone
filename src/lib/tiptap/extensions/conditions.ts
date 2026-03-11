@@ -26,8 +26,21 @@ function renderInjectedConditionsAsHtml(injectedConditions: JSONContent | null):
   }
 }
 
-export function createConditionsBlock(injectedConditions: JSONContent | null) {
-  const renderedInjectedHtml = renderInjectedConditionsAsHtml(injectedConditions);
+function createNode(html: string) {
+  const wrapper = document.createElement('div');
+  wrapper.setAttribute('data-type', CONDITIONS_DATA_TYPE);
+  wrapper.setAttribute('data-conditions', html);
+  wrapper.className = `conditions-block ${styles.tiptapCustomNode} ${styles.tiptapBlockWithRemove}`;
+  wrapper.contentEditable = 'false';
+
+  const content = document.createElement('div');
+  content.innerHTML = html;
+  wrapper.appendChild(content);
+  return wrapper;
+}
+
+export function createConditionsBlock(injectedConditions: JSONContent | undefined) {
+  const renderedInjectedHtml = injectedConditions && renderInjectedConditionsAsHtml(injectedConditions);
 
   return Node.create({
     name: CONDITIONS_TYPE,
@@ -41,27 +54,13 @@ export function createConditionsBlock(injectedConditions: JSONContent | null) {
     },
 
     renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, unknown> }) {
-      return [
-        'div',
-        mergeAttributes(HTMLAttributes, {
-          'data-type': CONDITIONS_DATA_TYPE,
-          class: `conditions-block ${styles.tiptapCustomNode}`,
-          contenteditable: 'false',
-        })
-      ];
+      return createNode(renderedInjectedHtml ?? HTMLAttributes?.['data-conditions']?.toString() ?? '');
     },
 
     // @todo: merge avec renderHTML
     addNodeView() {
       return ({ node, editor, getPos }) => {
-        const wrapper = document.createElement('div');
-        wrapper.setAttribute('data-type', CONDITIONS_DATA_TYPE);
-        wrapper.className = `conditions-block ${styles.tiptapCustomNode} ${styles.tiptapBlockWithRemove}`;
-        wrapper.contentEditable = 'false';
-
-        const content = document.createElement('div');
-        content.innerHTML = renderedInjectedHtml;
-        wrapper.appendChild(content);
+        const wrapper = createNode(renderedInjectedHtml ?? node?.attrs?.['data-conditions']?.toString() ?? '');
 
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
@@ -96,7 +95,7 @@ export function createConditionsBlock(injectedConditions: JSONContent | null) {
             }
 
             return commands.insertContent([
-              { type: CONDITIONS_TYPE },
+              { type: CONDITIONS_TYPE, attrs: { 'data-conditions': renderedInjectedHtml  ?? '' } },
               { type: 'paragraph' },
             ]);
           },

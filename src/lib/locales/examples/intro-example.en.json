@@ -13,7 +13,7 @@
       "type": "paragraph",
       "content": [
         { "type": "text", "text": "I have left my information for all of you. You will be able to access it together, provided at least " },
-        { "type": "quorumInline", "attrs": { "quorum": 2 } },
+        { "type": "quorumInline", "attrs": { "data-quorum": 2 } },
         { "type": "text", "text": " of you are present. Please use it wisely." }
       ]
     },
