@@ -49,7 +49,7 @@ function buildChecklistItems(
   return keys.map(({ key, readonly }) => ({
     label: t(`introEditor.sidePanel.checkboxes.${key}.title`),
     description: t(`introEditor.sidePanel.checkboxes.${key}.description`),
-    value: checkboxState[key],
+    value: readonly ? true : checkboxState[key],
     readonly,
     setter: readonly ? null : makeSetter(key),
   }));

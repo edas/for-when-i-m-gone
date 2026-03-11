@@ -27,7 +27,7 @@ interface ContactTypeLabels {
 export const INTRO_NODE_TYPES = {
   recipientsBlock: 'recipientsBlock',
   conditionsBlock: 'conditionsBlock',
-  dateTimeInline: 'dateTimeInline',
+  dateTimeInline: 'docDatetime',
   quorumInline: 'quorumInline',
 } as const;
 
