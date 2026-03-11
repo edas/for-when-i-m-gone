@@ -1,11 +1,14 @@
 import type { Editor } from '@tiptap/core';
+import { useEditorState } from '@tiptap/react';
 import { Icon, type IconName } from './Icons';
 import styles from './RichTextToolbar.module.css';
 import { useTranslation } from 'react-i18next';
+import { Level } from '@tiptap/extension-heading';
 
 interface RichTextToolbarProps {
   editor: Editor | null;
   insertButtons?: ToolbarButton[];
+  headingLevel: number;
 }
 
 export interface ToolbarButton {
@@ -13,19 +16,28 @@ export interface ToolbarButton {
   label: string;
   action: () => void;
   disabled?: boolean;
+  active?: boolean;
 }
 
-export function RichTextToolbar({ editor, insertButtons }: RichTextToolbarProps) {
+export function RichTextToolbar({ editor, insertButtons, headingLevel }: RichTextToolbarProps) {
   const { t } = useTranslation();
+  const isHeadingActive = Boolean(
+    useEditorState({
+      editor,
+      selector: ({ editor: e }) => e?.isActive('heading') ?? false,
+    }),
+  );
 
   // Editor commands
   const toggleBold = () => editor?.chain().focus().toggleBold().run();
   const toggleItalic = () => editor?.chain().focus().toggleItalic().run();
   const toggleUnderline = () => editor?.chain().focus().toggleUnderline().run();
+  const toggleHeading = () => editor?.chain().focus().toggleHeading({ level: headingLevel as Level }).run();
   const toggleBulletList = () => editor?.chain().focus().toggleBulletList().run();
   const toggleOrderedList = () => editor?.chain().focus().toggleOrderedList().run();
 
   const styleButtons: ToolbarButton[] = [
+    { icon: 'heading', label: t('howEditor.toolbar.heading'), action: toggleHeading, active: isHeadingActive },
     { icon: 'bold', label: t('howEditor.toolbar.bold'), action: toggleBold },
     { icon: 'italic', label: t('howEditor.toolbar.italic'), action: toggleItalic },
     { icon: 'underline', label: t('howEditor.toolbar.underline'), action: toggleUnderline },
@@ -39,10 +51,10 @@ export function RichTextToolbar({ editor, insertButtons }: RichTextToolbarProps)
   const renderButtonGroup = (buttons: ToolbarButton[], isInsert = false) => (
     <div className={styles.toolbarGroup}>
       {buttons.map((btn) => (
-        <button 
+        <button
           key={btn.icon}
-          className={`${styles.toolbarBtn} ${isInsert ? styles.insertBtn : ''} ${btn.disabled ? styles.alreadyInserted : ''}`}
-          onClick={btn.action} 
+          className={`${styles.toolbarBtn} ${isInsert ? styles.insertBtn : ''} ${btn.disabled ? styles.alreadyInserted : ''} ${btn.active ? styles.active : ''}`}
+          onClick={btn.action}
           title={btn.label}
           disabled={!editor || btn.disabled}
         >

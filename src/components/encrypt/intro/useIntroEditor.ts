@@ -24,7 +24,7 @@ export function useIntroEditor() {
 
   return useEditor({
     extensions: [
-      getBaseStarterKit(true),
+      getBaseStarterKit({levels: [2]}),
       recipientsBlock,
       conditionsBlock,
       DateTimeInline,

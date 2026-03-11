@@ -14,7 +14,7 @@ export function ConditionEditor({ editor }: { editor: Editor }) {
       </label>
 
       <div className={tiptap.editorWrapper}>
-        <RichTextToolbar editor={editor} />
+        <RichTextToolbar editor={editor} headingLevel={3} />
         <EditorContent editor={editor} className={tiptap.tiptapEditor} />
       </div>
     </section>

@@ -3,12 +3,9 @@
  */
 
 import StarterKit from '@tiptap/starter-kit';
+import type { HeadingOptions } from '@tiptap/extension-heading';
 
-/**
- * Base StarterKit configuration used by all editors.
- * @param enableHeadings - If false (default), heading is disabled; if true, uses StarterKit default.
- */
-export function getBaseStarterKit(enableHeadings = false) {
+export function getBaseStarterKit(levels: Partial<HeadingOptions> | undefined) {
   return StarterKit.configure({
     blockquote: false,
     code: false,
@@ -16,6 +13,6 @@ export function getBaseStarterKit(enableHeadings = false) {
     hardBreak: false,
     horizontalRule: false,
     strike: false,
-    heading: enableHeadings ? undefined : false,
+    heading: levels ?? false,
   });
 }

@@ -1,5 +1,3 @@
-- simplifier les composants custom tiptap qui ont parfois un nodeview et un renderhtml
-- Permettre les titres dans l'éditeur d'intro (mais pas celui des conditions, ou alors que ce ne soient pas les mêmes niveaux de titre)
 - dans la liste des destinataires, le nom d'une carte repliée doit être plus gros
 - passer à l'étape de génération
 - permettre les fichiers joints sur l'étape du quoi

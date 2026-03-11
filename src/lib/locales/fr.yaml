@@ -173,6 +173,7 @@ howEditor:
     title: Comment et sous quelles conditions doivent-elles le faire ?
     placeholder: "Décrivez dans quels cas le secret doit être ouvert, et dans quels cas il ne doit PAS l'être.\n\nEx : En cas de décès ou d'incapacité prolongée, mais PAS en cas de simple voyage ou d'hospitalisation temporaire..."
   toolbar:
+    heading: Titre
     bold: Gras
     italic: Italique
     underline: Souligné

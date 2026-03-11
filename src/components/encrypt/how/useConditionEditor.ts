@@ -9,7 +9,7 @@ export function useConditionEditor(
 ) {
   const { t } = useTranslation();
   const editor = useEditor({
-    extensions: [getBaseStarterKit()],
+    extensions: [getBaseStarterKit({levels: [3]})],
     content: defaultValue ?? undefined,
     editorProps: {
       attributes: {

@@ -172,6 +172,7 @@ howEditor:
     title: How and under what conditions should they do it?
     placeholder: "Describe when the secret should be opened, and when it should NOT be opened.\n\nE.g.: In case of death or prolonged incapacity, but NOT in case of simple travel or temporary hospitalization..."
   toolbar:
+    heading: Title
     bold: Bold
     italic: Italic
     underline: Underline

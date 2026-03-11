@@ -39,7 +39,7 @@ export function IntroEditor({ editor }: { editor: Editor | null }) {
     <section className={introStyles.section}>
       <label className={introStyles.sectionSubtitle}>{t('introEditor.subtitle')}</label>
       <div className={tiptap.editorWrapper}>
-        <RichTextToolbar editor={editor} insertButtons={insertButtons} />
+        <RichTextToolbar editor={editor} insertButtons={insertButtons} headingLevel={2} />
         <EditorContent editor={editor} className={tiptap.tiptapEditor} />
       </div>
     </section>

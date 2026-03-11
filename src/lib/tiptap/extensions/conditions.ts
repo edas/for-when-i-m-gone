@@ -1,4 +1,4 @@
-import { Node, mergeAttributes, generateHTML, type Editor, type JSONContent } from '@tiptap/core';
+import { Node, generateHTML, type Editor, type JSONContent } from '@tiptap/core';
 import { hasNodeTypeInEditor } from '../extensions';
 import { getBaseStarterKit } from '../createEditor';
 import styles from '../extensions.module.css';
@@ -6,7 +6,7 @@ import styles from '../extensions.module.css';
 const CONDITIONS_TYPE = 'conditionsBlock';
 const CONDITIONS_DATA_TYPE = 'conditions-block';
 
-const starterKitConfig = getBaseStarterKit();
+const starterKitConfig = getBaseStarterKit({levels: [3]});
 
 export function hasConditionsBlock(editor: Editor | null): boolean {
   if (!editor) return false;
