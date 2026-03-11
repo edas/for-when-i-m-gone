@@ -1,10 +1,11 @@
-import { Node, mergeAttributes, type Editor } from '@tiptap/core';
+import { Node, type Editor } from '@tiptap/core';
 import type { ContactInfo, ContactType, Recipient } from '@/lib/types/recipient';
 import { hasNodeTypeInEditor } from '../extensions';
 import styles from '../extensions.module.css';
 
 const RECIPIENTS_TYPE = 'recipientsBlock';
 const RECIPIENTS_DATA_TYPE = 'recipients-block';
+const RECIPIENTS_DATA_ATTR = 'data-recipients';
 type ContactTypeLabelsMap = Record<ContactType, string>;
 
 export function hasRecipientsBlock(editor: Editor | null): boolean {
@@ -109,6 +110,19 @@ function renderInjectedRecipientsAsHtml(
   return `<ul>${listItems.join('')}</ul>`;
 }
 
+function createNode(html: string): HTMLDivElement {
+  const wrapper = document.createElement('div');
+  wrapper.setAttribute('data-type', RECIPIENTS_DATA_TYPE);
+  wrapper.setAttribute(RECIPIENTS_DATA_ATTR, html);
+  wrapper.className = `recipients-block ${styles.tiptapCustomNode} ${styles.tiptapBlockWithRemove}`;
+  wrapper.contentEditable = 'false';
+
+  const content = document.createElement('div');
+  content.innerHTML = html;
+  wrapper.appendChild(content);
+  return wrapper;
+}
+
 export function createRecipientsBlock(
   injectedRecipients: Recipient[],
   injectedContactTypeLabels: ContactTypeLabelsMap
@@ -129,28 +143,17 @@ export function createRecipientsBlock(
       return [{ tag: `div[data-type="${RECIPIENTS_DATA_TYPE}"]` }];
     },
 
-    renderHTML({ HTMLAttributes }) {
-      return [
-        'div',
-        mergeAttributes(HTMLAttributes, {
-          'data-type': RECIPIENTS_DATA_TYPE,
-          class: `recipients-block ${styles.tiptapCustomNode}`,
-          contenteditable: 'false',
-        }),
-      ];
+    renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, unknown> }) {
+      return createNode(
+        renderedInjectedHtml ?? HTMLAttributes?.[RECIPIENTS_DATA_ATTR]?.toString() ?? ''
+      );
     },
 
-    // @todo: merge avec renderHTML
     addNodeView() {
       return ({ node, editor, getPos }) => {
-        const wrapper = document.createElement('div');
-        wrapper.setAttribute('data-type', RECIPIENTS_DATA_TYPE);
-        wrapper.className = `recipients-block ${styles.tiptapCustomNode} ${styles.tiptapBlockWithRemove}`;
-        wrapper.contentEditable = 'false';
-
-        const content = document.createElement('div');
-        content.innerHTML = renderedInjectedHtml;
-        wrapper.appendChild(content);
+        const wrapper = createNode(
+          renderedInjectedHtml ?? node?.attrs?.[RECIPIENTS_DATA_ATTR]?.toString() ?? ''
+        );
 
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
@@ -185,7 +188,10 @@ export function createRecipientsBlock(
             }
 
             return commands.insertContent([
-              { type: RECIPIENTS_TYPE },
+              {
+                type: RECIPIENTS_TYPE,
+                attrs: { [RECIPIENTS_DATA_ATTR]: renderedInjectedHtml ?? '' },
+              },
               { type: 'paragraph' },
             ]);
           },
