@@ -53,16 +53,34 @@ export function createConditionsBlock(injectedConditions: JSONContent | null) {
 
     // @todo: merge avec renderHTML
     addNodeView() {
-      return () => {
-        const dom = document.createElement('div');
-        dom.setAttribute('data-type', CONDITIONS_DATA_TYPE);
-        dom.className = `conditions-block ${styles.tiptapCustomNode}`;
-        dom.contentEditable = 'false';
+      return ({ node, editor, getPos }) => {
+        const wrapper = document.createElement('div');
+        wrapper.setAttribute('data-type', CONDITIONS_DATA_TYPE);
+        wrapper.className = `conditions-block ${styles.tiptapCustomNode} ${styles.tiptapBlockWithRemove}`;
+        wrapper.contentEditable = 'false';
 
-        dom.innerHTML = renderedInjectedHtml;
+        const content = document.createElement('div');
+        content.innerHTML = renderedInjectedHtml;
+        wrapper.appendChild(content);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = styles.tiptapBlockRemove;
+        removeBtn.setAttribute('aria-label', 'Retirer le bloc');
+        removeBtn.innerHTML = '×';
+        removeBtn.addEventListener('click', () => {
+          if (typeof getPos === 'function') {
+            const pos = getPos();
+            if (typeof pos === 'number') {
+              const { from, to } = { from: pos, to: pos + node.nodeSize };
+              editor.view.dispatch(editor.state.tr.delete(from, to));
+            }
+          }
+        });
+        wrapper.appendChild(removeBtn);
 
         return {
-          dom,
+          dom: wrapper,
           ignoreMutation: () => true,
         };
       };

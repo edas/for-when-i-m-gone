@@ -2,3 +2,35 @@
 .tiptapCustomNode {
   color: #cec3f8;
 }
+
+/* Wrapper for block nodes that have a remove button */
+.tiptapBlockWithRemove {
+  position: relative;
+}
+
+/* Remove (X) button in top-left of block */
+.tiptapBlockRemove {
+  position: absolute;
+  top: 0.25rem;
+  left: -1.25rem;
+  right: auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.25rem;
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+  font-size: 0.875rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.tiptapBlockRemove:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.35);
+}
