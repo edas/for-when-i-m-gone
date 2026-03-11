@@ -23,8 +23,8 @@ function parseQuorumFromElement(element: Element): number {
   return normalizeQuorum(stored);
 }
 
-export function createQuorumInline(injectedQuorum: number) {
-  const normalizedInjectedQuorum = normalizeQuorum(injectedQuorum);
+export function createQuorumInline(injectedQuorum: number|undefined) {
+  const normalizedInjectedQuorum = injectedQuorum ? normalizeQuorum(injectedQuorum) : undefined;
 
   return Node.create({
     name: QUORUM_TYPE,
@@ -50,13 +50,15 @@ export function createQuorumInline(injectedQuorum: number) {
     },
 
     renderHTML({ HTMLAttributes }) {
+      const storedQuorum = HTMLAttributes?.['data-quorum']?.trim();
+      if (!storedQuorum) throw new Error('Stored quorum is required');
       return [
         'span',
         mergeAttributes(HTMLAttributes, {
           'data-type': QUORUM_TYPE,
           class: `${styles.tiptapCustomNode}`,
           'contenteditable': 'false',
-          'data-quorum': String(normalizedInjectedQuorum),
+          'data-quorum': String(normalizedInjectedQuorum ?? storedQuorum),
         }),
         String(normalizedInjectedQuorum),
       ];
