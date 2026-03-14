@@ -3,7 +3,7 @@ import { SecretEditor } from './what/SecretEditor';
 import { WhoEditor } from './who/WhoEditor';
 import { HowEditor } from './how/HowEditor';
 import { IntroMessageEditor } from './intro/IntroMessageEditor';
-import { GenerateEditor } from './how/GenerateEditor';
+import { Generate } from './generate/Generate';
 import { EncryptStepHeader } from './header/EncryptStepHeader';
 
 interface EncryptProps {
@@ -28,7 +28,7 @@ export function Encrypt({ onBack: backToParent }: EncryptProps) {
       {step === 1 && <WhoEditor onContinue={onContinue} onBack={onBack} />}
       {step === 2 && <HowEditor onContinue={onContinue} onBack={onBack} />}
       {step === 3 && <IntroMessageEditor onContinue={onContinue} onBack={onBack} />}
-      {step === 4 && <GenerateEditor onBack={onBack} />}
+      {step === 4 && <Generate onBack={onBack} />}
       {step > 4 && (() => { throw new Error(`Unknown step: ${step}`); })()}
     </>
   );

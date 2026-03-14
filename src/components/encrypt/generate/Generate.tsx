@@ -14,15 +14,15 @@ import { EditorLayout } from '@/components/ui/EditorLayout';
 import { ActionButtons } from '@/components/ui/ActionButtons';
 import { HelpSection } from '@/components/ui/HelpSection';
 import type { Recipient } from '@/lib/types/recipient';
-import styles from './GenerateEditor.module.css';
+import styles from './Generate.module.css';
 
-interface GenerateEditorProps {
+interface GenerateProps {
   onBack: () => void;
 }
 
-export function GenerateEditor({ 
+export function Generate({ 
   onBack 
-}: GenerateEditorProps) {
+}: GenerateProps) {
   const { t } = useTranslation();
   
   // Récupérer les données depuis le store

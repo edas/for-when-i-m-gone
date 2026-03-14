@@ -1,4 +1,3 @@
-- dans la liste des destinataires, le nom d'une carte repliée doit être plus gros
 - passer à l'étape de génération
 - permettre les fichiers joints sur l'étape du quoi
 - s'assurer de verrouiller le quorum et les participants quand on génère une clé
